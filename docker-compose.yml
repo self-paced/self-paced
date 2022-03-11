@@ -10,6 +10,14 @@ services:
     volumes:
       - ./src/:/go/src
     tty: true
+    stdin_open: true
+    environment:
+      MYSQL_DATABASE: go_db
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PW: root
+    depends_on:
+      - db
   db:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
@@ -17,6 +25,8 @@ services:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - '3382:3306'
+    volumes:
+      - data-dev:/var/lib/mysql
   front:
     build:
       context: front
@@ -25,3 +35,6 @@ services:
     ports:
       - '3005:3000'
       
+volumes:
+  data-dev:
+    driver: local

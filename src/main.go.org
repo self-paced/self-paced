@@ -1,0 +1,96 @@
+package main
+
+import (
+  "github.com/gin-gonic/gin"
+  "fmt"
+  "os"
+	"log"  
+
+	"github.com/joho/godotenv"
+  //_ "github.com/go-sql-driver/mysql"
+  "github.com/jinzhu/gorm"
+  _ "github.com/jinzhu/gorm/dialects/mysql"
+  
+)
+
+var (
+  //db  *gorm.DB
+  err error
+)
+
+type Users struct {
+  ID int `gorm:"primary_key; not null"`
+  Name string `gorm:"type:varchar(50); packanot null"`
+  Age string `gorm:"type:varvahr(10);packanot null"`
+}
+
+func connect() *gorm.DB {
+  DBMS := "mysql"
+  USER := "root"
+  PASS := "root"
+  PROTOCOL := "tcp(db:3306)"
+  DBNAME := "go_db"
+  CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME
+  db, err := gorm.Open(DBMS, CONNECT) 
+
+  if err != nil {
+    log.Fatalf("failed to create new schema, error: %v", err.Error())
+  }
+
+  db.Set("gorm:table_options", "ENGINE=InnoDB")
+  db.SingularTable(true)
+  db.AutoMigrate(&Users{})
+
+  fmt.Println("db connected: ", &db)
+  return db  
+}
+
+func getUser() [] Users {
+  db := connect()
+  var users []Users
+  db.First(&users)
+  defer db.Close()
+
+  return users
+}
+
+func getAllUser() [] Users {
+  db := connect()
+  var users []Users
+  db.Find(&users)
+  defer db.Close()
+
+  return users
+}
+
+func main_() {
+  loadEnv()
+	r := gin.Default()
+
+  fmt.Println("hey start")
+
+  results := getAllUser()
+  fmt.Println(results)
+
+  result := getUser()
+  fmt.Println(result)
+  
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+  
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+}
+
+func loadEnv() {
+
+  err = godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("読み込み出来ませんでした: %v", err)
+	} 
+	
+	message := os.Getenv("SAMPLE_MESSAGE")
+	fmt.Println(message)  
+}

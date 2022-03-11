@@ -3,6 +3,8 @@ FROM golang:1.17-alpine
 WORKDIR /go/src
 COPY ./src .
 
+RUN apk add mysql mysql-client
+
 RUN apk upgrade --update && \
     apk --no-cache add git
 
