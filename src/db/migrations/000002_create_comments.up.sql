@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS comment(
-   id INT PRIMARY KEY,
-   body VARCHAR (50) NOT NULL,
-   user_id INT NOT NULL
-);

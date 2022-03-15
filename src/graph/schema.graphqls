@@ -2,36 +2,124 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+type Account {
+  id: Int!
+  number: String!
+  company: String!
+  name: String!
+  status: Boolean!
+  account_users: [AccountUser!]!
+  account_meta: [AccountMeta!]!
 }
 
-type User {
-  id: ID!
+type AccountUser {
+  id: Int!
+  number: String!
   name: String!
-  age: String!
-  todos: [Todo!]!
+  email: String!
+  password: String!
+  status: Boolean!
+  accountID: Int!
+  account: Account!
+}
+
+type AccountMeta {
+  id: Int!
+  accountID: Int!
+  key: String!
+  value: String!
+  account: Account!
+}
+
+type DataType {
+  id: Int!
+  title: String!
+  descriptio: String
+  name: String!
+}
+
+type Data {
+  id: Int!
+  accountID: Int!
+  number: String!
+  accountUserId: Int!
 }
 
 type Query {
-  todos: [Todo!]!
-  users: [User!]!
+  accounts: [Account!]!
+  account(id: String!): Account!
+  account_users: [AccountUser!]!
+  account_user(id: String!): AccountUser!
+
+  # data
+  data_types: [DataType!]!
+  data_type(id: Int!): DataType!
+
+  data(account_id: Int!): [Data!]!
+  datum(account_id: Int!, id: Int!): Data!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
 
-input NewUser {
+## mutation
+
+# account 
+input NewAccount {
+  company: String!
   name: String!
-  age: String!
+}
+
+input EditAccount {
+  number: String!
+  company: String!
+  name: String!
+  status: Boolean!
+}
+
+# account user
+input NewAccountUser {
+  name: String!
+  email: String!
+  password: String!
+  accountId: Int!
+}
+
+input EditAccountUser {
+  id: Int!
+  email: String!
+  password: String!
+}
+
+input DeleteAccountUser {
+  id: Int!
+  accountId: Int!
+}
+
+# account meta
+input NewAccountMeta {
+  key: String!
+  value: String!
+  accountId: Int!
+}
+
+input EditAccountMeta {
+  id: Int!
+  accountId: Int!
+  value: String!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
-  createUser(input: NewUser!): User!
+
+  # account
+  createAccount(input: NewAccount!): Account!
+  updateAccount(input: EditAccount!): Account!
+
+  # account user
+  createAccountUser(input: NewAccountUser!): AccountUser!
+  updateAccountUser(input: EditAccountUser!): AccountUser!
+  deleteAccountUser(input: DeleteAccountUser!): AccountUser!
+
+  # account meta
+  createAccountMeta(input: NewAccountMeta!): AccountMeta!
+  udpateAccountMeta(input: EditAccountMeta!): AccountMeta!
+  
 }

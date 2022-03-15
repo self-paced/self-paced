@@ -2,26 +2,87 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type Account struct {
+	ID           int            `json:"id"`
+	Number       string         `json:"number"`
+	Company      string         `json:"company"`
+	Name         string         `json:"name"`
+	Status       bool           `json:"status"`
+	AccountUsers []*AccountUser `json:"account_users"`
+	AccountMeta  []*AccountMeta `json:"account_meta"`
 }
 
-type NewUser struct {
-	Name string `json:"name"`
-	Age  string `json:"age"`
+type AccountMeta struct {
+	ID        int      `json:"id"`
+	AccountID int      `json:"accountID"`
+	Key       string   `json:"key"`
+	Value     string   `json:"value"`
+	Account   *Account `json:"account"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type AccountUser struct {
+	ID        int      `json:"id"`
+	Number    string   `json:"number"`
+	Name      string   `json:"name"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	Status    bool     `json:"status"`
+	AccountID int      `json:"accountID"`
+	Account   *Account `json:"account"`
 }
 
-type User struct {
-	ID    string  `json:"id"`
-	Name  string  `json:"name"`
-	Age   string  `json:"age"`
-	Todos []*Todo `json:"todos"`
+type Data struct {
+	ID            int    `json:"id"`
+	AccountID     int    `json:"accountID"`
+	Number        string `json:"number"`
+	AccountUserID int    `json:"accountUserId"`
+}
+
+type DataType struct {
+	ID         int     `json:"id"`
+	Title      string  `json:"title"`
+	Descriptio *string `json:"descriptio"`
+	Name       string  `json:"name"`
+}
+
+type DeleteAccountUser struct {
+	ID        int `json:"id"`
+	AccountID int `json:"accountId"`
+}
+
+type EditAccount struct {
+	Number  string `json:"number"`
+	Company string `json:"company"`
+	Name    string `json:"name"`
+	Status  bool   `json:"status"`
+}
+
+type EditAccountMeta struct {
+	ID        int    `json:"id"`
+	AccountID int    `json:"accountId"`
+	Value     string `json:"value"`
+}
+
+type EditAccountUser struct {
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type NewAccount struct {
+	Company string `json:"company"`
+	Name    string `json:"name"`
+}
+
+type NewAccountMeta struct {
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	AccountID int    `json:"accountId"`
+}
+
+type NewAccountUser struct {
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	AccountID int    `json:"accountId"`
 }

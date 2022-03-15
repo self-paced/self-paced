@@ -1,9 +1,8 @@
-# docker build -t ecforce-ma-tmp .
-# docker tag ecforce-ma-tmp:latest 699380865487.dkr.ecr.ap-northeast-1.amazonaws.com/ecforce-ma-tmp:latest
-# docker push 699380865487.dkr.ecr.ap-northeast-1.amazonaws.com/ecforce-ma-tmp:latest
-# 699380865487.dkr.ecr.ap-northeast-1.amazonaws.com/ecforce-ma-tmp
-#
 
+## migration
+### create migration file
+migrate create -ext sql -dir db/migrations -seq create_accounts
 
-
-
+### migrate
+migrate -path db/migrations/. -database ${GODB_POSTGRES} up
+migrate -path db/migrations/. -database ${GODB_POSTGRES} down

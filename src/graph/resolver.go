@@ -5,11 +5,9 @@ package graph
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
-  "github.com/super-studio/ecforce_ma/graph/model"
+  "gorm.io/gorm"
 )
 
-
 type Resolver struct{
-  todos []*model.Todo
-  users []*model.User
+  DB *gorm.DB
 }
