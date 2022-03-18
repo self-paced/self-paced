@@ -13,7 +13,7 @@ import (
   "github.com/rs/cors"
 )
 
-const defaultPort = "8080"
+const defaultPort = "8085"
 
 func main() {
 	port := os.Getenv("PORT")
@@ -36,4 +36,3 @@ func main() {
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
-

@@ -2,20 +2,47 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+type OrdersWithPayment {
+  shopId: String!
+  orderItemId: Int!
+  sourceId: Int
+  quantity: Int
+  orderId: Int
+  tenantId: Int
+  subsOrderId: Int
+  times: Int
+  orderNumber: String
+  subtotal: Int
+  discount: Int
+  delivFee: Int
+  charge: Int
+  tax: Int
+  total: Int
+  paymentTotal: Int
+  createdAt: String
+  shippedAt: String
+  deliverdAt:String
+  completedAt: String
+  variantsId: Int
+  productId: Int
+  sku: String
+  cost: Int
+  salesPrice: Int
+  paymentsId: Int
+  paymentsState: String
+  paymentMethodId: Int
+  paymentsAuthedAt: String
+  paymentsVoidedAt: String
+  paymentsCompletedAt: String
 }
 
-type User {
-  id: ID!
-  name: String!
+type Todo {
+  id: Int
 }
 
 type Query {
-  todos: [Todo!]!
+  orders: [OrdersWithPayment!]!
+  shopOrders(id: String!): [OrdersWithPayment!]!
 }
 
 input NewTodo {

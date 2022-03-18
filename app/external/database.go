@@ -13,14 +13,10 @@ import (
 
 // .env読み込み
 func loadEnv() {
-
   err := godotenv.Load(".env")
   if err != nil {
     fmt.Printf("読み込み出来ませんでした: %v", err)
   }
-  message := os.Getenv("LOADING_MESSAGE")
-
-  fmt.Println(message)
 }
 
 // DB接続

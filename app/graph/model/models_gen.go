@@ -88,3 +88,17 @@ type NewAccountUser struct {
 	Password  string `json:"password"`
 	AccountID int    `json:"accountId"`
 }
+
+type ShopOrder struct {
+	ShopID  *string `json:"shopId"`
+	Times   *int    `json:"times"`
+	OrderID *int    `json:"orderId"`
+}
+
+type ShopOrderData struct {
+	Data *ShopOrders `json:"data"`
+}
+
+type ShopOrders struct {
+	ShopOrders []*ShopOrder `json:"shopOrders"`
+}

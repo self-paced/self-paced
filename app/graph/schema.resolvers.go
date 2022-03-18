@@ -4,14 +4,18 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"strconv"
 
 	"github.com/super-studio/ecforce_ma/graph/generated"
 	"github.com/super-studio/ecforce_ma/graph/model"
-  "github.com/super-studio/ecforce_ma/service"
+	"github.com/super-studio/ecforce_ma/service"
 )
 
 func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*model.Account, error) {
@@ -153,14 +157,44 @@ func (r *queryResolver) Data(ctx context.Context, accountID int) ([]*model.Data,
 	return data, nil
 }
 
-func (r *queryResolver) Datum(ctx context.Context, accountID int, id int) (*model.Data, error) {
+func (r *queryResolver) Datum(ctx context.Context, accountID int, id int) (*model.ShopOrderData, error) {
+	//  ecforce DBからaccount IDを取得してデータを取得
+
 	var data *model.Data
 	r.DB.Debug().Where(&model.Data{AccountID: accountID, ID: id}).First(&data)
-	return data, nil
+
+	var jsonData = []byte(`{"query": "query { shopOrders(id: \"cosmedyjp\") { shopId times orderId }}"}`)
+	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+	if error != nil {
+		panic(error)
+	}
+	defer response.Body.Close()
+
+	// fmt.Println("response Status:", response.Status)
+	// fmt.Println("response Headers:", response.Header)
+	body, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("response Body:", string(body))
+
+	var shopOrderData *model.ShopOrderData
+
+	err := json.Unmarshal(body, &shopOrderData)
+	if err != nil {
+		fmt.Println("[!] " + err.Error())
+	}
+
+	if err := json.Unmarshal(body, &shopOrderData); err != nil {
+		fmt.Println("[!] " + err.Error())
+	}
+
+	return shopOrderData, nil
 }
 
 func (r *queryResolver) Test(ctx context.Context) (*model.Data, error) {
-  data.ListEcforce()
+	data.ListEcforce()
 	panic(fmt.Errorf("not implemented"))
 }
 

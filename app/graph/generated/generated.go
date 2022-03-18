@@ -109,6 +109,20 @@ type ComplexityRoot struct {
 		Datum        func(childComplexity int, accountID int, id int) int
 		Test         func(childComplexity int) int
 	}
+
+	ShopOrder struct {
+		OrderID func(childComplexity int) int
+		ShopID  func(childComplexity int) int
+		Times   func(childComplexity int) int
+	}
+
+	ShopOrderData struct {
+		Data func(childComplexity int) int
+	}
+
+	ShopOrders struct {
+		ShopOrders func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
@@ -128,7 +142,7 @@ type QueryResolver interface {
 	DataTypes(ctx context.Context) ([]*model.DataType, error)
 	DataType(ctx context.Context, id int) (*model.DataType, error)
 	Data(ctx context.Context, accountID int) ([]*model.Data, error)
-	Datum(ctx context.Context, accountID int, id int) (*model.Data, error)
+	Datum(ctx context.Context, accountID int, id int) (*model.ShopOrderData, error)
 	Test(ctx context.Context) (*model.Data, error)
 }
 
@@ -489,7 +503,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Data(childComplexity, args["account_id"].(int)), true
+		return e.complexity.Query.Data(childComplexity, args["accountId"].(int)), true
 
 	case "Query.data_type":
 		if e.complexity.Query.DataType == nil {
@@ -520,7 +534,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Datum(childComplexity, args["account_id"].(int), args["id"].(int)), true
+		return e.complexity.Query.Datum(childComplexity, args["accountId"].(int), args["id"].(int)), true
 
 	case "Query.test":
 		if e.complexity.Query.Test == nil {
@@ -528,6 +542,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Test(childComplexity), true
+
+	case "ShopOrder.orderId":
+		if e.complexity.ShopOrder.OrderID == nil {
+			break
+		}
+
+		return e.complexity.ShopOrder.OrderID(childComplexity), true
+
+	case "ShopOrder.shopId":
+		if e.complexity.ShopOrder.ShopID == nil {
+			break
+		}
+
+		return e.complexity.ShopOrder.ShopID(childComplexity), true
+
+	case "ShopOrder.times":
+		if e.complexity.ShopOrder.Times == nil {
+			break
+		}
+
+		return e.complexity.ShopOrder.Times(childComplexity), true
+
+	case "ShopOrderData.data":
+		if e.complexity.ShopOrderData.Data == nil {
+			break
+		}
+
+		return e.complexity.ShopOrderData.Data(childComplexity), true
+
+	case "ShopOrders.shopOrders":
+		if e.complexity.ShopOrders.ShopOrders == nil {
+			break
+		}
+
+		return e.complexity.ShopOrders.ShopOrders(childComplexity), true
 
 	}
 	return 0, false
@@ -633,6 +682,21 @@ type DataType {
   name: String!
 }
 
+type ShopOrderData {
+  data: ShopOrders!
+}
+
+type ShopOrders {
+  shopOrders: [ShopOrder!]!
+}
+
+type ShopOrder {
+  shopId: String
+  times: Int 
+  orderId: Int
+}
+
+
 type Data {
   id: Int!
   accountID: Int!
@@ -652,8 +716,8 @@ type Query {
   data_types: [DataType!]!
   data_type(id: Int!): DataType!
 
-  data(account_id: Int!): [Data!]!
-  datum(account_id: Int!, id: Int!): Data!
+  data(accountId: Int!): [Data!]!
+  datum(accountId: Int!, id: Int!): ShopOrderData!
 
   # test
   test: Data!
@@ -885,14 +949,14 @@ func (ec *executionContext) field_Query_data_args(ctx context.Context, rawArgs m
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["account_id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_id"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["account_id"] = arg0
+	args["accountId"] = arg0
 	return args, nil
 }
 
@@ -915,14 +979,14 @@ func (ec *executionContext) field_Query_datum_args(ctx context.Context, rawArgs 
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
-	if tmp, ok := rawArgs["account_id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_id"))
+	if tmp, ok := rawArgs["accountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
 		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["account_id"] = arg0
+	args["accountId"] = arg0
 	var arg1 int
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
@@ -2570,7 +2634,7 @@ func (ec *executionContext) _Query_data(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Data(rctx, args["account_id"].(int))
+		return ec.resolvers.Query().Data(rctx, args["accountId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2612,7 +2676,7 @@ func (ec *executionContext) _Query_datum(ctx context.Context, field graphql.Coll
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Datum(rctx, args["account_id"].(int), args["id"].(int))
+		return ec.resolvers.Query().Datum(rctx, args["accountId"].(int), args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2624,9 +2688,9 @@ func (ec *executionContext) _Query_datum(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Data)
+	res := resTmp.(*model.ShopOrderData)
 	fc.Result = res
-	return ec.marshalNData2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐData(ctx, field.Selections, res)
+	return ec.marshalNShopOrderData2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_test(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2733,6 +2797,172 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopOrder_shopId(ctx context.Context, field graphql.CollectedField, obj *model.ShopOrder) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopOrder",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShopID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopOrder_times(ctx context.Context, field graphql.CollectedField, obj *model.ShopOrder) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopOrder",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Times, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopOrder_orderId(ctx context.Context, field graphql.CollectedField, obj *model.ShopOrder) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopOrder",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OrderID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopOrderData_data(ctx context.Context, field graphql.CollectedField, obj *model.ShopOrderData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopOrderData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShopOrders)
+	fc.Result = res
+	return ec.marshalNShopOrders2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrders(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ShopOrders_shopOrders(ctx context.Context, field graphql.CollectedField, obj *model.ShopOrders) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ShopOrders",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShopOrders, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShopOrder)
+	fc.Result = res
+	return ec.marshalNShopOrder2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -4955,6 +5185,110 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var shopOrderImplementors = []string{"ShopOrder"}
+
+func (ec *executionContext) _ShopOrder(ctx context.Context, sel ast.SelectionSet, obj *model.ShopOrder) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shopOrderImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShopOrder")
+		case "shopId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ShopOrder_shopId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "times":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ShopOrder_times(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "orderId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ShopOrder_orderId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var shopOrderDataImplementors = []string{"ShopOrderData"}
+
+func (ec *executionContext) _ShopOrderData(ctx context.Context, sel ast.SelectionSet, obj *model.ShopOrderData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shopOrderDataImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShopOrderData")
+		case "data":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ShopOrderData_data(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var shopOrdersImplementors = []string{"ShopOrders"}
+
+func (ec *executionContext) _ShopOrders(ctx context.Context, sel ast.SelectionSet, obj *model.ShopOrders) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shopOrdersImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShopOrders")
+		case "shopOrders":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ShopOrders_shopOrders(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
@@ -5733,6 +6067,84 @@ func (ec *executionContext) unmarshalNNewAccountUser2githubᚗcomᚋsuperᚑstud
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNShopOrder2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShopOrder) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShopOrder2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrder(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNShopOrder2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrder(ctx context.Context, sel ast.SelectionSet, v *model.ShopOrder) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ShopOrder(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNShopOrderData2githubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderData(ctx context.Context, sel ast.SelectionSet, v model.ShopOrderData) graphql.Marshaler {
+	return ec._ShopOrderData(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNShopOrderData2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderData(ctx context.Context, sel ast.SelectionSet, v *model.ShopOrderData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ShopOrderData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNShopOrders2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrders(ctx context.Context, sel ast.SelectionSet, v *model.ShopOrders) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ShopOrders(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6024,6 +6436,22 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
 	return res
 }
 

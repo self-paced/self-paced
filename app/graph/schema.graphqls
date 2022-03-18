@@ -38,6 +38,21 @@ type DataType {
   name: String!
 }
 
+type ShopOrderData {
+  data: ShopOrders!
+}
+
+type ShopOrders {
+  shopOrders: [ShopOrder!]!
+}
+
+type ShopOrder {
+  shopId: String
+  times: Int 
+  orderId: Int
+}
+
+
 type Data {
   id: Int!
   accountID: Int!
@@ -57,8 +72,8 @@ type Query {
   data_types: [DataType!]!
   data_type(id: Int!): DataType!
 
-  data(account_id: Int!): [Data!]!
-  datum(account_id: Int!, id: Int!): Data!
+  data(accountId: Int!): [Data!]!
+  datum(accountId: Int!, id: Int!): ShopOrderData!
 
   # test
   test: Data!

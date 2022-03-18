@@ -22,12 +22,13 @@ services:
     depends_on:
       - db
       - postgres
+      - ecforce_db_app
   ecforce_db_app:
     build:
       context: .
       dockerfile: ./docker/ecforce_db_app/Dockerfile
     ports:
-     - "3605:8080"
+     - "3605:8085"
     volumes:
       - ./ecforce_db_app/:/go/src
     tty: true

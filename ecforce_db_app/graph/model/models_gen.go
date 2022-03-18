@@ -7,14 +7,40 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type OrdersWithPayment struct {
+	ShopID              string  `json:"shopId"`
+	OrderItemID         int     `json:"orderItemId"`
+	SourceID            *int    `json:"sourceId"`
+	Quantity            *int    `json:"quantity"`
+	OrderID             *int    `json:"orderId"`
+	TenantID            *int    `json:"tenantId"`
+	SubsOrderID         *int    `json:"subsOrderId"`
+	Times               *int    `json:"times"`
+	OrderNumber         *string `json:"orderNumber"`
+	Subtotal            *int    `json:"subtotal"`
+	Discount            *int    `json:"discount"`
+	DelivFee            *int    `json:"delivFee"`
+	Charge              *int    `json:"charge"`
+	Tax                 *int    `json:"tax"`
+	Total               *int    `json:"total"`
+	PaymentTotal        *int    `json:"paymentTotal"`
+	CreatedAt           *string `json:"createdAt"`
+	ShippedAt           *string `json:"shippedAt"`
+	DeliverdAt          *string `json:"deliverdAt"`
+	CompletedAt         *string `json:"completedAt"`
+	VariantsID          *int    `json:"variantsId"`
+	ProductID           *int    `json:"productId"`
+	Sku                 *string `json:"sku"`
+	Cost                *int    `json:"cost"`
+	SalesPrice          *int    `json:"salesPrice"`
+	PaymentsID          *int    `json:"paymentsId"`
+	PaymentsState       *string `json:"paymentsState"`
+	PaymentMethodID     *int    `json:"paymentMethodId"`
+	PaymentsAuthedAt    *string `json:"paymentsAuthedAt"`
+	PaymentsVoidedAt    *string `json:"paymentsVoidedAt"`
+	PaymentsCompletedAt *string `json:"paymentsCompletedAt"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Todo struct {
+	ID *int `json:"id"`
 }

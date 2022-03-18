@@ -12,14 +12,10 @@ import (
 
 // .env読み込み
 func loadEnv() {
-
   err := godotenv.Load(".env")
   if err != nil {
     fmt.Printf("読み込み出来ませんでした: %v", err)
   }
-  message := os.Getenv("LOADING_MESSAGE")
-
-  fmt.Println(message)
 }
 
 // DB接続
@@ -41,7 +37,6 @@ func ConnectDatabase() *gorm.DB {
   }
 
   // db.AutoMigrate( &model.Account{}, &model.AccountUser{})
-
   fmt.Println("db connected: ", &db)
   return db
 }

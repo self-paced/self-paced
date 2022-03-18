@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS data (
        data_type_id int not null,
        number varchar(100) unique not null,
        title varchar(255) not null,
-       record_count int not null default 0,
-       size int not null default 0,
+       record_count int default 0,
+       size int default 0,
        created_by int not null,
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -14,3 +14,13 @@ CREATE TABLE IF NOT EXISTS data (
        foreign key (data_type_id) references data_types(id),
        foreign key (created_by) references account_users(id)
 );
+
+insert into public.data ( account_id, data_type_id, number, title, created_by )
+       select 1, 1, '00000001', '接続の仮データ', 1
+       WHERE
+       (
+        NOT EXISTS
+            (
+              select id from public.data where id = 1
+            )
+       );
