@@ -1,0 +1,56 @@
+{
+  "reactFunctionalComponent": {
+    "scope": "typescriptreact",
+    "prefix": "comp",
+    "body": [
+      "const ${1:${TM_FILENAME_BASE}}: React.FC = () => {",
+      "\treturn <>$0</>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE}};",
+      ""
+    ],
+    "description": "React Functional Component"
+  },
+  "reactFunctionalComponentWithProps": {
+    "scope": "typescriptreact",
+    "prefix": "compprops",
+    "body": [
+      "interface ${1:${TM_FILENAME_BASE}}Props {",
+      "\t$2",
+      "}",
+      "",
+      "const ${1:${TM_FILENAME_BASE}}: React.FC<${1:${TM_FILENAME_BASE}}Props> = (props) => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t$0",
+      "\t\t</div>",
+      "\t)",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE}};",
+      ""
+    ],
+    "description": "React Functional Component With Properties"
+  },
+  "nextPage": {
+    "scope": "typescriptreact",
+    "prefix": "nextpage",
+    "body": [
+      "import type { NextPage } from 'next';",
+      "import PageFrame from '../components/PageFrame';",
+      "",
+      "const Page: NextPage = () => {",
+      "\treturn (",
+      "\t\t<PageFrame>",
+      "\t\t\t$0",
+      "\t\t</PageFrame>",
+      "\t);",
+      "};",
+      "",
+      "export default Page;",
+      ""
+    ],
+    "description": "NextJS Page"
+  }
+}

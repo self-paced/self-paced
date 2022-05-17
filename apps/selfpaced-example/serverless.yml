@@ -1,0 +1,8 @@
+nextApp:
+  component: '@sls-next/serverless-component@3.7.0'
+  inputs:
+    bucketName: self-paced-hosting
+    name:
+      defaultLambda: selfPacedDefaultLambda
+      apiLambda: selfPacedApiLambda
+      imageLambda: selfPacedImageLambda

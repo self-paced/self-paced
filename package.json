@@ -8,7 +8,10 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "dev": "npm run dev:app",
+    "dev:app": "turbo run dev --parallel --filter=selfpaced-example",
+    "dev:docs": "turbo run dev --parallel --filter=docs",
+    "dev:db": "turbo run dev:db",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
@@ -20,5 +23,9 @@
     "npm": ">=7.0.0",
     "node": ">=14.0.0"
   },
-  "packageManager": "npm@8.5.5"
+  "packageManager": "npm@8.5.5",
+  "overrides": {
+    "react": "18.0.0",
+    "react-dom": "18.0.0"
+  }
 }

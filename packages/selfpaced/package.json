@@ -1,11 +1,14 @@
 {
-  "name": "ui",
+  "name": "selfpaced",
   "version": "0.0.0",
   "main": "./index.tsx",
   "types": "./index.tsx",
   "license": "MIT",
   "scripts": {
     "lint": "eslint *.ts*"
+  },
+  "dependencies": {
+    "next": "12.1.6"
   },
   "devDependencies": {
     "@types/react": "17.0.43",
