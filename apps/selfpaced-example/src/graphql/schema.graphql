@@ -5,6 +5,8 @@
 
 type Query {
   me: User
+  listCategories: [Category!]!
+  getCategory(id: Float!): Category
 }
 
 type User {
@@ -14,12 +16,43 @@ type User {
   email: String!
 }
 
+type Category {
+  id: ID!
+  name: String!
+  description: String!
+  imageSrc: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
 type Mutation {
   createUser: User!
   registerUser(input: RegisterUserInput!): User!
+  createCategory(input: CreateCategoryInput!): Category!
+  editCategory(input: EditCategoryInput!): Category!
+  deleteCategory(id: Float!): Category!
 }
 
 input RegisterUserInput {
   firstName: String!
   lastName: String!
+}
+
+input CreateCategoryInput {
+  name: String!
+  description: String!
+  imageSrc: String
+}
+
+input EditCategoryInput {
+  id: ID!
+  name: String
+  description: String
+  imageSrc: String
 }

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { Category } from './entity/Category';
 import { User } from './entity/User';
 
 let dataSource: DataSource;
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: 'self-paced-db',
   synchronize: true,
   logging: false,
-  entities: [User],
+  entities: [User, Category],
   migrations: process.env['TS_NODE_COMPILER_OPTIONS']
     ? ['src/graphql/migration/**/*.ts'] // TypeORM glob patterns only works with module=commonjs
     : [],
