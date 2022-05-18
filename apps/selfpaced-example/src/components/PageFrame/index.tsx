@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import * as react from 'react';
 import CustomAppBar from './CustomAppBar';
-import CustomSideBar from './CustomSideBar';
 
 type Props = {
   rightContent?: react.ReactNode;
@@ -29,32 +28,12 @@ const PageFrame: react.FC<Props> = ({
           sx={{
             flex: 10,
             display: fullWidth ? 'none' : { xs: 'none', md: 'block' },
-            position: 'relative',
           }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            }}
-          >
-            <Box
-              sx={{
-                position: 'sticky',
-                top: 64,
-                display: 'flex',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <CustomSideBar />
-            </Box>
-          </Box>
-        </Box>
+        ></Box>
         <Box
           sx={{
             flex: 40,
-            maxWidth: fullWidth ? undefined : 800,
+            maxWidth: fullWidth ? undefined : 1800,
             minWidth: 0,
             minHeight: 'calc(100vh - 64px)',
             margin: fullWidth ? 0 : { xs: 0, md: '0 20px' },
