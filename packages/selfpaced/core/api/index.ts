@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import apolloServerHandler from 'selfpaced/core/api/graphql/server';
+import apolloServerHandler from './graphql/server';
 
 export default apolloServerHandler;
 
