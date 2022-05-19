@@ -31,10 +31,11 @@ type AccountMeta {
   account: Account!
 }
 
-type DataType {
+type ObjectType {
   id: Int!
+  accountID: Int!
   title: String!
-  descriptio: String
+  description: String
   name: String!
 }
 
@@ -53,13 +54,18 @@ type ShopOrder {
 }
 
 
-type Data {
+type Object {
   id: Int!
   accountID: Int!
   number: String!
   accountUserId: Int!
-  dataTypeId: Int!
-  data_type: DataType!
+  objectTypeId: Int!
+
+  title: String!
+  recordCount: Int!
+  size: Int!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Query {
@@ -69,14 +75,14 @@ type Query {
   account_user(id: String!): AccountUser!
 
   # data
-  data_types: [DataType!]!
-  data_type(id: Int!): DataType!
+  objectTypes(accountId: Int!, id: Int!): [ObjectType!]!
+  objectType(id: Int!): ObjectType!
 
-  data(accountId: Int!): [Data!]!
-  datum(accountId: Int!, id: Int!): ShopOrderData!
+  getObjects(accountId: Int!): [Object!]!
+  getObject(accountId: Int!, id: Int!): ShopOrderData!
 
   # test
-  test: Data!
+  test: Object!
 }
 
 

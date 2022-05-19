@@ -15,7 +15,7 @@ import (
 
 	"github.com/super-studio/ecforce_ma/graph/generated"
 	"github.com/super-studio/ecforce_ma/graph/model"
-	"github.com/super-studio/ecforce_ma/service"
+	data "github.com/super-studio/ecforce_ma/service"
 )
 
 func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*model.Account, error) {
@@ -134,34 +134,34 @@ func (r *queryResolver) AccountUser(ctx context.Context, id string) (*model.Acco
 	return user, nil
 }
 
-func (r *queryResolver) DataTypes(ctx context.Context) ([]*model.DataType, error) {
-	var data_types []*model.DataType
-	r.DB.Debug().Find(&data_types)
-	return data_types, nil
+func (r *queryResolver) ObjectTypes(ctx context.Context, accountID int, id int) ([]*model.ObjectType, error) {
+	var object_types []*model.ObjectType
+	r.DB.Debug().Where("account_id = ? and id = ?", accountID, id).Find(&object_types)
+	return object_types, nil
 }
 
-func (r *queryResolver) DataType(ctx context.Context, id int) (*model.DataType, error) {
-	var data_type *model.DataType
-	if err := r.DB.Debug().Find(&data_type, id).Error; err != nil {
+func (r *queryResolver) ObjectType(ctx context.Context, id int) (*model.ObjectType, error) {
+	var object_type *model.ObjectType
+	if err := r.DB.Debug().Find(&object_type, id).Error; err != nil {
 		return nil, err
 	}
-	return data_type, nil
+	return object_type, nil
 }
 
-func (r *queryResolver) Data(ctx context.Context, accountID int) ([]*model.Data, error) {
-	var data []*model.Data
+func (r *queryResolver) GetObjects(ctx context.Context, accountID int) ([]*model.Object, error) {
+	var object []*model.Object
 
-	if err := r.DB.Debug().Find(&data, accountID).Error; err != nil {
+	if err := r.DB.Debug().Find(&object, accountID).Error; err != nil {
 		return nil, err
 	}
-	return data, nil
+	return object, nil
 }
 
-func (r *queryResolver) Datum(ctx context.Context, accountID int, id int) (*model.ShopOrderData, error) {
+func (r *queryResolver) GetObject(ctx context.Context, accountID int, id int) (*model.ShopOrderData, error) {
 	//  ecforce DBからaccount IDを取得してデータを取得
 
-	var data *model.Data
-	r.DB.Debug().Where(&model.Data{AccountID: accountID, ID: id}).First(&data)
+	var data *model.Object
+	r.DB.Debug().Where(&model.Object{AccountID: accountID, ID: id}).First(&data)
 
 	var jsonData = []byte(`{"query": "query { shopOrders(id: \"cosmedyjp\") { shopId times orderId }}"}`)
 	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
@@ -193,7 +193,7 @@ func (r *queryResolver) Datum(ctx context.Context, accountID int, id int) (*mode
 	return shopOrderData, nil
 }
 
-func (r *queryResolver) Test(ctx context.Context) (*model.Data, error) {
+func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {
 	data.ListEcforce()
 	panic(fmt.Errorf("not implemented"))
 }

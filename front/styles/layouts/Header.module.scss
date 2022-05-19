@@ -1,0 +1,13 @@
+.header_nav {
+  background: #f7f7f7;
+  width: 100%;
+  display: flex;
+
+  &__inner {
+    display: flex;
+    ul {
+      display: flex;
+    }
+  }
+  
+}

@@ -31,22 +31,6 @@ type AccountUser struct {
 	Account   *Account `json:"account"`
 }
 
-type Data struct {
-	ID            int       `json:"id"`
-	AccountID     int       `json:"accountID"`
-	Number        string    `json:"number"`
-	AccountUserID int       `json:"accountUserId"`
-	DataTypeID    int       `json:"dataTypeId"`
-	DataType      *DataType `json:"data_type"`
-}
-
-type DataType struct {
-	ID         int     `json:"id"`
-	Title      string  `json:"title"`
-	Descriptio *string `json:"descriptio"`
-	Name       string  `json:"name"`
-}
-
 type DeleteAccountUser struct {
 	ID        int `json:"id"`
 	AccountID int `json:"accountId"`
@@ -87,6 +71,27 @@ type NewAccountUser struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	AccountID int    `json:"accountId"`
+}
+
+type Object struct {
+	ID            int    `json:"id"`
+	AccountID     int    `json:"accountID"`
+	Number        string `json:"number"`
+	AccountUserID int    `json:"accountUserId"`
+	ObjectTypeID  int    `json:"objectTypeId"`
+	Title         string `json:"title"`
+	RecordCount   int    `json:"recordCount"`
+	Size          int    `json:"size"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
+}
+
+type ObjectType struct {
+	ID          int     `json:"id"`
+	AccountID   int     `json:"accountID"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	Name        string  `json:"name"`
 }
 
 type ShopOrder struct {

@@ -4,8 +4,7 @@ import (
   "os"
   "fmt"
   "log"
-  
-  // "github.com/super-studio/ecforce_ma/graph/model"
+
   "gorm.io/driver/postgres"
   "gorm.io/gorm"
   "github.com/joho/godotenv"
@@ -39,7 +38,5 @@ func ConnectDatabase() *gorm.DB {
 
   // db.AutoMigrate( &model.Account{}, &model.AccountUser{})
 
-  fmt.Println("db connected: ", &db)
   return db
 }
-

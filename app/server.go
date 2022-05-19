@@ -26,12 +26,12 @@ func main() {
   srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db,}}))
 
   c := cors.New(cors.Options{
-    AllowedOrigins:   []string{"http://localhost:3010", "http://localhost:8080"},
+    AllowedOrigins:   []string{"http://localhost:3010", "http://localhost:8080", "http://localhost:3005"},
     //AllowedOrigins:   []string{"*"},
     AllowCredentials: true,
   })
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+ 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", c.Handler(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
