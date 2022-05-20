@@ -11,7 +11,7 @@ import {
 
 @ObjectType()
 @Entity()
-export class Category extends BaseEntity {
+export class Course extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
   id!: number;
@@ -21,7 +21,7 @@ export class Category extends BaseEntity {
   name!: string;
 
   @Field()
-  @Column()
+  @Column('longtext')
   description!: string;
 
   @Field()

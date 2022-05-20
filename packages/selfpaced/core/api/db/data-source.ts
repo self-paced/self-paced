@@ -1,19 +1,19 @@
 import { DataSource } from 'typeorm';
-import { Category } from './entity/Category';
+import { Course } from './entity/Course';
 import { User } from './entity/User';
 
 let dataSource: DataSource;
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
-  host: 'localhost',
-  port: 3400,
-  username: 'root',
-  password: 'password',
-  database: 'self-paced-db',
-  synchronize: true,
+  host: process.env['MYSQL_HOST'] ?? 'localhost',
+  port: parseInt(process.env['MYSQL_PORT'] ?? '3400'),
+  username: process.env['MYSQL_USER'] ?? 'root',
+  password: process.env['MYSQL_PASSWORD'] ?? 'password',
+  database: process.env['MYSQL_DATABASE'] ?? 'self-paced-db',
+  synchronize: true, // TODO: set to false in production
   logging: false,
-  entities: [User, Category],
+  entities: [User, Course],
   migrations: process.env['TS_NODE_COMPILER_OPTIONS']
     ? ['src/graphql/migration/**/*.ts'] // TypeORM glob patterns only works with module=commonjs
     : [],

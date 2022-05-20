@@ -1,7 +1,7 @@
 import { Field, ID, InputType } from 'type-graphql';
 
 @InputType()
-export default class EditCategoryInput {
+export default class EditCourseInput {
   @Field(() => ID)
   id!: number;
 
