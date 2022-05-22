@@ -53,7 +53,7 @@
       "@Resolver()",
       "export default class ${TM_FILENAME_BASE} {",
       "\t@Query(() => [${1:Something}])",
-      "\tasync listCategories(): Promise<${1:Something}[]> {",
+      "\tasync list${3:Something}s(): Promise<${1:Something}[]> {",
       "\t\treturn await ${1:Something}.find();",
       "\t}",
       "",

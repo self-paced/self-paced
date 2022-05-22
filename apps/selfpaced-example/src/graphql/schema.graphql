@@ -5,8 +5,8 @@
 
 type Query {
   me: User
-  listCategories: [Category!]!
-  getCategory(id: Float!): Category
+  listCourses: [Course!]!
+  getCourse(id: Float!): Course
 }
 
 type User {
@@ -16,7 +16,7 @@ type User {
   email: String!
 }
 
-type Category {
+type Course {
   id: ID!
   name: String!
   description: String!
@@ -34,9 +34,9 @@ scalar DateTime
 type Mutation {
   createUser: User!
   registerUser(input: RegisterUserInput!): User!
-  createCategory(input: CreateCategoryInput!): Category!
-  editCategory(input: EditCategoryInput!): Category!
-  deleteCategory(id: Float!): Category!
+  createCourse(input: CreateCourseInput!): Course!
+  editCourse(input: EditCourseInput!): Course!
+  deleteCourse(id: Float!): Course!
 }
 
 input RegisterUserInput {
@@ -44,13 +44,13 @@ input RegisterUserInput {
   lastName: String!
 }
 
-input CreateCategoryInput {
+input CreateCourseInput {
   name: String!
   description: String!
   imageSrc: String
 }
 
-input EditCategoryInput {
+input EditCourseInput {
   id: ID!
   name: String
   description: String
