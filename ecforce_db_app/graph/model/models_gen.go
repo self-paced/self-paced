@@ -41,6 +41,22 @@ type OrdersWithPayment struct {
 	PaymentsCompletedAt *string `json:"paymentsCompletedAt"`
 }
 
+type OrdersWithPaymentConnection struct {
+	Edges     []*OrdersWithPaymentEdge `json:"edges"`
+	PageInfor *PageInfo                `json:"pageInfor"`
+}
+
+type OrdersWithPaymentEdge struct {
+	Cursor string             `json:"cursor"`
+	Node   *OrdersWithPayment `json:"node"`
+}
+
+type PageInfo struct {
+	StartCursor string `json:"startCursor"`
+	EndCursor   string `json:"endCursor"`
+	HasNextPage *bool  `json:"hasNextPage"`
+}
+
 type Todo struct {
 	ID *int `json:"id"`
 }

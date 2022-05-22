@@ -134,15 +134,15 @@ func (r *queryResolver) AccountUser(ctx context.Context, id string) (*model.Acco
 	return user, nil
 }
 
-func (r *queryResolver) ObjectTypes(ctx context.Context, accountID int, id int) ([]*model.ObjectType, error) {
+func (r *queryResolver) GetObjectTypes(ctx context.Context, accountID int, id int) ([]*model.ObjectType, error) {
 	var object_types []*model.ObjectType
 	r.DB.Debug().Where("account_id = ? and id = ?", accountID, id).Find(&object_types)
 	return object_types, nil
 }
 
-func (r *queryResolver) ObjectType(ctx context.Context, id int) (*model.ObjectType, error) {
+func (r *queryResolver) GetObjectType(ctx context.Context, accountID int) (*model.ObjectType, error) {
 	var object_type *model.ObjectType
-	if err := r.DB.Debug().Find(&object_type, id).Error; err != nil {
+	if err := r.DB.Debug().Find(&object_type, accountID).Error; err != nil {
 		return nil, err
 	}
 	return object_type, nil
@@ -157,13 +157,25 @@ func (r *queryResolver) GetObjects(ctx context.Context, accountID int) ([]*model
 	return object, nil
 }
 
-func (r *queryResolver) GetObject(ctx context.Context, accountID int, id int) (*model.ShopOrderData, error) {
+func (r *queryResolver) GetObject(ctx context.Context, accountID int, number string, first *int, after *string) (*model.ShopOrderData, error) {
 	//  ecforce DBからaccount IDを取得してデータを取得
 
-	var data *model.Object
-	r.DB.Debug().Where(&model.Object{AccountID: accountID, ID: id}).First(&data)
+	var object *model.Object
+	r.DB.Debug().Where(&model.Object{AccountID: accountID, Number: number}).First(&object)
 
-	var jsonData = []byte(`{"query": "query { shopOrders(id: \"cosmedyjp\") { shopId times orderId }}"}`)
+	var difinitions []*model.ObjectDifinition
+	r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: 1}).Find(&difinitions)
+
+	var query string
+
+	query = `{"query": "query { shopOrders(id: \"cosmedyjp\") {`
+	for i := 0; i < len(difinitions); i++ {
+		query += difinitions[i].Name + " "
+	}
+	query += `}}"}`
+
+	// query = `{"query": "query { shopOrders(id: \"cosmedyjp\") { shopId times orderId orderItemId sourceId sourceId}}"}`
+	var jsonData = []byte(query)
 	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -177,20 +189,45 @@ func (r *queryResolver) GetObject(ctx context.Context, accountID int, id int) (*
 	// fmt.Println("response Status:", response.Status)
 	// fmt.Println("response Headers:", response.Header)
 	body, _ := ioutil.ReadAll(response.Body)
-	fmt.Println("response Body:", string(body))
+	// fmt.Println("response Body:", string(body))
 
-	var shopOrderData *model.ShopOrderData
+	var j interface{}
 
-	err := json.Unmarshal(body, &shopOrderData)
-	if err != nil {
+	if err := json.Unmarshal(body, &j); err != nil {
 		fmt.Println("[!] " + err.Error())
 	}
 
-	if err := json.Unmarshal(body, &shopOrderData); err != nil {
-		fmt.Println("[!] " + err.Error())
+	var data = model.ShopOrderData{j}
+
+	return &data, nil
+}
+
+func (r *queryResolver) GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, error) {
+	var object *model.Object
+	r.DB.Debug().Where(&model.Object{AccountID: 1, ID: 1}).First(&object)
+
+	var jsonData = []byte(`{"query": "query { shopOrders(id:  \"cosmedyjp\") { shopId sourceId orderId subtotal }}"}`)
+
+	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+
+	if error != nil {
+		panic(error)
 	}
 
-	return shopOrderData, nil
+	defer response.Body.Close()
+	body, _ := ioutil.ReadAll(response.Body)
+
+	var j interface{}
+
+	if err := json.Unmarshal(body, &j); err != nil {
+		fmt.Println("[!] " + err.Error())
+	}
+	var data = model.ShopOrderTmp{j}
+	return &data, nil
 }
 
 func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {

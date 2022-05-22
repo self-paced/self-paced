@@ -86,6 +86,16 @@ type Object struct {
 	UpdatedAt     string `json:"updatedAt"`
 }
 
+type ObjectDifinition struct {
+	ID         int     `json:"id"`
+	AccountID  int     `json:"accountID"`
+	ObjectID   int     `json:"objectID"`
+	Title      string  `json:"title"`
+	Name       string  `json:"name"`
+	ColumnType *string `json:"columnType"`
+	PrimaryFlg *bool   `json:"primaryFlg"`
+}
+
 type ObjectType struct {
 	ID          int     `json:"id"`
 	AccountID   int     `json:"accountID"`
@@ -101,7 +111,11 @@ type ShopOrder struct {
 }
 
 type ShopOrderData struct {
-	Data *ShopOrders `json:"data"`
+	Ecforce interface{} `json:"ecforce"`
+}
+
+type ShopOrderTmp struct {
+	Ecforce interface{} `json:"ecforce"`
 }
 
 type ShopOrders struct {

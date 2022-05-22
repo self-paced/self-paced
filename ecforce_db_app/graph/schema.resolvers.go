@@ -23,6 +23,14 @@ func (r *queryResolver) Orders(ctx context.Context) ([]*model.OrdersWithPayment,
 
 func (r *queryResolver) ShopOrders(ctx context.Context, id string) ([]*model.OrdersWithPayment, error) {
 	var orders []*model.OrdersWithPayment
+	r.DB.Debug().Limit(100).Where(model.OrdersWithPayment{ShopID: id}).Find(&orders)
+
+	return orders, nil
+}
+
+func (r *queryResolver) GetOrdersWithPayment(ctx context.Context, id string, first *int, after *string) (*model.OrdersWithPaymentConnection, error) {
+
+	var orders *model.OrdersWithPaymentConnection
 	r.DB.Debug().Where(model.OrdersWithPayment{ShopID: id}).Find(&orders)
 
 	return orders, nil
@@ -43,16 +51,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *queryResolver) Order(ctx context.Context, id string) (*model.OrdersWithPayment, error) {
-	var orders []*model.OrdersWithPayment
-	//if err := r.DB.Debug().Find(&orders, id).Error; err != nil {
-	// r.DB.Where(&model.OrdersWithPayment{ShopID: id}).Find(&orders)
-	r.DB.Where(model.OrdersWithPayment{ShopID: id}).Find(&orders)
-
-	fmt.Println("db: ", &orders)
-	//return orders, nil
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}

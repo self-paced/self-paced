@@ -36,6 +36,22 @@ type OrdersWithPayment {
   paymentsCompletedAt: String
 }
 
+type OrdersWithPaymentConnection {
+  edges: [OrdersWithPaymentEdge!]!
+  pageInfor: PageInfo!
+}
+
+type OrdersWithPaymentEdge {
+  cursor: ID!
+  node: OrdersWithPayment
+}
+
+type PageInfo {
+  startCursor: ID!
+  endCursor: ID!
+  hasNextPage: Boolean
+}
+
 type Todo {
   id: Int
 }
@@ -43,6 +59,7 @@ type Todo {
 type Query {
   orders: [OrdersWithPayment!]!
   shopOrders(id: String!): [OrdersWithPayment!]!
+  getOrdersWithPayment(id: String!, first: Int=100, after: ID): OrdersWithPaymentConnection
 }
 
 input NewTodo {
