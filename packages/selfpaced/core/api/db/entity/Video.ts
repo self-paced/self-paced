@@ -7,32 +7,29 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  ManyToOne,
   Relation,
 } from 'typeorm';
-import { Video } from './Video';
+import { Course } from './Course';
 
 @ObjectType()
 @Entity()
-export class Course extends BaseEntity {
+export class Video extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Field()
   @Column()
-  name!: string;
-
-  @Field()
-  @Column('longtext')
-  description!: string;
+  title!: string;
 
   @Field()
   @Column()
-  imageSrc!: string;
+  url!: string;
 
-  @OneToMany(() => Video, (video) => video.course)
-  videos!: Relation<Video>[];
+  @Field(() => Course)
+  @ManyToOne(() => Course, (course) => course.videos)
+  course!: Relation<Course>;
 
   @Field()
   @CreateDateColumn()

@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Course } from './entity/Course';
 import { User } from './entity/User';
+import { Video } from './entity/Video';
 
 let dataSource: DataSource;
 
@@ -13,7 +14,7 @@ export const AppDataSource = new DataSource({
   database: process.env['MYSQL_DATABASE'] ?? 'self-paced-db',
   synchronize: true, // TODO: set to false in production
   logging: false,
-  entities: [User, Course],
+  entities: [User, Course, Video],
   migrations: process.env['TS_NODE_COMPILER_OPTIONS']
     ? ['src/graphql/migration/**/*.ts'] // TypeORM glob patterns only works with module=commonjs
     : [],

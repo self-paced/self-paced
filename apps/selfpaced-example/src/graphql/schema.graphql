@@ -7,6 +7,8 @@ type Query {
   me: User
   listCourses: [Course!]!
   getCourse(id: Float!): Course
+  listCourseVideos(courseId: Float!): [Video!]!
+  getVideo(id: Float!): Video
 }
 
 type User {
@@ -31,12 +33,25 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+type Video {
+  id: ID!
+  title: String!
+  url: String!
+  course: Course!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
 type Mutation {
   createUser: User!
   registerUser(input: RegisterUserInput!): User!
   createCourse(input: CreateCourseInput!): Course!
   editCourse(input: EditCourseInput!): Course!
-  deleteCourse(id: Float!): Course!
+  deleteCourse(id: Float!): Boolean!
+  createVideo(input: CreateVideoInput!): Video!
+  editVideo(input: EditVideoInput!): Video!
+  deleteVideo(id: Float!): Boolean!
 }
 
 input RegisterUserInput {
@@ -55,4 +70,16 @@ input EditCourseInput {
   name: String
   description: String
   imageSrc: String
+}
+
+input CreateVideoInput {
+  title: String!
+  url: String!
+  courseId: Int!
+}
+
+input EditVideoInput {
+  id: ID!
+  title: String
+  url: String
 }
