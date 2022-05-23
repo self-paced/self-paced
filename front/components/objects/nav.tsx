@@ -32,7 +32,6 @@ export default function Nav(){
     )
   }
   const { getObjectTypes } = data
-  console.log(data)
 
   return (
     <ul>

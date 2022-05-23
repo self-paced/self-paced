@@ -72,6 +72,19 @@ type ComplexityRoot struct {
 		Status    func(childComplexity int) int
 	}
 
+	GetFilter struct {
+		AccountID          func(childComplexity int) int
+		Connector          func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		ObjectDifinitionID func(childComplexity int) int
+		Oparator           func(childComplexity int) int
+		Value              func(childComplexity int) int
+	}
+
+	GetFilters struct {
+		Filter func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateAccount     func(childComplexity int, input model.NewAccount) int
 		CreateAccountMeta func(childComplexity int, input model.NewAccountMeta) int
@@ -114,16 +127,18 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Account        func(childComplexity int, id string) int
-		AccountUser    func(childComplexity int, id string) int
-		AccountUsers   func(childComplexity int) int
-		Accounts       func(childComplexity int) int
-		GetObject      func(childComplexity int, accountID int, number string, first *int, after *string) int
-		GetObjectTmp   func(childComplexity int) int
-		GetObjectType  func(childComplexity int, accountID int) int
-		GetObjectTypes func(childComplexity int, accountID int, id int) int
-		GetObjects     func(childComplexity int, accountID int) int
-		Test           func(childComplexity int) int
+		Account              func(childComplexity int, id string) int
+		AccountUser          func(childComplexity int, id string) int
+		AccountUsers         func(childComplexity int) int
+		Accounts             func(childComplexity int) int
+		GetObject            func(childComplexity int, accountID int, number string, first *int, after *string) int
+		GetObjectDifinitions func(childComplexity int, accountID int, objectID int) int
+		GetObjectTmp         func(childComplexity int) int
+		GetObjectType        func(childComplexity int, accountID int) int
+		GetObjectTypes       func(childComplexity int, accountID int, id int) int
+		GetObjects           func(childComplexity int, accountID int) int
+		GetReportData        func(childComplexity int, accountID int, number string, filters []*model.Filter, groups []*model.Group) int
+		Test                 func(childComplexity int) int
 	}
 
 	ShopOrder struct {
@@ -163,7 +178,9 @@ type QueryResolver interface {
 	GetObjectType(ctx context.Context, accountID int) (*model.ObjectType, error)
 	GetObjects(ctx context.Context, accountID int) ([]*model.Object, error)
 	GetObject(ctx context.Context, accountID int, number string, first *int, after *string) (*model.ShopOrderData, error)
+	GetObjectDifinitions(ctx context.Context, accountID int, objectID int) ([]*model.ObjectDifinition, error)
 	GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, error)
+	GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group) (*model.ShopOrderData, error)
 	Test(ctx context.Context) (*model.Object, error)
 }
 
@@ -321,6 +338,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AccountUser.Status(childComplexity), true
+
+	case "GetFilter.accountId":
+		if e.complexity.GetFilter.AccountID == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.AccountID(childComplexity), true
+
+	case "GetFilter.connector":
+		if e.complexity.GetFilter.Connector == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.Connector(childComplexity), true
+
+	case "GetFilter.id":
+		if e.complexity.GetFilter.ID == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.ID(childComplexity), true
+
+	case "GetFilter.objectDifinitionId":
+		if e.complexity.GetFilter.ObjectDifinitionID == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.ObjectDifinitionID(childComplexity), true
+
+	case "GetFilter.oparator":
+		if e.complexity.GetFilter.Oparator == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.Oparator(childComplexity), true
+
+	case "GetFilter.value":
+		if e.complexity.GetFilter.Value == nil {
+			break
+		}
+
+		return e.complexity.GetFilter.Value(childComplexity), true
+
+	case "GetFilters.filter":
+		if e.complexity.GetFilters.Filter == nil {
+			break
+		}
+
+		return e.complexity.GetFilters.Filter(childComplexity), true
 
 	case "Mutation.createAccount":
 		if e.complexity.Mutation.CreateAccount == nil {
@@ -610,6 +676,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetObject(childComplexity, args["accountId"].(int), args["number"].(string), args["first"].(*int), args["after"].(*string)), true
 
+	case "Query.getObjectDifinitions":
+		if e.complexity.Query.GetObjectDifinitions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getObjectDifinitions_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetObjectDifinitions(childComplexity, args["accountId"].(int), args["objectId"].(int)), true
+
 	case "Query.getObjectTmp":
 		if e.complexity.Query.GetObjectTmp == nil {
 			break
@@ -652,6 +730,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetObjects(childComplexity, args["accountId"].(int)), true
+
+	case "Query.getReportData":
+		if e.complexity.Query.GetReportData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getReportData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetReportData(childComplexity, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group)), true
 
 	case "Query.test":
 		if e.complexity.Query.Test == nil {
@@ -851,6 +941,19 @@ type ObjectDifinition {
   primaryFlg: Boolean
 }
 
+type GetFilter {
+  id: Int!
+  accountId: Int!
+  objectDifinitionId: Int!
+  oparator: String!
+  value: String!
+  connector: String
+}
+
+type GetFilters {
+  filter: [GetFilter!]!
+}
+
 type Query {
   accounts: [Account!]!
   account(id: String!): Account!
@@ -863,14 +966,27 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID): ShopOrderData!
+  getObjectDifinitions(accountId: Int!, objectId: Int!): [ObjectDifinition!]!
 
   getObjectTmp: ShopOrderTmp!
+  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group]): ShopOrderData!
   # test
   test: Object!
 }
 
 
 ## mutation
+
+input Filter {
+  objectDifinitionId: Int!
+  oparator: String!
+  value: String!
+  connector: String
+}
+
+input Group {
+  objectDifinitionId: Int!
+}
 
 # account 
 input NewAccount {
@@ -1091,6 +1207,30 @@ func (ec *executionContext) field_Query_account_user_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_getObjectDifinitions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["accountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountId"] = arg0
+	var arg1 int
+	if tmp, ok := rawArgs["objectId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("objectId"))
+		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["objectId"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_getObjectType_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1184,6 +1324,48 @@ func (ec *executionContext) field_Query_getObjects_args(ctx context.Context, raw
 		}
 	}
 	args["accountId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getReportData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["accountId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["number"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["number"] = arg1
+	var arg2 []*model.Filter
+	if tmp, ok := rawArgs["filters"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filters"))
+		arg2, err = ec.unmarshalOFilter2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filters"] = arg2
+	var arg3 []*model.Group
+	if tmp, ok := rawArgs["groups"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("groups"))
+		arg3, err = ec.unmarshalOGroup2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["groups"] = arg3
 	return args, nil
 }
 
@@ -1923,6 +2105,248 @@ func (ec *executionContext) _AccountUser_account(ctx context.Context, field grap
 	res := resTmp.(*model.Account)
 	fc.Result = res
 	return ec.marshalNAccount2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐAccount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_id(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_accountId(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_objectDifinitionId(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObjectDifinitionID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_oparator(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Oparator, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_value(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilter_connector(ctx context.Context, field graphql.CollectedField, obj *model.GetFilter) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilter",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Connector, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetFilters_filter(ctx context.Context, field graphql.CollectedField, obj *model.GetFilters) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetFilters",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Filter, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.GetFilter)
+	fc.Result = res
+	return ec.marshalNGetFilter2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGetFilterᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3302,6 +3726,48 @@ func (ec *executionContext) _Query_getObject(ctx context.Context, field graphql.
 	return ec.marshalNShopOrderData2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderData(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getObjectDifinitions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getObjectDifinitions_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetObjectDifinitions(rctx, args["accountId"].(int), args["objectId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ObjectDifinition)
+	fc.Result = res
+	return ec.marshalNObjectDifinition2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐObjectDifinitionᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getObjectTmp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3335,6 +3801,48 @@ func (ec *executionContext) _Query_getObjectTmp(ctx context.Context, field graph
 	res := resTmp.(*model.ShopOrderTmp)
 	fc.Result = res
 	return ec.marshalNShopOrderTmp2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderTmp(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getReportData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getReportData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetReportData(rctx, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShopOrderData)
+	fc.Result = res
+	return ec.marshalNShopOrderData2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐShopOrderData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_test(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4986,6 +5494,76 @@ func (ec *executionContext) unmarshalInputEditAccountUser(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputFilter(ctx context.Context, obj interface{}) (model.Filter, error) {
+	var it model.Filter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "objectDifinitionId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("objectDifinitionId"))
+			it.ObjectDifinitionID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "oparator":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("oparator"))
+			it.Oparator, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			it.Value, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "connector":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("connector"))
+			it.Connector, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGroup(ctx context.Context, obj interface{}) (model.Group, error) {
+	var it model.Group
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "objectDifinitionId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("objectDifinitionId"))
+			it.ObjectDifinitionID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewAccount(ctx context.Context, obj interface{}) (model.NewAccount, error) {
 	var it model.NewAccount
 	asMap := map[string]interface{}{}
@@ -5356,6 +5934,115 @@ func (ec *executionContext) _AccountUser(ctx context.Context, sel ast.SelectionS
 		case "account":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._AccountUser_account(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var getFilterImplementors = []string{"GetFilter"}
+
+func (ec *executionContext) _GetFilter(ctx context.Context, sel ast.SelectionSet, obj *model.GetFilter) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getFilterImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetFilter")
+		case "id":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "accountId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_accountId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "objectDifinitionId":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_objectDifinitionId(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "oparator":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_oparator(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "connector":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilter_connector(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var getFiltersImplementors = []string{"GetFilters"}
+
+func (ec *executionContext) _GetFilters(ctx context.Context, sel ast.SelectionSet, obj *model.GetFilters) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getFiltersImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetFilters")
+		case "filter":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._GetFilters_filter(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -5951,6 +6638,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "getObjectDifinitions":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getObjectDifinitions(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "getObjectTmp":
 			field := field
 
@@ -5961,6 +6671,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getObjectTmp(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "getReportData":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getReportData(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -6810,6 +7543,60 @@ func (ec *executionContext) unmarshalNEditAccountUser2githubᚗcomᚋsuperᚑstu
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNGetFilter2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGetFilterᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.GetFilter) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNGetFilter2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGetFilter(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNGetFilter2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGetFilter(ctx context.Context, sel ast.SelectionSet, v *model.GetFilter) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._GetFilter(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6896,6 +7683,60 @@ func (ec *executionContext) marshalNObject2ᚖgithubᚗcomᚋsuperᚑstudioᚋec
 		return graphql.Null
 	}
 	return ec._Object(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNObjectDifinition2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐObjectDifinitionᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ObjectDifinition) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNObjectDifinition2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐObjectDifinition(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNObjectDifinition2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐObjectDifinition(ctx context.Context, sel ast.SelectionSet, v *model.ObjectDifinition) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ObjectDifinition(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNObjectType2githubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐObjectType(ctx context.Context, sel ast.SelectionSet, v model.ObjectType) graphql.Marshaler {
@@ -7330,6 +8171,62 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOFilter2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐFilter(ctx context.Context, v interface{}) ([]*model.Filter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.Filter, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOFilter2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐFilter(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOFilter2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐFilter(ctx context.Context, v interface{}) (*model.Filter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOGroup2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx context.Context, v interface{}) ([]*model.Group, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.Group, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOGroup2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOGroup2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx context.Context, v interface{}) (*model.Group, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGroup(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

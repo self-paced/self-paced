@@ -55,6 +55,30 @@ type EditAccountUser struct {
 	Password string `json:"password"`
 }
 
+type Filter struct {
+	ObjectDifinitionID int     `json:"objectDifinitionId"`
+	Oparator           string  `json:"oparator"`
+	Value              string  `json:"value"`
+	Connector          *string `json:"connector"`
+}
+
+type GetFilter struct {
+	ID                 int     `json:"id"`
+	AccountID          int     `json:"accountId"`
+	ObjectDifinitionID int     `json:"objectDifinitionId"`
+	Oparator           string  `json:"oparator"`
+	Value              string  `json:"value"`
+	Connector          *string `json:"connector"`
+}
+
+type GetFilters struct {
+	Filter []*GetFilter `json:"filter"`
+}
+
+type Group struct {
+	ObjectDifinitionID int `json:"objectDifinitionId"`
+}
+
 type NewAccount struct {
 	Company string `json:"company"`
 	Name    string `json:"name"`

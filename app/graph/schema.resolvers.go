@@ -16,6 +16,7 @@ import (
 	"github.com/super-studio/ecforce_ma/graph/generated"
 	"github.com/super-studio/ecforce_ma/graph/model"
 	data "github.com/super-studio/ecforce_ma/service"
+	gojsonq "github.com/thedevsaddam/gojsonq/v2"
 )
 
 func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*model.Account, error) {
@@ -202,6 +203,13 @@ func (r *queryResolver) GetObject(ctx context.Context, accountID int, number str
 	return &data, nil
 }
 
+func (r *queryResolver) GetObjectDifinitions(ctx context.Context, accountID int, objectID int) ([]*model.ObjectDifinition, error) {
+	var difinitions []*model.ObjectDifinition
+	r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Find(&difinitions)
+
+	return difinitions, nil
+}
+
 func (r *queryResolver) GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, error) {
 	var object *model.Object
 	r.DB.Debug().Where(&model.Object{AccountID: 1, ID: 1}).First(&object)
@@ -228,6 +236,63 @@ func (r *queryResolver) GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, 
 	}
 	var data = model.ShopOrderTmp{j}
 	return &data, nil
+}
+
+func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group) (*model.ShopOrderData, error) {
+	var object *model.Object
+	r.DB.Debug().Where(&model.Object{AccountID: accountID, Number: number}).Find(&object)
+
+	var difinitions []*model.ObjectDifinition
+	r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: 1}).Find(&difinitions)
+
+	var query string
+	query = `{"query": "query { shopOrders(id: \"cosmedyjp\") {`
+	for i := 0; i < len(difinitions); i++ {
+		query += difinitions[i].Name + " "
+	}
+	query += `}}"}`
+
+	var jsonData = []byte(query)
+	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+
+	if error != nil {
+		panic(error)
+	}
+	defer response.Body.Close()
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	var j interface{}
+
+	if err := json.Unmarshal(body, &j); err != nil {
+		fmt.Println("[!]", err.Error())
+	}
+
+	// data := gojsonq.New().FromString(string(body)).From("data.shopOrders").Where("total", ">", 10000).Where("paymentsId", "=", 73610)
+
+	data := gojsonq.New().FromString(string(body)).From("data.shopOrders").Where("subtotal", ">", 5000)
+	for i := 0; i < len(filters); i++ {
+		var difinition *model.ObjectDifinition
+		r.DB.Debug().Where(&model.ObjectDifinition{ID: filters[i].ObjectDifinitionID}).First(&difinition)
+
+		fmt.Println("condition: ", difinition.Name, " ", filters[i].Oparator, " ", filters[i].Value)
+
+		if *difinition.ColumnType == "String" {
+			fmt.Println("columntype: string")
+			data.Where(difinition.Name, filters[i].Oparator, string(filters[i].Value))
+		} else {
+			num, _ := strconv.Atoi(filters[i].Value)
+			data.Where(difinition.Name, filters[i].Oparator, num)
+		}
+	}
+
+	// fmt.Println(data.Get())
+
+	return &model.ShopOrderData{Ecforce: data.Get()}, nil
 }
 
 func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {

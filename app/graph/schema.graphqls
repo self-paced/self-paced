@@ -83,6 +83,19 @@ type ObjectDifinition {
   primaryFlg: Boolean
 }
 
+type GetFilter {
+  id: Int!
+  accountId: Int!
+  objectDifinitionId: Int!
+  oparator: String!
+  value: String!
+  connector: String
+}
+
+type GetFilters {
+  filter: [GetFilter!]!
+}
+
 type Query {
   accounts: [Account!]!
   account(id: String!): Account!
@@ -95,14 +108,27 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID): ShopOrderData!
+  getObjectDifinitions(accountId: Int!, objectId: Int!): [ObjectDifinition!]!
 
   getObjectTmp: ShopOrderTmp!
+  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group]): ShopOrderData!
   # test
   test: Object!
 }
 
 
 ## mutation
+
+input Filter {
+  objectDifinitionId: Int!
+  oparator: String!
+  value: String!
+  connector: String
+}
+
+input Group {
+  objectDifinitionId: Int!
+}
 
 # account 
 input NewAccount {

@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.1
 	github.com/joho/godotenv v1.4.0
 	github.com/rs/cors v1.8.2
+	github.com/thedevsaddam/gojsonq/v2 v2.5.2
 	github.com/vektah/gqlparser/v2 v2.4.0
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.2

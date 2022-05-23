@@ -2,15 +2,24 @@ import Link from 'next/link'
 import Layout from '../../components/layouts/layout'
 import Head from 'next/head'
 import { H1 } from '../../components/header'
-import Nav from '../../components/objects/nav'
 import { useQuery, gql } from '@apollo/client'
-import Thead from './thead'
 
-export default function Show(){
+type Filter = {
+  objectDifinitionId: int
+  oparator: string
+  value: string
+  connector: string
+}
+
+type Filters = {
+  filter: [filter]
+}
+
+export default function New(){
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $number: String!){
-      getObject(accountId: $accountId, number: $number){
+    query($accountId: Int!, $number: String!, $filters: Filter){
+      getReportData(accountId: $accountId, number: $number, filters: $filters ){
         ecforce
       }
     }
@@ -18,7 +27,14 @@ export default function Show(){
 
   const variables = {
     accountId: 1,
-    number: "00000001"
+    number: "00000001",
+    filters: [
+      {
+        objectDifinitionId: 1,
+        oparator: "=",
+        value: ""
+      }
+    ]
   }
 
   let { data, loading, error } = useQuery(GET_OBJECT, {
@@ -26,32 +42,26 @@ export default function Show(){
   })
 
   if(error){
-    console.log(error)
     return (<div className="grid-1 grid-container">Failed to load</div>)
   }
 
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
 
   const { getObject } = data
-
   console.log(getObject)
-  return (
+
+  return(
     <Layout>
       <div>
-        <H1 title="オブジェクト管理" />
+        <H1 title="レポート/セグメント管理" />
       </div>
-      <Nav />
 
       <table>
-        <Thead />
         <tbody>
-          {getObject.ecforce.data.shopOrders.map((order) => {
+          {getObject.ecforce.data.shopOrders.map((order)=>{
             return(
               <tr key={order.orderItemId}>
                 <td>{order.orderId}</td>
-                <td>{order.orderItemId}</td>
-                <td>{order.sourceId}</td>
-                <td>{order.quantity}</td>
               </tr>
             )
           })}

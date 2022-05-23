@@ -33,13 +33,17 @@ export default function SideNav(){
        <div>
         <ul>
           <li>
-            <Link href="#">
-              <a>セグメント管理</a>
+            <Link href="/reports">
+              <a>レポート/セグメント管理</a>
             </Link>
           </li>
+        </ul>
+      </div>
+      <div>
+        <ul>
           <li>
             <Link href="#">
-              <a>データファイル管理</a>
+              <a>ダッシュボード</a>
             </Link>
           </li>
         </ul>
