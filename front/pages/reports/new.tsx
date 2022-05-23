@@ -11,15 +11,15 @@ type Filter = {
   connector: string
 }
 
-type Filters = {
-  filter: [filter]
+type Group = {
+  objectDifinitionId: int
 }
 
 export default function New(){
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $number: String!, $filters: Filter){
-      getReportData(accountId: $accountId, number: $number, filters: $filters ){
+    query($accountId: Int!, $number: String!, $filters: [Filter], $groups: [Group]){
+      getReportData(accountId: $accountId, number: $number, filters: $filters, groups: $groups ){
         ecforce
       }
     }
@@ -30,9 +30,9 @@ export default function New(){
     number: "00000001",
     filters: [
       {
-        objectDifinitionId: 1,
-        oparator: "=",
-        value: ""
+        objectDifinitionId: 14,
+        oparator: ">",
+        value: "15000"
       }
     ]
   }
@@ -47,8 +47,8 @@ export default function New(){
 
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
 
-  const { getObject } = data
-  console.log(getObject)
+  const { getReportData } = data
+  console.log(getReportData)
 
   return(
     <Layout>
@@ -58,10 +58,10 @@ export default function New(){
 
       <table>
         <tbody>
-          {getObject.ecforce.data.shopOrders.map((order)=>{
+          {Object.entries(getReportData.ecforce).map(([k,v])=>{
             return(
-              <tr key={order.orderItemId}>
-                <td>{order.orderId}</td>
+              <tr>
+                <td>{v["orderItemId"]}</td>
               </tr>
             )
           })}

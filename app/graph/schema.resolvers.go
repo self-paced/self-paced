@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/super-studio/ecforce_ma/graph/generated"
@@ -216,7 +217,7 @@ func (r *queryResolver) GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, 
 
 	var jsonData = []byte(`{"query": "query { shopOrders(id:  \"cosmedyjp\") { shopId sourceId orderId subtotal }}"}`)
 
-	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
+	request, error := http.NewRequest("POST", os.Getenv("ECFORCE_DB_APP")+"/query", bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 	client := &http.Client{}
@@ -253,7 +254,7 @@ func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number
 	query += `}}"}`
 
 	var jsonData = []byte(query)
-	request, error := http.NewRequest("POST", "http://ecforce_db_app:8085/query", bytes.NewBuffer(jsonData))
+	request, error := http.NewRequest("POST", os.Getenv("ECFORCE_DB_APP")+"/query", bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 	client := &http.Client{}
@@ -265,34 +266,32 @@ func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number
 	defer response.Body.Close()
 
 	body, _ := ioutil.ReadAll(response.Body)
+	jq := gojsonq.New().FromString(string(body)).From("data.shopOrders")
 
-	var j interface{}
-
-	if err := json.Unmarshal(body, &j); err != nil {
-		fmt.Println("[!]", err.Error())
-	}
-
-	// data := gojsonq.New().FromString(string(body)).From("data.shopOrders").Where("total", ">", 10000).Where("paymentsId", "=", 73610)
-
-	data := gojsonq.New().FromString(string(body)).From("data.shopOrders").Where("subtotal", ">", 5000)
+	// filters
 	for i := 0; i < len(filters); i++ {
 		var difinition *model.ObjectDifinition
 		r.DB.Debug().Where(&model.ObjectDifinition{ID: filters[i].ObjectDifinitionID}).First(&difinition)
 
-		fmt.Println("condition: ", difinition.Name, " ", filters[i].Oparator, " ", filters[i].Value)
-
 		if *difinition.ColumnType == "String" {
 			fmt.Println("columntype: string")
-			data.Where(difinition.Name, filters[i].Oparator, string(filters[i].Value))
+			jq.Where(difinition.Name, filters[i].Oparator, string(filters[i].Value))
 		} else {
 			num, _ := strconv.Atoi(filters[i].Value)
-			data.Where(difinition.Name, filters[i].Oparator, num)
+			jq.Where(difinition.Name, filters[i].Oparator, num)
 		}
 	}
 
-	// fmt.Println(data.Get())
+	// groups
+	for i := 0; i < len(groups); i++ {
+		var difinition *model.ObjectDifinition
+		r.DB.Debug().Where(&model.ObjectDifinition{ID: groups[i].ObjectDifinitionID}).First(&difinition)
+		jq.GroupBy(difinition.Name)
+	}
 
-	return &model.ShopOrderData{Ecforce: data.Get()}, nil
+	// fmt.Println(jq.Get())
+
+	return &model.ShopOrderData{Ecforce: jq.Get()}, nil
 }
 
 func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {
