@@ -132,12 +132,12 @@ type ComplexityRoot struct {
 		AccountUsers         func(childComplexity int) int
 		Accounts             func(childComplexity int) int
 		GetObject            func(childComplexity int, accountID int, number string, first *int, after *string) int
-		GetObjectDifinitions func(childComplexity int, accountID int, objectID int) int
+		GetObjectDifinitions func(childComplexity int, accountID int, objectID int, ids []*int) int
 		GetObjectTmp         func(childComplexity int) int
 		GetObjectType        func(childComplexity int, accountID int) int
 		GetObjectTypes       func(childComplexity int, accountID int, id int) int
 		GetObjects           func(childComplexity int, accountID int) int
-		GetReportData        func(childComplexity int, accountID int, number string, filters []*model.Filter, groups []*model.Group) int
+		GetReportData        func(childComplexity int, accountID int, number string, filters []*model.Filter, groups []*model.Group, rowIds []*model.Group, colIds []*model.Group) int
 		Test                 func(childComplexity int) int
 	}
 
@@ -178,9 +178,9 @@ type QueryResolver interface {
 	GetObjectType(ctx context.Context, accountID int) (*model.ObjectType, error)
 	GetObjects(ctx context.Context, accountID int) ([]*model.Object, error)
 	GetObject(ctx context.Context, accountID int, number string, first *int, after *string) (*model.ShopOrderData, error)
-	GetObjectDifinitions(ctx context.Context, accountID int, objectID int) ([]*model.ObjectDifinition, error)
+	GetObjectDifinitions(ctx context.Context, accountID int, objectID int, ids []*int) ([]*model.ObjectDifinition, error)
 	GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, error)
-	GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group) (*model.ShopOrderData, error)
+	GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group, rowIds []*model.Group, colIds []*model.Group) (*model.ShopOrderData, error)
 	Test(ctx context.Context) (*model.Object, error)
 }
 
@@ -686,7 +686,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetObjectDifinitions(childComplexity, args["accountId"].(int), args["objectId"].(int)), true
+		return e.complexity.Query.GetObjectDifinitions(childComplexity, args["accountId"].(int), args["objectId"].(int), args["ids"].([]*int)), true
 
 	case "Query.getObjectTmp":
 		if e.complexity.Query.GetObjectTmp == nil {
@@ -741,7 +741,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetReportData(childComplexity, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group)), true
+		return e.complexity.Query.GetReportData(childComplexity, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group), args["rowIds"].([]*model.Group), args["colIds"].([]*model.Group)), true
 
 	case "Query.test":
 		if e.complexity.Query.Test == nil {
@@ -966,10 +966,10 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID): ShopOrderData!
-  getObjectDifinitions(accountId: Int!, objectId: Int!): [ObjectDifinition!]!
+  getObjectDifinitions(accountId: Int!, objectId: Int!, ids: [Int]): [ObjectDifinition!]!
 
   getObjectTmp: ShopOrderTmp!
-  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group]): ShopOrderData!
+  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group], rowIds: [Group], colIds: [Group]): ShopOrderData!
   # test
   test: Object!
 }
@@ -1228,6 +1228,15 @@ func (ec *executionContext) field_Query_getObjectDifinitions_args(ctx context.Co
 		}
 	}
 	args["objectId"] = arg1
+	var arg2 []*int
+	if tmp, ok := rawArgs["ids"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
+		arg2, err = ec.unmarshalOInt2ᚕᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ids"] = arg2
 	return args, nil
 }
 
@@ -1366,6 +1375,24 @@ func (ec *executionContext) field_Query_getReportData_args(ctx context.Context, 
 		}
 	}
 	args["groups"] = arg3
+	var arg4 []*model.Group
+	if tmp, ok := rawArgs["rowIds"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rowIds"))
+		arg4, err = ec.unmarshalOGroup2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["rowIds"] = arg4
+	var arg5 []*model.Group
+	if tmp, ok := rawArgs["colIds"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("colIds"))
+		arg5, err = ec.unmarshalOGroup2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["colIds"] = arg5
 	return args, nil
 }
 
@@ -3751,7 +3778,7 @@ func (ec *executionContext) _Query_getObjectDifinitions(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetObjectDifinitions(rctx, args["accountId"].(int), args["objectId"].(int))
+		return ec.resolvers.Query().GetObjectDifinitions(rctx, args["accountId"].(int), args["objectId"].(int), args["ids"].([]*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3828,7 +3855,7 @@ func (ec *executionContext) _Query_getReportData(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetReportData(rctx, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group))
+		return ec.resolvers.Query().GetReportData(rctx, args["accountId"].(int), args["number"].(string), args["filters"].([]*model.Filter), args["groups"].([]*model.Group), args["rowIds"].([]*model.Group), args["colIds"].([]*model.Group))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8243,6 +8270,38 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	}
 	res := graphql.MarshalID(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕᚖint(ctx context.Context, v interface{}) ([]*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOInt2ᚖint(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕᚖint(ctx context.Context, sel ast.SelectionSet, v []*int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOInt2ᚖint(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

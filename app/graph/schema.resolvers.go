@@ -204,10 +204,14 @@ func (r *queryResolver) GetObject(ctx context.Context, accountID int, number str
 	return &data, nil
 }
 
-func (r *queryResolver) GetObjectDifinitions(ctx context.Context, accountID int, objectID int) ([]*model.ObjectDifinition, error) {
+func (r *queryResolver) GetObjectDifinitions(ctx context.Context, accountID int, objectID int, ids []*int) ([]*model.ObjectDifinition, error) {
 	var difinitions []*model.ObjectDifinition
-	r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Find(&difinitions)
 
+	if len(ids) > 0 {
+		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Where("id in ?", ids).Find(&difinitions)
+	} else {
+		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Find(&difinitions)
+	}
 	return difinitions, nil
 }
 
@@ -239,7 +243,7 @@ func (r *queryResolver) GetObjectTmp(ctx context.Context) (*model.ShopOrderTmp, 
 	return &data, nil
 }
 
-func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group) (*model.ShopOrderData, error) {
+func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, groups []*model.Group, rowIds []*model.Group, colIds []*model.Group) (*model.ShopOrderData, error) {
 	var object *model.Object
 	r.DB.Debug().Where(&model.Object{AccountID: accountID, Number: number}).Find(&object)
 
@@ -282,10 +286,10 @@ func (r *queryResolver) GetReportData(ctx context.Context, accountID int, number
 		}
 	}
 
-	// groups
-	for i := 0; i < len(groups); i++ {
+	// rows
+	for i := 0; i < len(rowIds); i++ {
 		var difinition *model.ObjectDifinition
-		r.DB.Debug().Where(&model.ObjectDifinition{ID: groups[i].ObjectDifinitionID}).First(&difinition)
+		r.DB.Debug().Where(&model.ObjectDifinition{ID: rowIds[i].ObjectDifinitionID}).First(&difinition)
 		jq.GroupBy(difinition.Name)
 	}
 

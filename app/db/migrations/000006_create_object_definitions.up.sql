@@ -239,7 +239,7 @@ insert into public.object_difinitions
     account_id, object_id, title, name, column_type
   )
   select
-    1, 1, '作成日', 'createdAt', 'String'
+    1, 1, '作成日', 'createdAt', 'Datetime'
   WHERE
     (
       NOT EXISTS
@@ -253,7 +253,7 @@ insert into public.object_difinitions
     account_id, object_id, title, name, column_type
   )
   select
-    1, 1, '配送日時', 'shippedAt', 'String'
+    1, 1, '配送日時', 'shippedAt', 'Datetime'
   WHERE
     (
       NOT EXISTS
@@ -267,7 +267,7 @@ insert into public.object_difinitions
     account_id, object_id, title, name, column_type
   )
   select
-    1, 1, '完了日時', 'completedAt', 'String'
+    1, 1, '完了日時', 'completedAt', 'Datetime'
   WHERE
     (
       NOT EXISTS

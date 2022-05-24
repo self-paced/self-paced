@@ -108,10 +108,10 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID): ShopOrderData!
-  getObjectDifinitions(accountId: Int!, objectId: Int!): [ObjectDifinition!]!
+  getObjectDifinitions(accountId: Int!, objectId: Int!, ids: [Int]): [ObjectDifinition!]!
 
   getObjectTmp: ShopOrderTmp!
-  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group]): ShopOrderData!
+  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group], rowIds: [Group], colIds: [Group]): ShopOrderData!
   # test
   test: Object!
 }
