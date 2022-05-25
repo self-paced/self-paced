@@ -9,16 +9,25 @@ import Thead from './thead'
 export default function Show(){
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $number: String!){
+    query($accountId: Int!, $number: String!, $objectId: Int!, $ids: [Int]){
       getObject(accountId: $accountId, number: $number){
         ecforce
+      }
+
+      getObjectDifinitions(accountId: $accountId, objectId: $objectId, ids: $ids){
+        id
+        title
+        name
+        columnType
       }
     }
   `
 
   const variables = {
     accountId: 1,
-    number: "00000001"
+    number: "00000001",
+    ids: [],
+    objectId: 1
   }
 
   let { data, loading, error } = useQuery(GET_OBJECT, {
@@ -32,7 +41,7 @@ export default function Show(){
 
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
 
-  const { getObject } = data
+  const { getObject, getObjectDifinitions } = data
 
   console.log(getObject)
   return (
@@ -43,15 +52,24 @@ export default function Show(){
       <Nav />
 
       <table>
-        <Thead />
+        <thead>
+          <tr>
+            {getObjectDifinitions.map((difinition)=>{
+              return (
+                <th key={difinition.id}>{difinition.title}</th>
+              )
+            })}
+          </tr>
+        </thead>
         <tbody>
-          {getObject.ecforce.data.shopOrders.map((order) => {
+          {Object.entries(getObject.ecforce).map(([k,v]) => {
             return(
-              <tr key={order.orderItemId}>
-                <td>{order.orderId}</td>
-                <td>{order.orderItemId}</td>
-                <td>{order.sourceId}</td>
-                <td>{order.quantity}</td>
+              <tr key={k}>
+                {getObjectDifinitions.map((difinition)=>{
+                  return(
+                    <td>{v[difinition.name]}</td>
+                  )
+                })}
               </tr>
             )
           })}

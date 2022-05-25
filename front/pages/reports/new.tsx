@@ -11,7 +11,7 @@ import { objectDifinitionsVar } from '../../apollo/objectDifinitions'
 
 type Filter = {
   objectDifinitionId: int
-  oparator: string
+  operator: string
   value: string
   connector: string
 }
@@ -56,8 +56,8 @@ export default function New(){
     colIds = []
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $number: String!, $filters: [Filter], $groups: [Group], $objectId: Int!, $ids: [Int], $colIds: [Group], $rowIds: [Group]){
-      getReportData(accountId: $accountId, number: $number, filters: $filters, groups: $groups, rowIds: $rowIds, colIds: $colIds ){
+    query($accountId: Int!, $number: String!, $filters: [Filter], $objectId: Int!, $ids: [Int], $colIds: [Group], $rowIds: [Group]){
+      getObject(accountId: $accountId, number: $number, filters: $filters, rowIds: $rowIds, colIds: $colIds ){
         ecforce
       }
 
@@ -73,7 +73,7 @@ export default function New(){
   filters.map((filter)=>{
     let f = {
       objectDifinitionId: filter.objectDifinitionId,
-      oparator: filter.oparator,
+      operator: filter.operator,
       value: filter.value
     }
 
@@ -117,11 +117,9 @@ export default function New(){
   }
 
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
-  const { getReportData, getObjectDifinitions } = data
-  
-  objectDifinitionsVar(getObjectDifinitions)
+  const { getObject, getObjectDifinitions } = data
 
-  console.log(getReportData)
+  objectDifinitionsVar(getObjectDifinitions)
 
   return(
     <Layout>
@@ -147,23 +145,23 @@ export default function New(){
           <tr>
             {getObjectDifinitions.map((difinition)=>{
               return(
-                <th>{difinition.title}</th>
+                <th key={difinition.id}>{difinition.title}</th>
               )
             })}
           </tr>
         </thead>
         <tbody>
-              {Object.entries(getReportData.ecforce).map(([k,v])=>{
-                return (
-                  <tr>
-                    {getObjectDifinitions.map((difinition)=>{
-                      return (
-                        <td>{v[difinition.name]}</td>
-                      )
-                    })}
-                  </tr>
-                  )
+          {Object.entries(getObject.ecforce).map(([k,v])=>{
+            return (
+              <tr key={k}>
+                {getObjectDifinitions.map((difinition)=>{
+                  return (
+                    <td key={difinition.id}>{v[difinition.name]}</td>
+                    )
                 })}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </Layout>

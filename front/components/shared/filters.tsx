@@ -29,28 +29,8 @@ export default function FilterField(props){
   const Name      = watch("name")
   const Condition = watch("condition")
   const Value     = watch("value")
+  const Operator  = watch("operator")
   let difinitions: any = useReactiveVar(objectDifinitionsVar)
-
-  const onSubmit: SubmitHandler<Inputs> = (value) => {
-    let name, title
-
-    difinitions.map((difinition)=>{
-      if(difinition.id == value.id){
-        name = difinition.name
-        title = difinition.title
-      }
-    })
-
-    setFilters(
-      [...filters, {
-        oparator: value.oparator,
-        value: value.value,
-        objectDifinitionId: value.id,
-        name: name,
-        title: title
-      }]
-    )
-  }
 
   function HandleDelete(value){
     setFilters(
@@ -84,6 +64,26 @@ export default function FilterField(props){
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
   const { getObjectDifinitions } = data
 
+  const onSubmit: SubmitHandler<Inputs> = (value) => {
+    let name, title
+    getObjectDifinitions.map((difinition)=>{
+      if(difinition.id == value.id){
+        name = difinition.name
+        title = difinition.title
+      }
+    })
+
+    setFilters(
+      [...filters, {
+        operator: value.operator,
+        value: value.value,
+        objectDifinitionId: value.id,
+        name: name,
+        title: title
+      }]
+    )
+  }
+
   return(
     <div>
       <form onSubmit={handleSubmit(onSubmit)} acceptCharset="UTF-8">
@@ -98,16 +98,16 @@ export default function FilterField(props){
         <option value="">選択してください</option>
         {getObjectDifinitions.map((field)=>{
           return(
-            <option data-hoge={field.title} value={field.id}>{field.title}</option>
+            <option key={field.id} data-hoge={field.title} value={field.id}>{field.title}</option>
           )
         })}
       </select>
 
       <select
         className={` ${errors.condition && 'is-invalid'}`}
-        id="oparator"
-        name="oparator"
-        {...register("oparator",{
+        id="operator"
+        name="operator"
+        {...register("operator",{
           required: true
         })}
         >
@@ -136,8 +136,8 @@ export default function FilterField(props){
     <ul>
       {filters.map((filter)=>{
         return(
-          <li>
-            {filter.title} {filter.oparator} {filter.value}
+          <li key={filter.objectDifinitionId}>
+            {filter.title} {filter.operator} {filter.value}
             <button onClick={()=>HandleDelete(filter.objectDifinitionId)}>x</button>
           </li>
         )

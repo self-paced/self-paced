@@ -23,31 +23,6 @@ export default function ColField(props){
   const Name      = watch("name")
   let difinitions: any = useReactiveVar(objectDifinitionsVar)
 
-  const onSubmit: SubmitHandler<Inputs> = (value) =>{
-    let name, title
-
-    difinitions.map((difinition)=>{
-      if( difinition.id == value.id ){
-        name = difinition.name
-        title = difinition.title
-      }
-    })
-
-    setCols(
-      [...cols, {
-        name: name,
-        title: title,
-        objectDifinitionId: value.id
-      }]
-    )
-  }
-
-  function HandleDelete(value){
-    setCols(
-      cols.filter((col, index) => (col.objectDifinitionId != value))
-    )
-  }
-
   const GET_OBJECT = gql`
     query($accountId: Int!, $objectId: Int!){
       getObjectDifinitions(accountId: $accountId, objectId: $objectId){
@@ -74,6 +49,30 @@ export default function ColField(props){
   if(!data) return <div className="grid-1 grid-container">Loading...</div>
   const { getObjectDifinitions } = data
 
+  const onSubmit: SubmitHandler<Inputs> = (value) =>{
+    let name, title
+    getObjectDifinitions.map((difinition)=>{
+      if( difinition.id == value.id ){
+        name = difinition.name
+        title = difinition.title
+      }
+    })
+    setCols(
+      [...cols, {
+        name: name,
+        title: title,
+        objectDifinitionId: value.id
+      }]
+    )
+  }
+  function HandleDelete(value){
+    setCols(
+      cols.filter((col, index) => (col.objectDifinitionId != value))
+    )
+  }
+
+
+
   return (
     <div>
       <h2>列</h2>
@@ -88,7 +87,7 @@ export default function ColField(props){
           <option value="">選択してください</option>
           {getObjectDifinitions.map((field)=>{
             return (
-              <option value={field.id}>{field.title}</option>
+              <option key={field.id} value={field.id}>{field.title}</option>
             )
           })}
         </select>
@@ -100,9 +99,8 @@ export default function ColField(props){
       </form>
       <ul>
         {cols.map((col)=>{
-          console.log(col)
           return (
-            <li>
+            <li key={col}>
               {col.title}
               <button onClick={()=>HandleDelete(col.objectDifinitionId)}>x</button>
             </li>

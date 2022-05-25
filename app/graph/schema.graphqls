@@ -55,10 +55,6 @@ type ShopOrder {
   orderId: Int
 }
 
-type ShopOrderTmp {
-  ecforce: Any!
-}
-
 type Object {
   id: Int!
   accountID: Int!
@@ -83,17 +79,44 @@ type ObjectDifinition {
   primaryFlg: Boolean
 }
 
-type GetFilter {
-  id: Int!
+type WhereQuery {
+  id: Int
   accountId: Int!
   objectDifinitionId: Int!
-  oparator: String!
+  operator: String!
   value: String!
   connector: String
 }
 
-type GetFilters {
-  filter: [GetFilter!]!
+type Report {
+  id: Int!
+  accountId: Int!
+  accountUserId: Int!
+  objectId: Int!
+  number: String!
+  title: String!
+  description: String
+  whereQueries: [WhereQuery]
+  rowQueries: [ReportRowQuery]
+  colQueries: [ReportColQuery]
+}
+
+type ReportWhereQuery {
+  id: Int
+  reportId: Int!
+  whereQueryId: Int!
+}
+
+type ReportColQuery {
+  id: Int
+  reportId: Int!
+  objectDifinitionId: Int!
+}
+
+type ReportRowQuery {
+  id: Int
+  reportId: Int!
+  objectDifinitionId: Int!
 }
 
 type Query {
@@ -107,11 +130,12 @@ type Query {
   getObjectType(accountId: Int!): ObjectType!
 
   getObjects(accountId: Int!): [Object!]!
-  getObject(accountId: Int!, number: String!, first: Int = 100, after: ID): ShopOrderData!
+  getObject(accountId: Int!, number: String!, first: Int = 100, after: ID, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
   getObjectDifinitions(accountId: Int!, objectId: Int!, ids: [Int]): [ObjectDifinition!]!
 
-  getObjectTmp: ShopOrderTmp!
-  getReportData(accountId: Int!, number: String!, filters: [Filter], groups: [Group], rowIds: [Group], colIds: [Group]): ShopOrderData!
+  getReportData(accountId: Int!, number: String!, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
+  getReport(accountId: Int!, number: String!): Report!
+
   # test
   test: Object!
 }
@@ -121,7 +145,7 @@ type Query {
 
 input Filter {
   objectDifinitionId: Int!
-  oparator: String!
+  operator: String!
   value: String!
   connector: String
 }
@@ -175,6 +199,11 @@ input EditAccountMeta {
   value: String!
 }
 
+input NewReport {
+  title: String!
+  description: String
+}
+
 type Mutation {
 
   # account
@@ -189,5 +218,7 @@ type Mutation {
   # account meta
   createAccountMeta(input: NewAccountMeta!): AccountMeta!
   udpateAccountMeta(input: EditAccountMeta!): AccountMeta!
-  
+
+  # report
+  createReport(accountId: Int!, accountUserId: Int!, number: String!, title: String!, description: String, filters: [Filter], rowIds: [Group], colIds: [Group]): Report!
 }

@@ -57,22 +57,9 @@ type EditAccountUser struct {
 
 type Filter struct {
 	ObjectDifinitionID int     `json:"objectDifinitionId"`
-	Oparator           string  `json:"oparator"`
+	Operator           string  `json:"operator"`
 	Value              string  `json:"value"`
 	Connector          *string `json:"connector"`
-}
-
-type GetFilter struct {
-	ID                 int     `json:"id"`
-	AccountID          int     `json:"accountId"`
-	ObjectDifinitionID int     `json:"objectDifinitionId"`
-	Oparator           string  `json:"oparator"`
-	Value              string  `json:"value"`
-	Connector          *string `json:"connector"`
-}
-
-type GetFilters struct {
-	Filter []*GetFilter `json:"filter"`
 }
 
 type Group struct {
@@ -95,6 +82,11 @@ type NewAccountUser struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	AccountID int    `json:"accountId"`
+}
+
+type NewReport struct {
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
 }
 
 type Object struct {
@@ -128,6 +120,24 @@ type ObjectType struct {
 	Name        string  `json:"name"`
 }
 
+type ReportColQuery struct {
+	ID                 *int `json:"id"`
+	ReportID           int  `json:"reportId"`
+	ObjectDifinitionID int  `json:"objectDifinitionId"`
+}
+
+type ReportRowQuery struct {
+	ID                 *int `json:"id"`
+	ReportID           int  `json:"reportId"`
+	ObjectDifinitionID int  `json:"objectDifinitionId"`
+}
+
+type ReportWhereQuery struct {
+	ID           *int `json:"id"`
+	ReportID     int  `json:"reportId"`
+	WhereQueryID int  `json:"whereQueryId"`
+}
+
 type ShopOrder struct {
 	ShopID  *string `json:"shopId"`
 	Times   *int    `json:"times"`
@@ -138,10 +148,15 @@ type ShopOrderData struct {
 	Ecforce interface{} `json:"ecforce"`
 }
 
-type ShopOrderTmp struct {
-	Ecforce interface{} `json:"ecforce"`
-}
-
 type ShopOrders struct {
 	ShopOrders []*ShopOrder `json:"shopOrders"`
+}
+
+type WhereQuery struct {
+	ID                 *int    `json:"id"`
+	AccountID          int     `json:"accountId"`
+	ObjectDifinitionID int     `json:"objectDifinitionId"`
+	Operator           string  `json:"operator"`
+	Value              string  `json:"value"`
+	Connector          *string `json:"connector"`
 }

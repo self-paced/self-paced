@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS where_queries (
        connector varchar(50),
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      deleted_at TIMESTAMPTZ,
+
        foreign key (account_id) references accounts(id),
        foreign key (object_difinition_id) references object_difinitions(id)
        );
