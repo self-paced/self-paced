@@ -20,6 +20,7 @@ const CustomAppBar: react.FC = () => {
   return (
     <AppBar position="sticky" elevation={1} color="default">
       <Toolbar>
+        {/* Left Area */}
         <Box
           sx={{ flex: '1', display: 'flex', alignItems: 'center', gap: '5px' }}
         >
@@ -42,6 +43,7 @@ const CustomAppBar: react.FC = () => {
             </Typography>
           </Link>
         </Box>
+        {/* Center Area */}
         <Box
           sx={{
             flex: '1',
@@ -50,23 +52,8 @@ const CustomAppBar: react.FC = () => {
             justifyContent: 'center',
             gap: '5px',
           }}
-        >
-          <OutlinedInput
-            placeholder="Search"
-            size="small"
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={() => {}}
-                  edge="end"
-                >
-                  <Icon>search</Icon>
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-        </Box>
+        ></Box>
+        {/* Right Area */}
         <Box
           sx={{
             flex: '1',
@@ -76,9 +63,11 @@ const CustomAppBar: react.FC = () => {
             gap: '5px',
           }}
         >
-          <Link href="/article/new" passHref>
-            <Button variant="contained">Create</Button>
-          </Link>
+          {session?.user.isAdmin && (
+            <Link href="/admin" passHref>
+              <Button variant="contained">Admin</Button>
+            </Link>
+          )}
           {status === 'authenticated' && (
             <Button onClick={() => signOut()}>Sign Out</Button>
           )}

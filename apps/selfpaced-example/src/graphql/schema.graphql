@@ -51,7 +51,6 @@ type Mutation {
   createUser: User!
   registerUser(input: RegisterUserInput!): User!
   setupApp(input: SetupAppInput!): User!
-  login(password: String!, email: String!): User
   createCourse(input: CreateCourseInput!): Course!
   editCourse(input: EditCourseInput!): Course!
   deleteCourse(id: Float!): Boolean!

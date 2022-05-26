@@ -30,7 +30,6 @@ interface IListCoursesRes {
 
 const Page: NextPage<{ Theme?: React.FC }> = ({ Theme }) => {
   const { loading, error, data } = useQuery<IListCoursesRes>(LIST_COURSES);
-  console.log(data);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 

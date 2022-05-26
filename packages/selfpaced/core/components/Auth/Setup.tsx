@@ -2,6 +2,7 @@ import { gql, useMutation } from '@apollo/client';
 import { Box, Button, Card, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { TextField } from 'formik-mui';
+import { signIn } from 'next-auth/react';
 import Router from 'next/router';
 
 interface Values {
@@ -33,7 +34,10 @@ const Setup: React.FC = () => {
         },
       },
     });
-    Router.reload();
+    await signIn('credentials', {
+      email: values.email,
+      password: values.password,
+    });
   };
 
   const initialValues: Values = {
