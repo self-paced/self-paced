@@ -10,4 +10,5 @@ type Report struct {
 	Description   *string           `json:"description"`
 	WhereQueries  []*WhereQuery     `gorm:"many2many:report_where_queries; json:"whereQueries"`
 	RowQueries    []*ReportRowQuery `json:"rowQueries"`
+	ColQueries    []*ReportColQuery `json:"colQueries"`
 }

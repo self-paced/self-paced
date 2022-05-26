@@ -135,6 +135,7 @@ type Query {
 
   getReportData(accountId: Int!, number: String!, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
   getReport(accountId: Int!, number: String!): Report!
+  getReports(accountId: Int!, keyword: String): [Report!]!
 
   # test
   test: Object!

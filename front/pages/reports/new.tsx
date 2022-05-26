@@ -8,6 +8,7 @@ import FilterField from '../../components/shared/filters'
 import ColField from '../../components/shared/cols'
 import RowField from '../../components/shared/rows'
 import { objectDifinitionsVar } from '../../apollo/objectDifinitions'
+import Submit from '../../components/pages/reports/submit'
 
 type Filter = {
   objectDifinitionId: int
@@ -56,8 +57,22 @@ export default function New(){
     colIds = []
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $number: String!, $filters: [Filter], $objectId: Int!, $ids: [Int], $colIds: [Group], $rowIds: [Group]){
-      getObject(accountId: $accountId, number: $number, filters: $filters, rowIds: $rowIds, colIds: $colIds ){
+    query(
+      $accountId: Int!,
+      $number: String!, 
+      $filters: [Filter], 
+      $objectId: Int!, 
+      $ids: [Int], 
+      $colIds: [Group], 
+      $rowIds: [Group]
+    ){
+      getObject(
+        accountId: $accountId, 
+        number: $number, 
+        filters: $filters, 
+        rowIds: $rowIds, 
+        colIds: $colIds 
+      ){
         ecforce
       }
 
@@ -138,6 +153,15 @@ export default function New(){
         <RowConditions.Provider value={{rows, setRows}}>
           <RowField fields={getObjectDifinitions} />
         </RowConditions.Provider>
+        <Submit
+          accountId="1" 
+          number="00000001"
+          accountUserId="1"
+          title="title"
+          filters={filters}
+          rows={rows} 
+          cols={cols} 
+        />
       </div>
 
       <table>

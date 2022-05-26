@@ -8,11 +8,9 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/super-studio/ecforce_ma/graph/generated"
 	"github.com/super-studio/ecforce_ma/graph/model"
@@ -22,7 +20,7 @@ import (
 
 func (r *mutationResolver) CreateAccount(ctx context.Context, input model.NewAccount) (*model.Account, error) {
 	account := model.Account{
-		Number:  RandomString(20),
+		Number:  data.RandomString(20),
 		Company: input.Company,
 		Name:    input.Name,
 		Status:  true,
@@ -45,7 +43,7 @@ func (r *mutationResolver) UpdateAccount(ctx context.Context, input model.EditAc
 
 func (r *mutationResolver) CreateAccountUser(ctx context.Context, input model.NewAccountUser) (*model.AccountUser, error) {
 	account_user := model.AccountUser{
-		Number:   RandomString(20),
+		Number:   data.RandomString(20),
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
@@ -108,14 +106,43 @@ func (r *mutationResolver) CreateReport(ctx context.Context, accountID int, acco
 		return nil, result.Error
 	}
 
+	// filters
+	var whereQuery []*model.WhereQuery
+	for i := 0; i < len(filters); i++ {
+		whereQuery = append(whereQuery, &model.WhereQuery{
+			AccountID:          accountID,
+			ObjectDifinitionID: filters[i].ObjectDifinitionID,
+			Operator:           filters[i].Operator,
+			Value:              filters[i].Value,
+		})
+	}
+
+	// rows
+	var rowQuery []*model.ReportRowQuery
+	for i := 0; i < len(rowIds); i++ {
+		rowQuery = append(rowQuery, &model.ReportRowQuery{
+			ObjectDifinitionID: rowIds[i].ObjectDifinitionID,
+		})
+	}
+
+	var colQuery []*model.ReportColQuery
+	for i := 0; i < len(colIds); i++ {
+		colQuery = append(colQuery, &model.ReportColQuery{
+			ObjectDifinitionID: colIds[i].ObjectDifinitionID,
+		})
+	}
+
 	// Insert report
 	report := model.Report{
 		AccountID:     accountID,
 		AccountUserID: accountUserID,
 		ObjectID:      object.ID,
-		Number:        RandomString(20),
+		Number:        data.RandomString(20),
 		Title:         title,
 		Description:   description,
+		WhereQueries:  whereQuery,
+		RowQueries:    rowQuery,
+		ColQueries:    colQuery,
 	}
 
 	result = r.DB.Debug().Create(&report)
@@ -125,34 +152,6 @@ func (r *mutationResolver) CreateReport(ctx context.Context, accountID int, acco
 		return nil, result.Error
 	}
 	fmt.Println(report)
-
-	// gqlgenでassociationできたら書き換える
-	// insert filter
-	for i := 0; i < len(filters); i++ {
-		where_query := model.WhereQuery{
-			AccountID:          accountID,
-			ObjectDifinitionID: filters[i].ObjectDifinitionID,
-			Operator:           filters[i].Operator,
-			Value:              filters[i].Value,
-		}
-		result = r.DB.Create(&where_query)
-		if result.Error != nil {
-			return nil, result.Error
-		}
-
-		report_where_query := model.ReportWhereQuery{
-			ReportID:     report.ID,
-			WhereQueryID: *where_query.ID,
-		}
-		result = r.DB.Create(&report_where_query)
-		if result.Error != nil {
-			return nil, result.Error
-		}
-	}
-
-	// insert cols
-
-	// insert rows
 
 	return &report, nil
 }
@@ -354,12 +353,21 @@ func (r *queryResolver) GetReport(ctx context.Context, accountID int, number str
 	return report, nil
 }
 
-func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {
-	data.ListEcforce()
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) GetReports(ctx context.Context, accountID int, keyword *string) ([]*model.Report, error) {
+
+	var reports []*model.Report
+	if keyword != nil {
+		strKeyword := *keyword
+		r.DB.Debug().Where(&model.Report{AccountID: accountID}).Where("title LIKE ?", "%"+strKeyword+"%").Find(&reports)
+	} else {
+		r.DB.Debug().Where(&model.Report{AccountID: accountID}).Find(&reports)
+	}
+
+	return reports, nil
 }
 
-func (r *reportResolver) ColQueries(ctx context.Context, obj *model.Report) ([]*model.ReportColQuery, error) {
+func (r *queryResolver) Test(ctx context.Context) (*model.Object, error) {
+	data.ListEcforce()
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -369,12 +377,8 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// Report returns generated.ReportResolver implementation.
-func (r *Resolver) Report() generated.ReportResolver { return &reportResolver{r} }
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type reportResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
@@ -382,15 +386,3 @@ type reportResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func RandomString(n int) string {
-
-	dt := time.Now()
-	unix := dt.Unix()
-	var letter = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" + string(unix))
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
-	}
-	return string(b)
-}
