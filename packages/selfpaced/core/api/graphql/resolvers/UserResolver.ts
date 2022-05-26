@@ -3,7 +3,9 @@ import { ApiError } from 'next/dist/server/api-utils';
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { User } from '../../db/entity/User';
 import RegisterUserInput from '../models/user/RegisterUserInput';
+import SetupAppInput from '../models/user/SetupAppInput';
 import { Context } from '../server';
+import { hashPassword } from '../../../helpers/authHelper';
 
 @Resolver()
 export default class UserResolver {
@@ -33,6 +35,25 @@ export default class UserResolver {
       firstName: input.firstName,
       lastName: input.lastName,
       email: session.user!.email!,
+    }).save();
+    return user;
+  }
+
+  @Query(() => Boolean)
+  async checkApp(): Promise<boolean> {
+    const admins: User[] = await User.find({ where: { isAdmin: true } });
+    return admins.length > 0;
+  }
+
+  @Mutation(() => User)
+  async setupApp(
+    @Arg('input') { password, ...input }: SetupAppInput
+  ): Promise<User> {
+    const hashPass = await hashPassword(password);
+    const user: User = await User.create({
+      ...input,
+      password: hashPass,
+      isAdmin: true,
     }).save();
     return user;
   }

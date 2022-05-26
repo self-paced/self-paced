@@ -5,9 +5,9 @@ import type { AppProps } from 'next/app';
 import { ApolloProvider } from '@apollo/client';
 import client from '../graphql/client';
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { SessionProvider, useSession } from 'next-auth/react';
+import { SessionProvider } from 'next-auth/react';
+import { SelfPacedProvider } from 'selfpaced';
 import React from 'react';
-import NewUser from '../components/Auth/NewUser';
 
 const theme = createTheme({
   palette: {
@@ -23,29 +23,15 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
       <CssBaseline />
       <ApolloProvider client={client}>
         <SessionProvider session={session}>
-          <AuthGuard>
+          <SelfPacedProvider>
             <Provider store={store}>
               <Component {...pageProps} />
             </Provider>
-          </AuthGuard>
+          </SelfPacedProvider>
         </SessionProvider>
       </ApolloProvider>
     </ThemeProvider>
   );
 }
-
-const AuthGuard: React.FC = ({ children }) => {
-  const { data: session, status } = useSession();
-
-  if (status === 'loading') {
-    return <div>Loading...</div>;
-  }
-
-  if (session && session.isRegistered === false) {
-    return <NewUser />;
-  }
-
-  return <>{children}</>;
-};
 
 export default MyApp;

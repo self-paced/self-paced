@@ -27,7 +27,7 @@ const PageFrame: react.FC<Props> = ({
         <Box
           sx={{
             flexGrow: 1,
-            maxWidth: fullWidth ? undefined : 1400,
+            maxWidth: fullWidth ? undefined : 1450,
             minWidth: 0,
             minHeight: 'calc(100vh - 64px)',
             margin: fullWidth ? 0 : { xs: 0, md: '0 auto' },

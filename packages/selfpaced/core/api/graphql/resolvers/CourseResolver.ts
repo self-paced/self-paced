@@ -13,7 +13,7 @@ export default class CourseResolver {
 
   @Query(() => Course, { nullable: true })
   async getCourse(@Arg('id') id: number): Promise<Course | null> {
-    return await Course.findOneBy({ id });
+    return await Course.findOne({ where: { id }, relations: { videos: true } });
   }
 
   @Mutation(() => Course)

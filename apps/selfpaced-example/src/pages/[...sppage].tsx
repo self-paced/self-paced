@@ -6,7 +6,7 @@ const APage: React.FC = ({ children }) => {
 };
 
 const themes = {
-  aaa: APage,
+  './aaa': APage,
 };
 
 const Page: NextPage = ({ children }) => {

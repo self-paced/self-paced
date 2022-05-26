@@ -5,6 +5,7 @@
 
 type Query {
   me: User
+  checkApp: Boolean!
   listCourses: [Course!]!
   getCourse(id: Float!): Course
   listCourseVideos(courseId: Float!): [Video!]!
@@ -16,6 +17,8 @@ type User {
   firstName: String!
   lastName: String!
   email: String!
+  password: String!
+  isAdmin: Boolean!
 }
 
 type Course {
@@ -23,15 +26,11 @@ type Course {
   name: String!
   description: String!
   imageSrc: String!
+  videos: [Video!]!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime
 }
-
-"""
-The javascript `Date` as string. Type represents date and time as the ISO Date string.
-"""
-scalar DateTime
 
 type Video {
   id: ID!
@@ -43,9 +42,16 @@ type Video {
   deletedAt: DateTime
 }
 
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
 type Mutation {
   createUser: User!
   registerUser(input: RegisterUserInput!): User!
+  setupApp(input: SetupAppInput!): User!
+  login(password: String!, email: String!): User
   createCourse(input: CreateCourseInput!): Course!
   editCourse(input: EditCourseInput!): Course!
   deleteCourse(id: Float!): Boolean!
@@ -57,6 +63,13 @@ type Mutation {
 input RegisterUserInput {
   firstName: String!
   lastName: String!
+}
+
+input SetupAppInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
 }
 
 input CreateCourseInput {

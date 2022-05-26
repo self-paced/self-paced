@@ -31,6 +31,7 @@ export class Course extends BaseEntity {
   @Column()
   imageSrc!: string;
 
+  @Field(() => [Video])
   @OneToMany(() => Video, (video) => video.course)
   videos!: Relation<Video>[];
 
