@@ -120,7 +120,7 @@ type ComplexityRoot struct {
 		AccountUsers         func(childComplexity int) int
 		Accounts             func(childComplexity int) int
 		GetObject            func(childComplexity int, accountID int, number string, first *int, after *string, filters []*model.Filter, rowIds []*model.Group, colIds []*model.Group) int
-		GetObjectDifinitions func(childComplexity int, accountID int, objectID int, ids []*int) int
+		GetObjectDifinitions func(childComplexity int, accountID int, number string, ids []*int) int
 		GetObjectType        func(childComplexity int, accountID int) int
 		GetObjectTypes       func(childComplexity int, accountID int, id int) int
 		GetObjects           func(childComplexity int, accountID int) int
@@ -132,14 +132,17 @@ type ComplexityRoot struct {
 
 	Report struct {
 		AccountID     func(childComplexity int) int
+		AccountUser   func(childComplexity int) int
 		AccountUserID func(childComplexity int) int
 		ColQueries    func(childComplexity int) int
+		CreatedAt     func(childComplexity int) int
 		Description   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Number        func(childComplexity int) int
 		ObjectID      func(childComplexity int) int
 		RowQueries    func(childComplexity int) int
 		Title         func(childComplexity int) int
+		UpdatedAt     func(childComplexity int) int
 		WhereQueries  func(childComplexity int) int
 	}
 
@@ -204,7 +207,7 @@ type QueryResolver interface {
 	GetObjectType(ctx context.Context, accountID int) (*model.ObjectType, error)
 	GetObjects(ctx context.Context, accountID int) ([]*model.Object, error)
 	GetObject(ctx context.Context, accountID int, number string, first *int, after *string, filters []*model.Filter, rowIds []*model.Group, colIds []*model.Group) (*model.ShopOrderData, error)
-	GetObjectDifinitions(ctx context.Context, accountID int, objectID int, ids []*int) ([]*model.ObjectDifinition, error)
+	GetObjectDifinitions(ctx context.Context, accountID int, number string, ids []*int) ([]*model.ObjectDifinition, error)
 	GetReportData(ctx context.Context, accountID int, number string, filters []*model.Filter, rowIds []*model.Group, colIds []*model.Group) (*model.ShopOrderData, error)
 	GetReport(ctx context.Context, accountID int, number string) (*model.Report, error)
 	GetReports(ctx context.Context, accountID int, keyword *string) ([]*model.Report, error)
@@ -226,14 +229,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Account.account_meta":
+	case "Account.accountMeta":
 		if e.complexity.Account.AccountMeta == nil {
 			break
 		}
 
 		return e.complexity.Account.AccountMeta(childComplexity), true
 
-	case "Account.account_users":
+	case "Account.accountUsers":
 		if e.complexity.Account.AccountUsers == nil {
 			break
 		}
@@ -282,7 +285,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountMeta.Account(childComplexity), true
 
-	case "AccountMeta.accountID":
+	case "AccountMeta.accountId":
 		if e.complexity.AccountMeta.AccountID == nil {
 			break
 		}
@@ -317,7 +320,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AccountUser.Account(childComplexity), true
 
-	case "AccountUser.accountID":
+	case "AccountUser.accountId":
 		if e.complexity.AccountUser.AccountID == nil {
 			break
 		}
@@ -581,7 +584,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ObjectDifinition.Title(childComplexity), true
 
-	case "ObjectType.accountID":
+	case "ObjectType.accountId":
 		if e.complexity.ObjectType.AccountID == nil {
 			break
 		}
@@ -676,7 +679,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetObjectDifinitions(childComplexity, args["accountId"].(int), args["objectId"].(int), args["ids"].([]*int)), true
+		return e.complexity.Query.GetObjectDifinitions(childComplexity, args["accountId"].(int), args["number"].(string), args["ids"].([]*int)), true
 
 	case "Query.getObjectType":
 		if e.complexity.Query.GetObjectType == nil {
@@ -764,6 +767,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Report.AccountID(childComplexity), true
 
+	case "Report.accountUser":
+		if e.complexity.Report.AccountUser == nil {
+			break
+		}
+
+		return e.complexity.Report.AccountUser(childComplexity), true
+
 	case "Report.accountUserId":
 		if e.complexity.Report.AccountUserID == nil {
 			break
@@ -777,6 +787,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Report.ColQueries(childComplexity), true
+
+	case "Report.createdAt":
+		if e.complexity.Report.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Report.CreatedAt(childComplexity), true
 
 	case "Report.description":
 		if e.complexity.Report.Description == nil {
@@ -819,6 +836,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Report.Title(childComplexity), true
+
+	case "Report.updatedAt":
+		if e.complexity.Report.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Report.UpdatedAt(childComplexity), true
 
 	case "Report.whereQueries":
 		if e.complexity.Report.WhereQueries == nil {
@@ -1043,8 +1067,8 @@ type Account {
   company: String!
   name: String!
   status: Boolean!
-  account_users: [AccountUser!]!
-  account_meta: [AccountMeta!]!
+  accountUsers: [AccountUser!]!
+  accountMeta: [AccountMeta!]!
 }
 
 type AccountUser {
@@ -1054,13 +1078,13 @@ type AccountUser {
   email: String!
   password: String!
   status: Boolean!
-  accountID: Int!
+  accountId: Int!
   account: Account!
 }
 
 type AccountMeta {
   id: Int!
-  accountID: Int!
+  accountId: Int!
   key: String!
   value: String!
   account: Account!
@@ -1068,7 +1092,7 @@ type AccountMeta {
 
 type ObjectType {
   id: Int!
-  accountID: Int!
+  accountId: Int!
   title: String!
   description: String
   name: String!
@@ -1132,6 +1156,9 @@ type Report {
   whereQueries: [WhereQuery]
   rowQueries: [ReportRowQuery]
   colQueries: [ReportColQuery]
+  accountUser: AccountUser!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type ReportWhereQuery {
@@ -1164,7 +1191,7 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
-  getObjectDifinitions(accountId: Int!, objectId: Int!, ids: [Int]): [ObjectDifinition!]!
+  getObjectDifinitions(accountId: Int!, number: String!, ids: [Int]): [ObjectDifinition!]!
 
   getReportData(accountId: Int!, number: String!, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
   getReport(accountId: Int!, number: String!): Report!
@@ -1504,15 +1531,15 @@ func (ec *executionContext) field_Query_getObjectDifinitions_args(ctx context.Co
 		}
 	}
 	args["accountId"] = arg0
-	var arg1 int
-	if tmp, ok := rawArgs["objectId"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("objectId"))
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["number"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["objectId"] = arg1
+	args["number"] = arg1
 	var arg2 []*int
 	if tmp, ok := rawArgs["ids"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ids"))
@@ -1960,7 +1987,7 @@ func (ec *executionContext) _Account_status(ctx context.Context, field graphql.C
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Account_account_users(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
+func (ec *executionContext) _Account_accountUsers(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1995,7 +2022,7 @@ func (ec *executionContext) _Account_account_users(ctx context.Context, field gr
 	return ec.marshalNAccountUser2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐAccountUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Account_account_meta(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
+func (ec *executionContext) _Account_accountMeta(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2065,7 +2092,7 @@ func (ec *executionContext) _AccountMeta_id(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountMeta_accountID(ctx context.Context, field graphql.CollectedField, obj *model.AccountMeta) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountMeta_accountId(ctx context.Context, field graphql.CollectedField, obj *model.AccountMeta) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2415,7 +2442,7 @@ func (ec *executionContext) _AccountUser_status(ctx context.Context, field graph
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _AccountUser_accountID(ctx context.Context, field graphql.CollectedField, obj *model.AccountUser) (ret graphql.Marshaler) {
+func (ec *executionContext) _AccountUser_accountId(ctx context.Context, field graphql.CollectedField, obj *model.AccountUser) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3445,7 +3472,7 @@ func (ec *executionContext) _ObjectType_id(ctx context.Context, field graphql.Co
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ObjectType_accountID(ctx context.Context, field graphql.CollectedField, obj *model.ObjectType) (ret graphql.Marshaler) {
+func (ec *executionContext) _ObjectType_accountId(ctx context.Context, field graphql.CollectedField, obj *model.ObjectType) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3929,7 +3956,7 @@ func (ec *executionContext) _Query_getObjectDifinitions(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetObjectDifinitions(rctx, args["accountId"].(int), args["objectId"].(int), args["ids"].([]*int))
+		return ec.resolvers.Query().GetObjectDifinitions(rctx, args["accountId"].(int), args["number"].(string), args["ids"].([]*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4514,6 +4541,111 @@ func (ec *executionContext) _Report_colQueries(ctx context.Context, field graphq
 	res := resTmp.([]*model.ReportColQuery)
 	fc.Result = res
 	return ec.marshalOReportColQuery2ᚕᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐReportColQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Report_accountUser(ctx context.Context, field graphql.CollectedField, obj *model.Report) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Report",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccountUser, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.AccountUser)
+	fc.Result = res
+	return ec.marshalNAccountUser2ᚖgithubᚗcomᚋsuperᚑstudioᚋecforce_maᚋgraphᚋmodelᚐAccountUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Report_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Report) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Report",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Report_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Report) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Report",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ReportColQuery_id(ctx context.Context, field graphql.CollectedField, obj *model.ReportColQuery) (ret graphql.Marshaler) {
@@ -6820,9 +6952,9 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "account_users":
+		case "accountUsers":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Account_account_users(ctx, field, obj)
+				return ec._Account_accountUsers(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -6830,9 +6962,9 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "account_meta":
+		case "accountMeta":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Account_account_meta(ctx, field, obj)
+				return ec._Account_accountMeta(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -6871,9 +7003,9 @@ func (ec *executionContext) _AccountMeta(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "accountID":
+		case "accountId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._AccountMeta_accountID(ctx, field, obj)
+				return ec._AccountMeta_accountId(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -6992,9 +7124,9 @@ func (ec *executionContext) _AccountUser(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "accountID":
+		case "accountId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._AccountUser_accountID(ctx, field, obj)
+				return ec._AccountUser_accountId(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -7359,9 +7491,9 @@ func (ec *executionContext) _ObjectType(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "accountID":
+		case "accountId":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._ObjectType_accountID(ctx, field, obj)
+				return ec._ObjectType_accountId(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -7848,6 +7980,36 @@ func (ec *executionContext) _Report(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "accountUser":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Report_accountUser(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Report_createdAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Report_updatedAt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -11,4 +11,7 @@ type Report struct {
 	WhereQueries  []*WhereQuery     `gorm:"many2many:report_where_queries; json:"whereQueries"`
 	RowQueries    []*ReportRowQuery `json:"rowQueries"`
 	ColQueries    []*ReportColQuery `json:"colQueries"`
+	AccountUser   *AccountUser      `json:"accountUser"`
+	CreatedAt     string            `json:"createdAt"`
+	UpdatedAt     string            `json:"updatedAt"`
 }

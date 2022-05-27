@@ -10,8 +10,8 @@ type Account {
   company: String!
   name: String!
   status: Boolean!
-  account_users: [AccountUser!]!
-  account_meta: [AccountMeta!]!
+  accountUsers: [AccountUser!]!
+  accountMeta: [AccountMeta!]!
 }
 
 type AccountUser {
@@ -21,13 +21,13 @@ type AccountUser {
   email: String!
   password: String!
   status: Boolean!
-  accountID: Int!
+  accountId: Int!
   account: Account!
 }
 
 type AccountMeta {
   id: Int!
-  accountID: Int!
+  accountId: Int!
   key: String!
   value: String!
   account: Account!
@@ -35,7 +35,7 @@ type AccountMeta {
 
 type ObjectType {
   id: Int!
-  accountID: Int!
+  accountId: Int!
   title: String!
   description: String
   name: String!
@@ -99,6 +99,9 @@ type Report {
   whereQueries: [WhereQuery]
   rowQueries: [ReportRowQuery]
   colQueries: [ReportColQuery]
+  accountUser: AccountUser!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type ReportWhereQuery {
@@ -131,7 +134,7 @@ type Query {
 
   getObjects(accountId: Int!): [Object!]!
   getObject(accountId: Int!, number: String!, first: Int = 100, after: ID, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
-  getObjectDifinitions(accountId: Int!, objectId: Int!, ids: [Int]): [ObjectDifinition!]!
+  getObjectDifinitions(accountId: Int!, number: String!, ids: [Int]): [ObjectDifinition!]!
 
   getReportData(accountId: Int!, number: String!, filters: [Filter], rowIds: [Group], colIds: [Group]): ShopOrderData!
   getReport(accountId: Int!, number: String!): Report!

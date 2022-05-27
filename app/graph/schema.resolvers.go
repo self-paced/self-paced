@@ -271,13 +271,17 @@ func (r *queryResolver) GetObject(ctx context.Context, accountID int, number str
 	return &model.ShopOrderData{Ecforce: jq.Get()}, nil
 }
 
-func (r *queryResolver) GetObjectDifinitions(ctx context.Context, accountID int, objectID int, ids []*int) ([]*model.ObjectDifinition, error) {
+func (r *queryResolver) GetObjectDifinitions(ctx context.Context, accountID int, number string, ids []*int) ([]*model.ObjectDifinition, error) {
+
+	var object *model.Object
+	r.DB.Debug().Where(&model.Object{AccountID: accountID, Number: number}).First(&object)
+
 	var difinitions []*model.ObjectDifinition
 
 	if len(ids) > 0 {
-		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Where("id in ?", ids).Find(&difinitions)
+		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: object.ID}).Where("id in ?", ids).Find(&difinitions)
 	} else {
-		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: objectID}).Find(&difinitions)
+		r.DB.Debug().Where(&model.ObjectDifinition{AccountID: accountID, ObjectID: object.ID}).Find(&difinitions)
 	}
 	return difinitions, nil
 }
@@ -354,13 +358,12 @@ func (r *queryResolver) GetReport(ctx context.Context, accountID int, number str
 }
 
 func (r *queryResolver) GetReports(ctx context.Context, accountID int, keyword *string) ([]*model.Report, error) {
-
 	var reports []*model.Report
 	if keyword != nil {
 		strKeyword := *keyword
 		r.DB.Debug().Where(&model.Report{AccountID: accountID}).Where("title LIKE ?", "%"+strKeyword+"%").Find(&reports)
 	} else {
-		r.DB.Debug().Where(&model.Report{AccountID: accountID}).Find(&reports)
+		r.DB.Debug().Where(&model.Report{AccountID: accountID}).Preload("AccountUser").Find(&reports)
 	}
 
 	return reports, nil
@@ -379,10 +382,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.

@@ -61,7 +61,6 @@ export default function New(){
       $accountId: Int!,
       $number: String!, 
       $filters: [Filter], 
-      $objectId: Int!, 
       $ids: [Int], 
       $colIds: [Group], 
       $rowIds: [Group]
@@ -76,7 +75,7 @@ export default function New(){
         ecforce
       }
 
-      getObjectDifinitions(accountId: $accountId, objectId: $objectId, ids: $ids){
+      getObjectDifinitions(accountId: $accountId, number: $number, ids: $ids){
         id
         title
         name
@@ -120,7 +119,6 @@ export default function New(){
     colIds: colIds,
     rowIds: rowIds,
     ids: ids,
-    objectId: 1
   }
 
   let { data, loading, error } = useQuery(GET_OBJECT, {

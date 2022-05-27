@@ -8,13 +8,13 @@ type Account struct {
 	Company      string         `json:"company"`
 	Name         string         `json:"name"`
 	Status       bool           `json:"status"`
-	AccountUsers []*AccountUser `json:"account_users"`
-	AccountMeta  []*AccountMeta `json:"account_meta"`
+	AccountUsers []*AccountUser `json:"accountUsers"`
+	AccountMeta  []*AccountMeta `json:"accountMeta"`
 }
 
 type AccountMeta struct {
 	ID        int      `json:"id"`
-	AccountID int      `json:"accountID"`
+	AccountID int      `json:"accountId"`
 	Key       string   `json:"key"`
 	Value     string   `json:"value"`
 	Account   *Account `json:"account"`
@@ -27,7 +27,7 @@ type AccountUser struct {
 	Email     string   `json:"email"`
 	Password  string   `json:"password"`
 	Status    bool     `json:"status"`
-	AccountID int      `json:"accountID"`
+	AccountID int      `json:"accountId"`
 	Account   *Account `json:"account"`
 }
 
@@ -114,7 +114,7 @@ type ObjectDifinition struct {
 
 type ObjectType struct {
 	ID          int     `json:"id"`
-	AccountID   int     `json:"accountID"`
+	AccountID   int     `json:"accountId"`
 	Title       string  `json:"title"`
 	Description *string `json:"description"`
 	Name        string  `json:"name"`

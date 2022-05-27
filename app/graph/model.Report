@@ -1,5 +1,0 @@
-package model
-
-type Report struct {
-  ID int `json:"id"`
-}
