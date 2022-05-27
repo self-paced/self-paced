@@ -4,11 +4,11 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: ./ma/docker/app/Dockerfile
     ports:
      - "3600:8080"
     volumes:
-      - ./app/:/go/src
+      - ./ma/app/:/go/src
     tty: true
     stdin_open: true
     environment:
@@ -26,11 +26,11 @@ services:
   ecforce_db_app:
     build:
       context: .
-      dockerfile: ./docker/ecforce_db_app/Dockerfile
+      dockerfile: ./ma/docker/ecforce_db_app/Dockerfile
     ports:
      - "3605:8085"
     volumes:
-      - ./ecforce_db_app/:/go/src
+      - ./ma/ecforce_db_app/:/go/src
     tty: true
     stdin_open: true
     environment:
@@ -63,7 +63,7 @@ services:
     build:
       context: front
     volumes:
-      - ./front:/app
+      - ./ma/front:/app
     ports:
       - '3005:3000'
       

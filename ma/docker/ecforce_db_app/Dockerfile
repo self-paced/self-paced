@@ -1,7 +1,7 @@
 FROM golang:1.17-alpine
 
 WORKDIR /go/src
-COPY ./ecforce_db_app .
+COPY ./ma/ecforce_db_app .
 
 RUN apk upgrade --update && \
     apk --no-cache add git

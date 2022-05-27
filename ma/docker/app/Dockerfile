@@ -1,7 +1,7 @@
 FROM golang:1.17-alpine
 
 WORKDIR /go/src
-COPY ./app .
+COPY ./ma/app .
 
 RUN apk add mysql mysql-client
 
