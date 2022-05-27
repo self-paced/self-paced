@@ -25,6 +25,7 @@ export const RenderPage: React.FC<{ themes: any }> = ({ themes, children }) => {
 
 const PAGES: Readonly<{ [key: string]: string }> = Object.freeze({
   '/': './lp',
+  '/admin': './admin',
   '/aaa': './aaa',
   '/bbb': './bbb',
   '/course/[id]': './course/[id]',

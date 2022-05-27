@@ -6,6 +6,7 @@ import RegisterUserInput from '../models/user/RegisterUserInput';
 import SetupAppInput from '../models/user/SetupAppInput';
 import { Context } from '../server';
 import { hashPassword } from '../../../helpers/authHelper';
+import CreateUserInput from '../models/user/CreateUserInput';
 
 @Resolver()
 export default class UserResolver {
@@ -15,11 +16,12 @@ export default class UserResolver {
   }
 
   @Mutation(() => User)
-  async createUser(): Promise<User> {
+  async createUser(
+    @Arg('input') { password, ...input }: CreateUserInput
+  ): Promise<User> {
     const user: User = await User.create({
-      id: 1,
-      firstName: 'First',
-      lastName: 'Last',
+      ...input,
+      password: await hashPassword(password),
     }).save();
     return user;
   }
