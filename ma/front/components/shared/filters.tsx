@@ -39,8 +39,8 @@ export default function FilterField(props){
   }
 
   const GET_OBJECT = gql`
-    query($accountId: Int!, $objectId: Int!){
-      getObjectDifinitions(accountId: $accountId, objectId: $objectId){
+    query($accountId: Int!, $number: String!){
+      getObjectDifinitions(accountId: $accountId, number: $number){
         id
         title
         name
@@ -51,7 +51,7 @@ export default function FilterField(props){
 
   const variables = {
     accountId: 1,
-    objectId: "00000001"
+    number: props.number
   }
 
   let { data, loading, error } = useQuery(GET_OBJECT, {

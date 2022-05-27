@@ -6,10 +6,18 @@ import { useQuery, gql } from '@apollo/client'
 import { useRouter } from "next/router"
 import client from '../../../apollo-client'
 
+type Filter = {
+  objectDifinitionId: int
+  operator: string
+  value: string
+  connector: string
+}
+
+type Group = {
+  objectDifinitionId: int
+}
+
 export const getServerSideProps = async(context) => {
-  const variables = {
-    id: context.query.id,
-  }
 
   const GET_REPORT = gql`
     query getReport($accountId: Int!, $number: String!) {
@@ -30,16 +38,21 @@ export const getServerSideProps = async(context) => {
       }
     }
   `
+
+  const variables = {
+    accountId: 1,
+    number: context.query.id
+  }
+
   const { loading, error, data } = await client.query({
     query: GET_REPORT,
     variables: variables
-  });
+  })
 
   if (error) return <div className="grid-1 grid-container">Failed to load</div>
   if (!data) return <div className="grid-1 grid-container">Loading...</div>
 
   const  { getReport } = data
-
 
   return {
     props: {
@@ -54,7 +67,13 @@ export default function Index({getReport}){
   console.log(getReport)
 
   const GET_REPORT = gql`
-    query($accountId: Int!, $number: String!){
+    query(
+      $accountId: Int!,
+      $number: String!,
+      $filters: [Filter],
+      $colIds: [Group],
+      $rowIds: [Group]
+    ){
       getObject(accountId: $accountId, number: $number){
         ecforce
       }
@@ -82,7 +101,7 @@ export default function Index({getReport}){
   if(!data) return <div className="">Loading...</div>
 
   const { getObject, getObjectDifinitions } = data
-  console.log(data)
+
   return (
     <Layout>
       <div>

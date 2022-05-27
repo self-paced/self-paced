@@ -9,20 +9,13 @@ import ColField from '../../components/shared/cols'
 import RowField from '../../components/shared/rows'
 import { objectDifinitionsVar } from '../../apollo/objectDifinitions'
 import Submit from '../../components/pages/reports/submit'
+import { useRouter } from 'next/router'
 
 type Filter = {
   objectDifinitionId: int
   operator: string
   value: string
   connector: string
-}
-
-type Col = {
-  objectDifinitionId: int
-}
-
-type Row = {
-  objectDifinitionId: int
 }
 
 type Group = {
@@ -45,6 +38,9 @@ export const RowConditions = React.createContext({} as {
 })
 
 export default function New(){
+
+  const router = useRouter()
+  const number = router.query.object
 
   const [filters, setFilters] = useState([])
   const [cols, setCols] = useState([])
@@ -114,7 +110,7 @@ export default function New(){
 
   const variables = {
     accountId: 1,
-    number: "00000001",
+    number: number,
     filters: filtersInput,
     colIds: colIds,
     rowIds: rowIds,
@@ -143,13 +139,13 @@ export default function New(){
       <div>
         <h2>Filter</h2>
         <FilterConditions.Provider value={{filters, setFilters}}>
-          <FilterField fields={getObjectDifinitions} />
+          <FilterField fields={getObjectDifinitions} number={number} />
         </FilterConditions.Provider>
         <ColConditions.Provider value={{cols, setCols}}>
-          <ColField fields={getObjectDifinitions} />
+          <ColField fields={getObjectDifinitions} number={number} />
         </ColConditions.Provider>
         <RowConditions.Provider value={{rows, setRows}}>
-          <RowField fields={getObjectDifinitions} />
+          <RowField fields={getObjectDifinitions} number={number} />
         </RowConditions.Provider>
         <Submit
           accountId="1" 
