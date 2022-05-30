@@ -3,6 +3,7 @@ import { Box, SxProps, Theme, Typography } from '@mui/material';
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import React from 'react';
+import FixedRatioBox from '../components/FixedRatioBox';
 import PageFrame from '../components/PageFrame';
 import ThemedPage from '../components/ThemedPage';
 
@@ -133,30 +134,6 @@ const CourseCard: React.FC<{
         </Box>
       </Box>
     </Link>
-  );
-};
-
-const FixedRatioBox: React.FC<{
-  ratio: number;
-  width: string;
-  sx?: SxProps<Theme>;
-}> = ({ ratio, width, sx, children }) => {
-  return (
-    <Box
-      sx={{
-        width,
-        position: 'relative',
-        objectFit: 'cover',
-        ...sx,
-      }}
-    >
-      <Box
-        sx={{
-          paddingBottom: `${ratio * 100}%`,
-        }}
-      />
-      {children}
-    </Box>
   );
 };
 

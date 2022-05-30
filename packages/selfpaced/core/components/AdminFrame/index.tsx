@@ -29,7 +29,6 @@ const AdminFrame: React.FC = ({ children }) => {
           sx={{
             marginLeft: `${SIDE_BAR_WIDTH}px`,
             padding: 1,
-            height: 2000,
           }}
         >
           {children}
@@ -37,14 +36,6 @@ const AdminFrame: React.FC = ({ children }) => {
       </Box>
     </ThemeProvider>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return {
-    props: {
-      session: await getSession(context),
-    },
-  };
 };
 
 const NotAuthorized: React.FC = () => {
