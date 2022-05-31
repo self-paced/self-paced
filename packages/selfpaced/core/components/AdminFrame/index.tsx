@@ -16,7 +16,11 @@ const theme = createTheme({
   },
 });
 
-const AdminFrame: React.FC = ({ children }) => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+const AdminFrame: React.FC<Props> = ({ children }) => {
   const { data: session } = useSession({ required: true });
   if (!session?.user.isAdmin) return <NotAuthorized />;
   return (

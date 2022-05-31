@@ -1,10 +1,13 @@
 import { Box, SxProps, Theme } from '@mui/material';
 
-const FixedRatioBox: React.FC<{
+interface Props {
+  children?: React.ReactNode;
   ratio: number;
   width: string;
   sx?: SxProps<Theme>;
-}> = ({ ratio, width, sx, children }) => {
+}
+
+const FixedRatioBox: React.FC<Props> = ({ ratio, width, sx, children }) => {
   return (
     <Box
       sx={{

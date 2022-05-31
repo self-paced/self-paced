@@ -1,7 +1,11 @@
 import type { NextPage } from 'next';
 import { RenderPage } from 'selfpaced';
 
-const APage: React.FC = ({ children }) => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+const APage: React.FC = () => {
   return <div>Themed Page</div>;
 };
 
@@ -9,7 +13,7 @@ const themes = {
   './aaa': APage,
 };
 
-const Page: NextPage = ({ children }) => {
+const Page: React.FC<Props> = ({ children }) => {
   return <RenderPage themes={themes}>{children}</RenderPage>;
 };
 

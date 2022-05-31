@@ -1,6 +1,10 @@
 import AuthGuard from '../Auth/AuthGuard';
 
-const SelfPacedProvider: React.FC = ({ children }) => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+const SelfPacedProvider: React.FC<Props> = ({ children }) => {
   return <AuthGuard>{children}</AuthGuard>;
 };
 

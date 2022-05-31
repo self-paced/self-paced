@@ -1,21 +1,15 @@
 import { Box } from '@mui/material';
-import * as react from 'react';
 import CustomAppBar from './CustomAppBar';
 
 type Props = {
-  rightContent?: react.ReactNode;
+  children?: React.ReactNode;
   fullWidth?: boolean;
   noScroll?: boolean;
 };
 
-const PageFrame: react.FC<Props> = ({
-  children,
-  rightContent,
-  fullWidth,
-  noScroll,
-}) => {
+const PageFrame: React.FC<Props> = ({ children, fullWidth, noScroll }) => {
   return (
-    <react.Fragment>
+    <>
       <CustomAppBar></CustomAppBar>
       <Box
         sx={{
@@ -36,7 +30,7 @@ const PageFrame: react.FC<Props> = ({
           {children}
         </Box>
       </Box>
-    </react.Fragment>
+    </>
   );
 };
 

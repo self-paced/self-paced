@@ -2,11 +2,17 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-export const RenderPage: React.FC<{ themes: any }> = ({ themes, children }) => {
+interface Props {
+  children?: React.ReactNode;
+  themes: any;
+}
+
+export const RenderPage: React.FC<Props> = ({ themes, children }) => {
   const router = useRouter();
   if (!router) return null;
   const req = getPagePath((router.query?.sppage as string[]) ?? ['']);
   const Page = dynamic<{
+    children?: React.ReactNode;
     Theme?: React.FC;
     params: { [key: string]: string };
   }>(() =>
@@ -27,8 +33,6 @@ const PAGES: Readonly<{ [key: string]: string }> = Object.freeze({
   '/': './lp',
   '/admin': './admin',
   '/admin/course/[id]': './admin/course/[id]',
-  '/aaa': './aaa',
-  '/bbb': './bbb',
   '/course/[id]': './course/[id]',
 });
 

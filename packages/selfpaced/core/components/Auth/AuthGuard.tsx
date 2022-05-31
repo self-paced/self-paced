@@ -9,7 +9,11 @@ const CHECK_APP = gql`
   }
 `;
 
-const AuthGuard: React.FC = ({ children }) => {
+interface Props {
+  children?: React.ReactNode;
+}
+
+const AuthGuard: React.FC<Props> = ({ children }) => {
   const { data: session, status } = useSession();
   const { loading, error, data } = useQuery<{ checkApp: boolean }>(CHECK_APP);
   if (status === 'loading' || loading) {

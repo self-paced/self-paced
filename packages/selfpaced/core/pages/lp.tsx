@@ -1,6 +1,5 @@
 import { gql, useQuery } from '@apollo/client';
-import { Box, SxProps, Theme, Typography } from '@mui/material';
-import type { NextPage } from 'next';
+import { Box, Typography } from '@mui/material';
 import Link from 'next/link';
 import React from 'react';
 import FixedRatioBox from '../components/FixedRatioBox';
@@ -29,7 +28,7 @@ interface IListCoursesRes {
   listCourses: ICourse[];
 }
 
-const Page: NextPage<{ Theme?: React.FC }> = ({ Theme }) => {
+const Page: React.FC<{ Theme?: React.FC }> = ({ Theme }) => {
   const { loading, error, data } = useQuery<IListCoursesRes>(LIST_COURSES);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
