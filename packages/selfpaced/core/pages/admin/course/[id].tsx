@@ -1,8 +1,11 @@
 import { gql, useQuery } from '@apollo/client';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, Button, Icon, IconButton, Typography } from '@mui/material';
+import { blue, red } from '@mui/material/colors';
+import { Field, Form, Formik } from 'formik';
+import { TextField } from 'formik-mui';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { MouseEventHandler, useState } from 'react';
+import { MouseEventHandler, useEffect, useState } from 'react';
 import AdminFrame from '../../../components/AdminFrame';
 
 const GET_COURSE = gql`
@@ -20,7 +23,7 @@ const GET_COURSE = gql`
 `;
 
 interface IVideo {
-  id: number;
+  id: string;
   title: string;
   url: string;
 }
@@ -42,14 +45,25 @@ const Page: NextPage<{
     variables: { id: parseInt(params.id) },
     skip: !router,
   });
-  const [editingVideos, setEditingVideos] = useState<number[]>([]);
+  const [editingVideos, setEditingVideos] = useState<(number | string)[]>([]);
+  const [videos, setVideos] = useState<IVideo[]>([]);
+  useEffect(() => {
+    setVideos(data?.getCourse.videos ?? []);
+  }, [data]);
   if (!router || loading) return <p>Loading...</p>;
   if (error || !data) return <p>Error :(</p>;
-  const course = data.getCourse;
   return (
     <AdminFrame>
-      <Box sx={{ display: 'flex', flexFlow: 'column', gap: 1 }}>
-        {course.videos.map((video) => {
+      <Box
+        sx={{
+          display: 'flex',
+          flexFlow: 'column',
+          gap: 1,
+          maxWidth: '1000px',
+          margin: 'auto',
+        }}
+      >
+        {videos.map((video) => {
           if (!editingVideos.includes(video.id)) {
             return (
               <VideoBox
@@ -65,7 +79,23 @@ const Page: NextPage<{
               <VideoEditBox
                 key={video.id}
                 video={video}
+                onDelete={() => {
+                  setEditingVideos(
+                    editingVideos.filter((id) => id !== video.id)
+                  );
+                }}
                 onSave={() => {
+                  setEditingVideos(
+                    editingVideos.filter((id) => id !== video.id)
+                  );
+                }}
+                onCancel={() => {
+                  if (video.id.startsWith('new-')) {
+                    // if its an unsaved new video
+                    setVideos(
+                      videos.filter((fVideo) => fVideo.id !== video.id)
+                    );
+                  }
                   setEditingVideos(
                     editingVideos.filter((id) => id !== video.id)
                   );
@@ -74,6 +104,18 @@ const Page: NextPage<{
             );
           }
         })}
+        <Box sx={{ textAlign: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              const id = 'new-' + (Math.random() + 1).toString(36).substring(2);
+              setVideos([...videos, { id: id, title: '', url: '' }]);
+              setEditingVideos([...editingVideos, id]);
+            }}
+          >
+            <Icon>add</Icon>
+          </Button>
+        </Box>
       </Box>
     </AdminFrame>
   );
@@ -96,30 +138,70 @@ const VideoBox: React.FC<{
       <Box sx={{ flexGrow: 1 }}>
         <Typography>{video.title}</Typography>
       </Box>
-      <IconButton onClick={onEdit}>edit</IconButton>
+      <IconButton onClick={onEdit}>
+        <Icon>edit</Icon>
+      </IconButton>
     </Box>
   );
 };
 
 const VideoEditBox: React.FC<{
   video: IVideo;
+  onDelete: MouseEventHandler<HTMLButtonElement>;
   onSave: MouseEventHandler<HTMLButtonElement>;
-}> = ({ video, onSave }) => {
+  onCancel: MouseEventHandler<HTMLButtonElement>;
+}> = ({ video, onDelete, onSave, onCancel }) => {
   return (
-    <Box
-      sx={{
-        padding: 1,
-        backgroundColor: 'white',
-        borderRadius: 1,
-        boxShadow: '2px 2px 8px #00000020',
-        display: 'flex',
+    <Formik
+      initialValues={{
+        title: video.title,
+        url: video.url,
+      }}
+      onSubmit={async (values) => {
+        console.log(values);
       }}
     >
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography>{video.title}</Typography>
-      </Box>
-      <IconButton onClick={onSave}>save</IconButton>
-    </Box>
+      <Form>
+        <Box
+          sx={{
+            padding: 1,
+            backgroundColor: 'white',
+            borderRadius: 1,
+            boxShadow: '2px 2px 8px #00000020',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'start' }}>
+            <Field
+              name="title"
+              label="Title"
+              margin="dense"
+              size="small"
+              fullWidth
+              component={TextField}
+            />
+            {!video.id.startsWith('new-') && (
+              <IconButton onClick={onDelete} type="submit">
+                <Icon sx={{ color: red[300] }}>delete</Icon>
+              </IconButton>
+            )}
+            <IconButton onClick={onSave} type="submit">
+              <Icon sx={{ color: blue[600] }}>save</Icon>
+            </IconButton>
+            <IconButton onClick={onCancel}>
+              <Icon>cancel</Icon>
+            </IconButton>
+          </Box>
+          <Field
+            name="url"
+            label="Url"
+            margin="dense"
+            size="small"
+            fullWidth
+            component={TextField}
+          />
+        </Box>
+      </Form>
+    </Formik>
   );
 };
 
