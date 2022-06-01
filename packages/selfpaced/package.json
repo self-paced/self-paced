@@ -16,6 +16,7 @@
     "bcrypt": "^5.0.1",
     "formik": "2.2.9",
     "formik-mui": "4.0.0-alpha.3",
+    "mysql2": "2.3.3",
     "next": "12.1.7-canary.24",
     "next-auth": "^4.3.4",
     "reflect-metadata": "0.1.13",
