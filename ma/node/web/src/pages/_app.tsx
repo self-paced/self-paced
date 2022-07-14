@@ -1,10 +1,10 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import '../styles/globals.css';
+import type { AppProps } from 'next/app';
 import { withTRPC } from '@trpc/next';
-import {AppRouter} from '../../../sls/src/functions/trpc/handler'
+import { AppRouter } from '../../../sls/src/functions/trpc/handler';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return <Component {...pageProps} />;
 }
 
 export default withTRPC<AppRouter>({
@@ -13,9 +13,10 @@ export default withTRPC<AppRouter>({
      * If you want to use SSR, you need to use the server's full URL
      * @link https://trpc.io/docs/ssr
      */
-    const url = process.env.NODE_ENV === 'production'
-      ? `https://dummy.com/local`
-      : 'http://localhost:5050/local';
+    const url =
+      process.env.NODE_ENV === 'production'
+        ? `https://dummy.com/local`
+        : 'http://localhost:5050/local';
 
     return {
       url,
