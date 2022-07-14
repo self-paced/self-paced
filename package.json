@@ -8,14 +8,15 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "clear-modules": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
     "lint": "turbo run lint",
     "sls": "npx -w sls sls"
   },
   "devDependencies": {
-    "eslint-config-next": "latest",
-    "eslint-config-prettier": "latest",
-    "eslint-plugin-prettier": "latest",
-    "prettier": "latest",
+    "eslint": "8.19.0",
+    "eslint-config-next": "12.2.2",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-prettier": "4.2.1",
     "turbo": "latest"
   },
   "engines": {
