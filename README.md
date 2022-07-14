@@ -1,62 +1,32 @@
-# ecforce apps
-認証アプリケーション、MAの開発環境
+## セットアップ
 
+**前提条件**
+
+- npm がインストールされていること
+  - `npm --version`コマンドで確認
+
+**手順**
+
+- リポジトリーのルートからターミナルを開き、以下のコマンドを実行する。
+
+```bash
+npm ci
 ```
-docker-compose build
-docker-compose up
-````
 
-# ルートディレクトリ
-./ma  
-docker-compose.ymlの設定
+- API の環境変数を設定する。
 
+```bash
+cp ma/node/sls/.env.example ma/node/sls/.env
+```
 
+- アプリを実行する。
 
+```bash
+# apiとfront両方実行されます。
+npm run dev
+```
 
+- フロント： http://localhost:4040
+- API： http://localhost:5050/local
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+※ 開発を始める時は、eslint と prettier の IDE の extension をインストールしてください。
