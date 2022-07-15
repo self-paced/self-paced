@@ -4,15 +4,24 @@ import type { AppProps } from 'next/app';
 import { withTRPC } from '@trpc/next';
 import { AppRouter } from '../../../sls/src/functions/trpc/routers';
 import AppUtilityProvider from '../components/AppUtilityProvider';
+import { SessionProvider } from 'next-auth/react';
+import { Auth } from '../components/AuthGuard';
 
 type CustomAppProps = Omit<AppProps, 'Component'> & {
   Component: NextPage<{}, any>;
 };
 
-function MyApp({ Component, pageProps }: CustomAppProps) {
+function MyApp({
+  Component,
+  pageProps: { session, ...pageProps },
+}: CustomAppProps) {
   return (
     <AppUtilityProvider noFrame={Component.noFrame}>
-      <Component {...pageProps} />
+      <SessionProvider session={pageProps.session} refetchInterval={0}>
+        <Auth>
+          <Component {...pageProps} />
+        </Auth>
+      </SessionProvider>
     </AppUtilityProvider>
   );
 }
