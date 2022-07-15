@@ -2,7 +2,6 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   extends: ['plugin:@typescript-eslint/recommended'],
   rules: {
-    'no-console': 'error',
     'require-await': 'warn',
     'consistent-return': 'error',
     'max-depth': ['warn', 3],

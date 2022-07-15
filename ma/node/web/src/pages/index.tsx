@@ -2,16 +2,17 @@ import type { NextPage } from 'next';
 import { trpc } from '../utils/trpc';
 
 const Home: NextPage = () => {
-  const hello = trpc.useQuery(['hello', { text: 'Ravi' }]);
-  if (hello.error) {
-    return <div>Error: {hello.error.message}</div>;
+  // サンプルクエリー
+  const users = trpc.useQuery(['user.list', { name: 'test' }]);
+  if (users.error) {
+    return <div>Error: {users.error.message}</div>;
   }
-  if (!hello.data) {
+  if (!users.data) {
     return <div>Loading...</div>;
   }
   return (
     <div>
-      <p>{hello.data.greeting}</p>
+      <pre>{JSON.stringify(users.data, null, 2)}</pre>
     </div>
   );
 };
