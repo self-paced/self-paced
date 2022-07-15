@@ -1,10 +1,20 @@
 import '../styles/globals.css';
+import { NextPage } from 'next';
 import type { AppProps } from 'next/app';
 import { withTRPC } from '@trpc/next';
 import { AppRouter } from '../../../sls/src/functions/trpc/routers';
+import AppUtilityProvider from '../components/AppUtilityProvider';
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+type CustomAppProps = Omit<AppProps, 'Component'> & {
+  Component: NextPage<{}, any>;
+};
+
+function MyApp({ Component, pageProps }: CustomAppProps) {
+  return (
+    <AppUtilityProvider noFrame={Component.noFrame}>
+      <Component {...pageProps} />
+    </AppUtilityProvider>
+  );
 }
 
 export default withTRPC<AppRouter>({
