@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import { createSSGHelpers } from '@trpc/react/ssg';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { appRouter, createContext } from '../../api/trpc/[trpc]'
+import superjson from 'superjson';
 export const authOptions: NextAuthOptions = {
 
   providers: [
