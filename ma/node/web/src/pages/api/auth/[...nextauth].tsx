@@ -1,10 +1,11 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import { createSSGHelpers } from '@trpc/react/ssg';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { appRouter, createContext } from '../../api/trpc/[trpc]'
 import superjson from 'superjson';
-export const authOptions: NextAuthOptions = {
+// import { appRouter } from '../../../../../sls/src/functions/trpc/routers';
+import { router } from '../trpc/[trpc]';
 
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -14,16 +15,14 @@ export const authOptions: NextAuthOptions = {
         domain: { label: 'Domain', type: 'text' },
       },
       async authorize(credentials, req) {
+        //const ssg = createSSGHelpers({
+        //  router: router,
+        //  transformer: superjson,
+        //  ctx: {},
+        //});
 
-        const transformer = superjson
-        const ssg = createSSGHelpers({
-          router: appRouter,
-          transformer,
-          ctx: createContext,
-        });
-
-         await ssg.fetchQuery('auth.me', { token: "hoge", domain: "hogehoge"});
-         console.log('state', ssg.dehydrate())
+        //await ssg.fetchQuery('auth.me', { token: "hoge", domain: "hogehoge"});
+        //console.log('state', ssg.dehydrate())
 
         console.log(credentials);
         const user = { id: 1, name: 'J Smith', email: 'jsmith@example.com' };
