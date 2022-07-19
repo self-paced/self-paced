@@ -2,21 +2,8 @@ import type { NextPage } from 'next';
 import Link from 'next/link';
 import { MouseEventHandler } from 'react';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
+import CustomButton from '../components/CustomButton';
 import { trpc } from '../utils/trpc';
-
-const CustomButton: React.FC<{
-  onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
-  children: React.ReactNode;
-}> = ({ onClick, children }) => {
-  return (
-    <button
-      className="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-};
 
 const Home: NextPage = () => {
   // サンプルクエリー
