@@ -4,6 +4,7 @@ import { MouseEventHandler } from 'react';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 import { trpc } from '../utils/trpc';
 import { useSession, signIn } from 'next-auth/react';
+import { Button } from '@super_studio/ecforce_ui_albers';
 
 const CustomButton: React.FC<{
   onClick?: MouseEventHandler<HTMLButtonElement> | undefined;
@@ -38,6 +39,9 @@ const Home: NextPage = () => {
       <div>
         <div>これはAPIのレスポンスです：</div>
         <pre>{JSON.stringify(users.data, null, 2)}</pre>
+        <p>
+          <Button>success</Button>
+        </p>
         <button
           className="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
           onClick={async () => {
