@@ -95,42 +95,18 @@ const Home: NextPage = () => {
       </div>
       {type === 'target' && (
         <div>
-          <div>
-            <label htmlFor="ravi">
-              <input {...register('targets.ravi')} type="checkbox" id="ravi" />
-              ハヴィー
-            </label>
-          </div>
-          <div>
-            <label htmlFor="murakami">
-              <input
-                {...register('targets.murakami')}
-                type="checkbox"
-                id="murakami"
-              />
-              村上
-            </label>
-          </div>
-          <div>
-            <label htmlFor="kawabata">
-              <input
-                {...register('targets.kawabata')}
-                type="checkbox"
-                id="kawabata"
-              />
-              河端
-            </label>
-          </div>
-          <div>
-            <label htmlFor="kikuchi">
-              <input
-                {...register('targets.kikuchi')}
-                type="checkbox"
-                id="kikuchi"
-              />
-              菊池
-            </label>
-          </div>
+          {Object.entries(USER_MAP).map(([name]) => (
+            <div key={name}>
+              <label htmlFor={name}>
+                <input
+                  {...register(`targets.${name}` as any)}
+                  type="checkbox"
+                  id={name}
+                />
+                {name}
+              </label>
+            </div>
+          ))}
         </div>
       )}
       <div>
