@@ -1,5 +1,6 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 
 const auth = createRouter().mutation('token', {
   input: z.object({
@@ -13,10 +14,7 @@ const auth = createRouter().mutation('token', {
         message: 'success',
       };
     } else {
-      return {
-        status: 401,
-        message: 'error',
-      };
+      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'error' });
     }
   },
 });

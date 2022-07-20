@@ -14,8 +14,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         const payload = {
-          token: credentials.token,
-          domain: credentials.domain,
+          token: credentials?.token,
+          domain: credentials?.domain,
         };
         const url = 'http://localhost:5050/local/auth.token';
 
@@ -28,10 +28,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         const user = await res.json();
-
-        if (!res.ok) {
-          throw new Error(user.exception);
-        }
 
         if (res.ok && user) {
           console.log('authenticate ok');
@@ -46,10 +42,6 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    // redirect
-    async redirect(url, baseUrl) {
-      return 'http://localhost:3500/login';
-    },
     // callback
     async jwt({ token, user }) {
       if (user) {

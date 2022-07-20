@@ -5,7 +5,7 @@ import { withTRPC } from '@trpc/next';
 import { AppRouter } from '../../../sls/src/functions/trpc/routers';
 import AppUtilityProvider from '../components/AppUtilityProvider';
 import { SessionProvider } from 'next-auth/react';
-import { Auth } from '../components/AuthGuard';
+import AuthGuard from '../components/AuthGuard';
 
 type CustomAppProps = Omit<AppProps, 'Component'> & {
   Component: NextPage<{}, any>;
@@ -17,11 +17,11 @@ function MyApp({
 }: CustomAppProps) {
   return (
     <SessionProvider session={pageProps.session} refetchInterval={0}>
-      <Auth>
+      <AuthGuard>
         <AppUtilityProvider noFrame={Component.noFrame}>
           <Component {...pageProps} />
         </AppUtilityProvider>
-      </Auth>
+      </AuthGuard>
     </SessionProvider>
   );
 }
