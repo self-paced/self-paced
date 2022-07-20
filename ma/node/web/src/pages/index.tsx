@@ -40,6 +40,11 @@ const Home: NextPage = () => {
           <CustomButton>Go to Form Example</CustomButton>
         </a>
       </Link>
+      <Link href="/send" passHref>
+        <a>
+          <CustomButton>Go to Send Page</CustomButton>
+        </a>
+      </Link>
     </div>
   );
 };
