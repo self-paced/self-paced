@@ -1,9 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
-import { createSSGHelpers } from '@trpc/react/ssg';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import superjson from 'superjson';
-// import { appRouter } from '../../../../../sls/src/functions/trpc/routers';
-import { router } from '../trpc/[trpc]';
+import Axios from 'axios';
+import { redirect } from 'next/dist/server/api-utils';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,35 +13,63 @@ export const authOptions: NextAuthOptions = {
         domain: { label: 'Domain', type: 'text' },
       },
       async authorize(credentials, req) {
-        //const ssg = createSSGHelpers({
-        //  router: router,
-        //  transformer: superjson,
-        //  ctx: {},
-        //});
+        const payload = {
+          token: credentials.token,
+          domain: credentials.domain,
+        };
+        const url = 'http://localhost:5050/local/auth.token';
 
-        //await ssg.fetchQuery('auth.me', { token: "hoge", domain: "hogehoge"});
-        //console.log('state', ssg.dehydrate())
+        const res = await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        console.log(credentials);
-        const user = { id: 1, name: 'J Smith', email: 'jsmith@example.com' };
+        const user = await res.json();
 
-        if (credentials?.token == 'hoge') {
-          return user;
-        } else {
-          return null;
+        if (!res.ok) {
+          throw new Error(user.exception);
         }
+
+        if (res.ok && user) {
+          console.log('authenticate ok');
+          console.log('user: ' + JSON.stringify(user.result));
+          return user;
+          //return 'hoge';
+        }
+
+        return null;
       },
     }),
   ],
-  pages: {
-    // redirect
-    signIn: 'http://localhost:3000',
-  },
 
   callbacks: {
-    async jwt({ token }) {
-      token.userRole = 'admin';
+    // redirect
+    async redirect(url, baseUrl) {
+      return 'http://localhost:3500/login';
+    },
+    // callback
+    async jwt({ token, user }) {
+      if (user) {
+        return {
+          ...token,
+          accessToken: user,
+        };
+      }
       return token;
+    },
+    async session({ session, token, user }) {
+      // callbackを受け取ってセッションに入れようとしてるあと
+      console.log('session: ' + JSON.stringify(session));
+      console.log('user: ' + JSON.stringify(user));
+      console.log('token: ' + JSON.stringify(token));
+
+      session.user.hello = 'token';
+      session.user.user = user;
+      session.user.userRole = token.userRole;
+      return session;
     },
   },
 };

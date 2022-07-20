@@ -16,13 +16,13 @@ function MyApp({
   pageProps: { session, ...pageProps },
 }: CustomAppProps) {
   return (
-    <AppUtilityProvider noFrame={Component.noFrame}>
-      <SessionProvider session={pageProps.session} refetchInterval={0}>
-        <Auth>
+    <SessionProvider session={pageProps.session} refetchInterval={0}>
+      <Auth>
+        <AppUtilityProvider noFrame={Component.noFrame}>
           <Component {...pageProps} />
-        </Auth>
-      </SessionProvider>
-    </AppUtilityProvider>
+        </AppUtilityProvider>
+      </Auth>
+    </SessionProvider>
   );
 }
 

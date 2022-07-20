@@ -20,14 +20,14 @@ const CustomButton: React.FC<{
   );
 };
 
-const Home: NextPage = () => {
+const Home: NextPage = (props) => {
   const { data: session } = useSession();
   // サンプルクエリー
   const users = trpc.useQuery(['user.list', { name: 'test' }]);
   const showDialog = useDialog();
 
-  const auth = trpc.useQuery(['auth.me', { token: 'hoge', domain: 'hoge' }]);
-  console.log(auth);
+  console.log(session);
+
   if (users.error) {
     return <div>Error: {users.error.message}</div>;
   }
