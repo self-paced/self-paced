@@ -30,10 +30,7 @@ export const authOptions: NextAuthOptions = {
         const user = await res.json();
 
         if (res.ok && user) {
-          console.log('authenticate ok');
-          console.log('user: ' + JSON.stringify(user.result));
           return user;
-          //return 'hoge';
         }
 
         return null;
@@ -52,15 +49,9 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token, user }) {
-      // callbackを受け取ってセッションに入れようとしてるあと
-      console.log('session: ' + JSON.stringify(session));
-      console.log('user: ' + JSON.stringify(user));
-      console.log('token: ' + JSON.stringify(token));
-
-      session.user.hello = 'token';
-      session.user.user = user;
-      session.user.userRole = token.userRole;
+    async session({ session }) {
+      session.user.name = 'hoge';
+      session.user.isAdmin = true;
       return session;
     },
   },

@@ -30,3 +30,13 @@ npm run dev
 - API： http://localhost:5050/local
 
 ※ 開発を始める時は、eslint と prettier の IDE の extension をインストールしてください。
+
+### Design システムのインストール
+
+現在は private の状態なので、インストールする前にアカウントの作成が必要です。  
+アカウント作成時は菊池に連絡ください。
+
+```
+npm login
+npm install @super_studio/ecforce_ui_albers
+```
