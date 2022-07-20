@@ -5,15 +5,33 @@ import { z } from 'zod';
 import CustomButton from '../components/CustomButton';
 import { trpc } from '../utils/trpc';
 
+const MESSAGES_SCHEMA = z.array(z.string()).min(1).max(5);
+const AGE_SCHEMA = z.union([
+  z.literal('age_15'),
+  z.literal('age_20'),
+  z.literal('age_25'),
+  z.literal('age_30'),
+  z.literal('age_35'),
+  z.literal('age_40'),
+  z.literal('age_45'),
+  z.literal('age_50'),
+]);
+
 const schema = z.object({
-  messages: z.array(z.string().min(1)),
-  type: z.union([z.literal('broadcast'), z.literal('target')]),
+  messages: MESSAGES_SCHEMA,
+  type: z.union([
+    z.literal('broadcast'),
+    z.literal('multicast'),
+    z.literal('narrowcast'),
+  ]),
   targets: z.object({
     ravi: z.boolean(),
     murakami: z.boolean(),
     kawabata: z.boolean(),
     kikuchi: z.boolean(),
   }),
+  gender: z.union([z.literal('male'), z.literal('female')]).nullish(),
+  age: z.object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() }),
 });
 
 type Schema = z.infer<typeof schema>;
@@ -28,6 +46,7 @@ const USER_MAP: { [key: string]: string } = {
 const Home: NextPage = () => {
   const multicast = trpc.useMutation('line.multicast');
   const broadcast = trpc.useMutation('line.broadcast');
+  const narrowcast = trpc.useMutation('line.narrowcast');
   const {
     register,
     handleSubmit,
@@ -37,7 +56,7 @@ const Home: NextPage = () => {
     resolver: zodResolver(schema),
     defaultValues: {
       messages: [''],
-      type: 'target',
+      type: 'multicast',
       targets: {
         ravi: false,
         kawabata: false,
@@ -52,7 +71,7 @@ const Home: NextPage = () => {
   const onSubmit: SubmitHandler<Schema> = async (data) => {
     switch (data.type) {
       // 選択された友達に送信
-      case 'target':
+      case 'multicast':
         const userIds: string[] = [];
         Object.entries(data.targets).forEach(([name, isSelected]) => {
           if (isSelected) userIds.push(USER_MAP[name]);
@@ -62,6 +81,14 @@ const Home: NextPage = () => {
       // すべての友達に送信
       case 'broadcast':
         await broadcast.mutate({ messages: data.messages });
+        break;
+      // 条件付きで送信
+      case 'narrowcast':
+        await narrowcast.mutate({
+          messages: data.messages,
+          age: data.age,
+          gender: data.gender,
+        });
         break;
     }
   };
@@ -83,17 +110,28 @@ const Home: NextPage = () => {
         </label>
       </div>
       <div>
-        <label htmlFor="target">
+        <label htmlFor="multicast">
           <input
             {...register('type')}
             type="radio"
-            value="target"
-            id="target"
+            value="multicast"
+            id="multicast"
           />
-          Target
+          Multicast
         </label>
       </div>
-      {type === 'target' && (
+      <div>
+        <label htmlFor="narrowcast">
+          <input
+            {...register('type')}
+            type="radio"
+            value="narrowcast"
+            id="narrowcast"
+          />
+          Narrowcast
+        </label>
+      </div>
+      {type === 'multicast' && (
         <div>
           {Object.entries(USER_MAP).map(([name]) => (
             <div key={name}>
@@ -107,6 +145,66 @@ const Home: NextPage = () => {
               </label>
             </div>
           ))}
+        </div>
+      )}
+      {type === 'narrowcast' && (
+        <div className="flex">
+          <div className="border border-black m-2 p-2">
+            <div>gte</div>
+            {AGE_SCHEMA.options.map((opt) => {
+              const optStr = opt._def.value;
+              return (
+                <div key={optStr}>
+                  <label htmlFor={`gte-${optStr}`}>
+                    <input
+                      {...register(`age.gte`)}
+                      type="radio"
+                      value={optStr}
+                      id={`gte-${optStr}`}
+                    />
+                    {optStr}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+          <div className="border border-black m-2 p-2">
+            <div>lt</div>
+            {AGE_SCHEMA.options.map((opt) => {
+              const optStr = opt._def.value;
+              return (
+                <div key={optStr}>
+                  <label htmlFor={`lt-${optStr}`}>
+                    <input
+                      {...register(`age.lt`)}
+                      type="radio"
+                      value={optStr}
+                      id={`lt-${optStr}`}
+                    />
+                    {optStr}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+          <div className="border border-black m-2 p-2">
+            <div>gender</div>
+            {['male', 'female'].map((optStr) => {
+              return (
+                <div key={optStr}>
+                  <label htmlFor={optStr}>
+                    <input
+                      {...register(`gender`)}
+                      type="radio"
+                      value={optStr}
+                      id={optStr}
+                    />
+                    {optStr}
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       <div>
