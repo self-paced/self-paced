@@ -7,7 +7,7 @@ module.exports = {
     'max-depth': ['warn', 3],
     'max-lines-per-function': [
       'warn',
-      { max: 30, skipBlankLines: true, skipComments: true },
+      { max: 50, skipBlankLines: true, skipComments: true },
     ],
     complexity: ['warn', { max: 20 }],
   },
