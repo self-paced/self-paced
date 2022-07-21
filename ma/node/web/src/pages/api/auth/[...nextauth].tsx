@@ -1,7 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import Axios from 'axios';
-import { redirect } from 'next/dist/server/api-utils';
 
 export const authOptions: NextAuthOptions = {
   providers: [
