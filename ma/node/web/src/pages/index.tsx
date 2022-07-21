@@ -1,6 +1,5 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import { MouseEventHandler } from 'react';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 import CustomButton from '../components/CustomButton';
 import { trpc } from '../utils/trpc';
@@ -9,6 +8,7 @@ const Home: NextPage = () => {
   // サンプルクエリー
   const users = trpc.useQuery(['user.list', { name: 'test' }]);
   const showDialog = useDialog();
+
   if (users.error) {
     return <div>Error: {users.error.message}</div>;
   }
