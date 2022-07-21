@@ -1,0 +1,15 @@
+{
+  "reactFunctionalComponent": {
+    "scope": "typescriptreact",
+    "prefix": "comp",
+    "body": [
+      "const ${1:${TM_FILENAME_BASE}}: React.FC = () => {",
+      "\treturn <>$0</>;",
+      "};",
+      "",
+      "export default ${1:${TM_FILENAME_BASE}};",
+      ""
+    ],
+    "description": "React Functional Component"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "turborepo-basic-shared",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "ma/node/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "clear-modules": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
+    "lint": "turbo run lint",
+    "sls": "npx -w sls sls"
+  },
+  "devDependencies": {
+    "eslint": "8.19.0",
+    "eslint-config-next": "12.2.2",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "turbo": "latest"
+  },
+  "engines": {
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0"
+  },
+  "packageManager": "npm@8.5.5"
+}
