@@ -2,5 +2,7 @@ src/vendor/
 src/.env
 tmp/
 *.swp
+*.swo
+tags
 
 **/node_modules
