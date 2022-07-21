@@ -12,6 +12,7 @@
     "node": ">=16.15.1"
   },
   "dependencies": {
+    "@line/bot-sdk": "7.5.0",
     "@trpc/server": "9.25.3",
     "apollo-server-lambda": "3.9.0",
     "aws-sdk": "2.1160.0",
