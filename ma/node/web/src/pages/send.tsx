@@ -31,7 +31,9 @@ const schema = z.object({
     kikuchi: z.boolean(),
   }),
   gender: z.union([z.literal('male'), z.literal('female')]).nullish(),
-  age: z.object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() }),
+  age: z
+    .object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() })
+    .nullish(),
 });
 
 type Schema = z.infer<typeof schema>;
