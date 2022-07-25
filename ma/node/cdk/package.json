@@ -2,7 +2,7 @@
   "name": "cdk",
   "version": "0.1.0",
   "bin": {
-    "aws_cdk": "bin/aws_cdk.js"
+    "aws_cdk": "bin/aws_cdk.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -12,6 +12,7 @@
     "cdk:prd": "export CDK_ENV=prd && source .env.prd && cdk"
   },
   "dependencies": {
+    "@aws-cdk/aws-batch-alpha": "^2.20.0-alpha.0",
     "@types/jest": "26.0.24",
     "@types/node": "10.17.27",
     "aws-cdk": "2.20.0",
