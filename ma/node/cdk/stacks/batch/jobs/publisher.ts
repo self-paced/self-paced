@@ -4,18 +4,14 @@ import BatchRepo from '../enums/BatchRepo';
 
 const jobDef: BatchJobDef = {
   name: basename(__filename, '.ts'),
-  image: BatchRepo.PUBLISHER_BATCH,
+  image: BatchRepo.MA_BATCH,
   vcpu: 1,
   memory: 2048,
   retryAttempts: 1,
   timeoutSeconds: 600,
-  command: ['job', 'dump', '-s', 'Ref::SECRET_NAME', '-o', 'Ref::OUTPUT'],
-  environment: {
-    MODE: 's3',
-  },
+  command: ['greeting', 'Your name', '-s', 'Ref::MESSAGE'],
   parameters: {
-    SECRET_NAME: 'override_me',
-    OUTPUT: 'override_me',
+    MESSAGE: 'Nice name!!',
   },
 };
 

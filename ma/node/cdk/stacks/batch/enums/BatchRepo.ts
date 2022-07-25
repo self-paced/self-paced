@@ -1,5 +1,5 @@
 enum BatchRepo {
-  PUBLISHER_BATCH = 'ma_publisher_batch',
+  MA_BATCH = 'ma-batch',
 }
 
 export default BatchRepo;

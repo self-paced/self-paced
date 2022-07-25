@@ -15,10 +15,10 @@ export class Vpc extends Stack {
           name: 'public',
           subnetType: ec2.SubnetType.PUBLIC,
         },
-        {
-          name: 'isolated',
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-        },
+        // {
+        //   name: 'isolated',
+        //   subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+        // },
       ],
     });
   }
