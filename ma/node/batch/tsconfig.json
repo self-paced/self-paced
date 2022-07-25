@@ -3,15 +3,11 @@
     "target": "esnext",
     "module": "commonjs",
     "sourceMap": true,
-    "lib": [
-      "es2022"
-    ],
+    "lib": ["es2022"],
     "outDir": ".out",
     "rootDir": "bin",
     "strict": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "esModuleInterop": true,
     "resolveJsonModule": true
   }
