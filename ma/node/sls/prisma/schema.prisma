@@ -3,7 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "darwin"]
+  //binaryTargets = ["native", "darwin"]
+  output   = "../.webpack/service/src/functions/trpc/"
 }
 
 datasource db {
