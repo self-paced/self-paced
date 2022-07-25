@@ -94,8 +94,10 @@ const prepareJobDefinitions = async (
         retryAttempts: job.retryAttempts,
         timeout: Duration.seconds(job.timeoutSeconds),
         parameters: job.parameters,
+
         container: {
           image: new ecs.EcrImage(repos[job.image], job.imageTag ?? 'latest'),
+          assignPublicIp: true, // todo VPCを整理したら削除をする
           vcpus: job.vcpu,
           memoryLimitMiB: job.memory,
           command: job.command,
