@@ -1,5 +1,5 @@
 export const constants = Object.freeze({
-  projectName: 'awscdk',
+  projectName: 'ma',
 });
 
 export type ConstantsType = typeof constants;

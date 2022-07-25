@@ -1,8 +1,9 @@
 {
-  "name": "ts-cli",
+  "name": "batch",
   "version": "1.0.0",
   "description": "",
   "main": ".out/index.js",
+  "private": true,
   "bin": {
     "ts-cli": ".out/index.js"
   },
