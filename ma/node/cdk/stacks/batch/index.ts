@@ -104,9 +104,7 @@ const prepareJobDefinitions = async (
           executionRole: execRole,
           jobRole: jobRole,
           environment: {
-            PROJECT_NAME: constants.projectName,
             ENV_NAME: props.envName,
-            ECF_REDIS_HOST: `${constants.projectName}-${props.envName}-redis.m9bnsm.0001.apne1.cache.amazonaws.com`,
             ...job.environment,
           },
           logConfiguration: {
