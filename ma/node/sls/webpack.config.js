@@ -41,7 +41,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: 'src/functions/prisma/',
+          from: '../../../node_modules/.prisma/client/',
           to: 'src/functions/trpc/',
         },
       ],
