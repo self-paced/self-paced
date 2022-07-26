@@ -8,16 +8,14 @@ import {
   aws_iam as iam,
   aws_ec2 as ec2,
   aws_logs as logs,
-  aws_elasticache as elasticache,
 } from 'aws-cdk-lib';
 import camelcase from 'camelcase';
 import { Config, constants } from '../../lib/config';
 import { getVpc } from '../vpc';
-import { logGroupExists, sdkBatch } from '../../lib/helpers/awsHelper';
+import { logGroupExists } from '../../lib/helpers/awsHelper';
 import jobs from './all-jobs';
 import BatchRepo from './enums/BatchRepo';
 import BatchJobDef from './models/BatchJobDef';
-// import { projectName } from '../cicd/codebuild/create-shop';
 
 export class Batch extends Stack {
   constructor(scope: Construct, id: string, props: Config) {
@@ -186,6 +184,7 @@ const createJobRole = (scope: Construct, props: Config) =>
     inlinePolicies: {
       TaskPolicies: new iam.PolicyDocument({
         statements: [
+          // todo ここも不要かも
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
             actions: ['s3:*'],
@@ -216,29 +215,6 @@ const getRepos = (scope: Construct) => {
   }
   return repos as { [key in BatchRepo]: ecr.IRepository };
 };
-
-
-
-// export const getBatchSG = async (scope: Construct, props: Config) => {
-//   const pjName = projectName(props);
-//   const res = await sdkBatch
-//     .describeComputeEnvironments({ computeEnvironments: [computeEnvironmentName(props)] })
-//     .promise();
-//   const sgIds =
-//     res.computeEnvironments && res.computeEnvironments[0]
-//       ? res.computeEnvironments[0].computeResources?.securityGroupIds
-//       : undefined;
-//   let sgId: string;
-//   if (sgIds) {
-//     sgId = sgIds[0];
-//   } else {
-//     console.warn(`Batch project not found: ${pjName}`);
-//     return undefined;
-//   }
-//   return ec2.SecurityGroup.fromSecurityGroupId(scope, 'BatchSG', sgId, {
-//     mutable: false,
-//   });
-// };
 
 export const computeEnvironmentName = (props: Config) =>
   `${constants.projectName}-${props.envName}-batch`;
