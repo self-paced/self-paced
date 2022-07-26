@@ -1,8 +1,6 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-//import { PrismaClient } from '@prisma/client';
-
-//const prisma = new PrismaClient();
+import { prisma } from '../../../db/client';
 
 const user = createRouter()
   .mutation('create', {
@@ -23,11 +21,11 @@ const user = createRouter()
       // ユーザ取得
       return [input];
     },
+  })
+  .query('all', {
+    async resolve() {
+      return await prisma.post.findMany();
+    },
   });
-//.query('all', {
-//async resolve() {
-//return prisma.post.findMany({});
-//},
-//});
 
 export default user;

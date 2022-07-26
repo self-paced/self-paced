@@ -1,17 +1,17 @@
 // src/server/db/client.ts
 import { PrismaClient } from '@prisma/client';
-import { env } from '../env.mjs';
+import { env } from '../env';
 
-declare global {
-  var prisma: PrismaClient | undefined;
-}
+const prismaGlobal = global as typeof global & {
+  prisma?: PrismaClient;
+};
 
 export const prisma =
-  global.prisma ||
+  prismaGlobal.prisma ||
   new PrismaClient({
     log: ['query'],
   });
 
 if (env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
+  prismaGlobal.prisma = prisma;
 }
