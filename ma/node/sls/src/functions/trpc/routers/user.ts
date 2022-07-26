@@ -1,6 +1,6 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import { prisma } from '../../../db/client';
+import { env } from '@libs/config/env';
 
 const user = createRouter()
   .mutation('create', {
@@ -23,8 +23,8 @@ const user = createRouter()
     },
   })
   .query('all', {
-    async resolve() {
-      return await prisma.post.findMany();
+    async resolve({ ctx }) {
+      return await ctx.prisma.post.findMany();
     },
   });
 
