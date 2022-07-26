@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "sls offline --stage local --httpPort 5050",
-    "prisma:generate": "npx prisma generate",
     "prisma:migrate": "npx prisma migrate dev --name init",
     "deploy:dev": "sls deploy --stage dev",
-    "deploy:prd": "sls deploy --stage prd"
+    "deploy:prd": "sls deploy --stage prd",
+    "postinstall": "prisma generate"
   },
   "engines": {
     "node": ">=16.15.1"
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@line/bot-sdk": "7.5.0",
-    "@prisma/client": "^4.1.0",
+    "@prisma/client": "4.1.0",
     "@trpc/server": "9.25.3",
     "apollo-server-lambda": "3.9.0",
     "aws-sdk": "2.1160.0",
@@ -39,9 +39,9 @@
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
     "babel-loader": "8.2.5",
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "11.0.0",
     "fork-ts-checker-webpack-plugin": "7.2.11",
-    "prisma": "^4.1.0",
+    "prisma": "4.1.0",
     "serverless": "3.19.0",
     "serverless-offline": "8.8.0",
     "serverless-webpack": "5.7.1",
