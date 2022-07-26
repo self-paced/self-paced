@@ -1,6 +1,5 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import { env } from '@libs/config/env';
 
 const user = createRouter()
   .mutation('create', {
