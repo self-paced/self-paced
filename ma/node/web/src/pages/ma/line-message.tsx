@@ -14,7 +14,7 @@ import {
 } from '@super_studio/ecforce_ui_albers';
 import { ChangeEventHandler, useState } from 'react';
 
-const MESSAGES_SCHEMA = z.array(z.string()).min(1).max(5);
+const MESSAGES_SCHEMA = z.array(z.string().min(1)).min(1).max(5);
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
