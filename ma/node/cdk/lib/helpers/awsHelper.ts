@@ -3,7 +3,7 @@ import * as AWS from 'aws-sdk';
 // CodeBuildで実行される場合、profileをしていしない。（ロール権限で実行される）
 // todo profile名を別途取得出来るようにする
 if (!process.env.CODEBUILD_CONTAINER_NAME) {
-  AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: '4know' });
+  AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'ma-sso' });
 }
 AWS.config.update({ region: 'ap-northeast-1' });
 
