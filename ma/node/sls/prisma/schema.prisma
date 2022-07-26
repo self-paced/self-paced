@@ -3,8 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "darwin"]
-  output   = "../src/functions/prisma/"
 }
 
 datasource db {
@@ -16,8 +14,4 @@ model Post {
   id    String @id @default(uuid())
   title String
   text  String
-  // To return `Date`s intact through the API we need to add data transformers
-  // https://trpc.io/docs/data-transformers
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
 }
