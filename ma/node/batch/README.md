@@ -1,7 +1,3 @@
-## About the project
-
-Using `Commander` to create a dockerized TypeScript CLI to be used for running batch jobs on AWS.
-
 ## Getting started
 
 From the root of the app, run:
@@ -32,7 +28,3 @@ docker tag ma-batch:latest 925634978448.dkr.ecr.ap-northeast-1.amazonaws.com/ma-
 # push
 docker push 925634978448.dkr.ecr.ap-northeast-1.amazonaws.com/ma-batch:latest
 ```
-
-## Check the tutorial
-
-https://blog.perfect-base.com/typescript-cli-aws-batch
