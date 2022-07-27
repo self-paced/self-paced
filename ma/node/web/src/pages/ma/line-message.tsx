@@ -62,29 +62,6 @@ const ecfSchema = z.object({
 type EcfSchema = z.infer<typeof ecfSchema>;
 type LineSchema = z.infer<typeof lineSchema>;
 
-const DUMMY_DATA = {
-  segments: [
-    {
-      id: '1',
-      name: 'segment 1',
-      user_counts: 832,
-      line_counts: 153,
-    },
-    {
-      id: '2',
-      name: 'segment 2',
-      user_counts: 13,
-      line_counts: 3,
-    },
-    {
-      id: '3',
-      name: 'segment 3',
-      user_counts: 1109,
-      line_counts: 540,
-    },
-  ],
-};
-
 const TypeSelector: React.FC<{
   type: 'ecf' | 'line';
   onChange: ChangeEventHandler<HTMLInputElement>;
@@ -119,7 +96,8 @@ const EcfForm: React.FC<{
   defaultMessage: string;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: ChangeEventHandler<HTMLInputElement>;
-}> = ({ type, defaultMessage, onTypeChange, onMessageChange }) => {
+  segments: array;
+}> = ({ type, defaultMessage, onTypeChange, onMessageChange, segments }) => {
   const {
     register,
     handleSubmit,
@@ -133,11 +111,15 @@ const EcfForm: React.FC<{
   });
   const segmentId = watch('segmentId');
 
+  const publisher = trpc.useMutation('publisher.push');
+
   const onSubmit: SubmitHandler<EcfSchema> = async (data) => {
-    console.log('SUBMIT');
-    console.log(data);
-    // TODO: API連携
+    await publisher.mutate({
+      segmentId: segmentId,
+      messages: data.messages
+    });
   };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card header="配信対象">
@@ -149,8 +131,8 @@ const EcfForm: React.FC<{
           <InputLabel>配信対象検索条件</InputLabel>
           <Select {...register('segmentId')}>
             <option value="">選択してください</option>
-            {DUMMY_DATA.segments.map((segment) => (
-              <option key={segment.id} value={segment.id}>
+            {segments.map((segment) => (
+              <option key={segment.token} value={segment.token}>
                 {segment.name}
               </option>
             ))}
@@ -160,8 +142,8 @@ const EcfForm: React.FC<{
           <InputLabel>配信人数カウント</InputLabel>
           <div className="text-xs">
             {segmentId
-              ? DUMMY_DATA.segments.find((segment) => segment.id === segmentId)
-                  ?.user_counts + '人'
+              ? segments.find((segment) => segment.token === segmentId)
+                  ?.userCounts + '人'
               : '-'}
           </div>
         </div>
@@ -242,12 +224,20 @@ const LineForm: React.FC<{
 const Home: NextPage = () => {
   const [type, setType] = useState('ecf');
   const [message, setMessage] = useState('');
+
+  const segments = trpc.useQuery(['segment.list', { page: 1 }]);
+
+  if (!segments.data) {
+    return <div>Loading...</div>;
+  }
+
   const handleTypeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setType(e.target.value);
   };
   const handleMessageChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setMessage(e.target.value);
   };
+
   return (
     <div>
       {type === 'ecf' && (
@@ -256,6 +246,7 @@ const Home: NextPage = () => {
           defaultMessage={message}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          segments={segments.data.segments.data}
         />
       )}
       {type === 'line' && (
