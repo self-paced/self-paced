@@ -1,0 +1,25 @@
+{
+  "name": "batch",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".out/index.js",
+  "private": true,
+  "bin": {
+    "ts-cli": ".out/index.js"
+  },
+  "scripts": {
+    "cli": "ts-node bin/index.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "9.3.0",
+    "source-map-support": "0.5.21"
+  },
+  "devDependencies": {
+    "ts-node": "10.8.1",
+    "typescript": "4.7.4"
+  }
+}
