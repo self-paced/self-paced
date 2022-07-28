@@ -4,6 +4,7 @@ const slsw = require('serverless-webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   context: __dirname,
@@ -35,5 +36,15 @@ module.exports = {
       },
     ],
   },
-  plugins: [new ForkTsCheckerWebpackPlugin()],
+  plugins: [
+    new ForkTsCheckerWebpackPlugin(),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: '../../../node_modules/.prisma/client/',
+          to: 'src/functions/trpc/',
+        },
+      ],
+    }),
+  ],
 };
