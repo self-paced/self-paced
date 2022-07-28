@@ -96,7 +96,7 @@ const EcfForm: React.FC<{
   defaultMessage: string;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: ChangeEventHandler<HTMLInputElement>;
-  segments: array;
+  segments: { token: string; name: string; userCounts: number }[];
 }> = ({ type, defaultMessage, onTypeChange, onMessageChange, segments }) => {
   const {
     register,
@@ -116,7 +116,7 @@ const EcfForm: React.FC<{
   const onSubmit: SubmitHandler<EcfSchema> = async (data) => {
     await publisher.mutate({
       segmentId: segmentId,
-      messages: data.messages
+      messages: data.messages,
     });
   };
 
