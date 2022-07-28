@@ -1,14 +1,14 @@
-import {Html, Head, Main, NextScript} from "next/document";
+import { Html, Head, Main, NextScript } from 'next/document';
 
 const MyDocument = () => {
   return (
     <Html lang="ja-JP">
       <Head>
-        <meta name="application-name" content="ecforce ma"/>
+        <meta name="application-name" content="ecforce ma" />
       </Head>
       <body>
-        <Main/>
-        <NextScript/>
+        <Main />
+        <NextScript />
       </body>
     </Html>
   );
