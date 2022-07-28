@@ -27,12 +27,21 @@ export class Batch extends Stack {
 const main = async (scope: Construct, props: Config) => {
   const vpc = getVpc(scope, props);
   const batchSg = prepareBatchSecurityGroup(scope, props, vpc);
-  const computeEnvironment = prepareComputeEnvironment(scope, props, vpc, batchSg);
+  const computeEnvironment = prepareComputeEnvironment(
+    scope,
+    props,
+    vpc,
+    batchSg
+  );
   prepareJobQueue(scope, props, computeEnvironment);
   await prepareJobDefinitions(scope, props, jobs);
 };
 
-const prepareBatchSecurityGroup = (scope: Construct, props: Config, vpc: ec2.IVpc) => {
+const prepareBatchSecurityGroup = (
+  scope: Construct,
+  props: Config,
+  vpc: ec2.IVpc
+) => {
   return new ec2.SecurityGroup(scope, 'BatchSg', {
     securityGroupName: `${constants.projectName}-${props.envName}-batch-sg`,
     vpc,
@@ -80,9 +89,14 @@ const prepareJobDefinitions = async (
 ) => {
   const repos = getRepos(scope);
   const logGroup = await prepareLogGroup(scope, props);
-  const execRole = createExecutionRole(scope, props, logGroup, Object.values(repos));
+  const execRole = createExecutionRole(
+    scope,
+    props,
+    logGroup,
+    Object.values(repos)
+  );
   const jobRole = createJobRole(scope, props);
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     const jobDef = new aBatch.JobDefinition(
       scope,
       `Batch${camelcase(job.name, { pascalCase: true })}`,
@@ -153,7 +167,7 @@ const createExecutionRole = (
               'ecr:GetDownloadUrlForLayer',
               'ecr:BatchGetImage',
             ],
-            resources: repos.map(repo => repo.repositoryArn),
+            resources: repos.map((repo) => repo.repositoryArn),
           }),
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
@@ -162,15 +176,12 @@ const createExecutionRole = (
           }),
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
-            actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
-            resources: [logGroup.logGroupArn],
-          }),
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'],
-            resources: [
-              `arn:aws:secretsmanager:${props.env.region}:${props.env.account}:secret:${constants.projectName}/${props.envName}/*`,
+            actions: [
+              'logs:CreateLogGroup',
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
             ],
+            resources: [logGroup.logGroupArn],
           }),
         ],
       }),
@@ -181,26 +192,6 @@ const createJobRole = (scope: Construct, props: Config) =>
   new iam.Role(scope, 'JobRole', {
     roleName: `${constants.projectName}-${props.envName}-batch-job-role`,
     assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-    inlinePolicies: {
-      TaskPolicies: new iam.PolicyDocument({
-        statements: [
-          // todo ここも不要かも
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ['s3:*'],
-            resources: ['*'],
-          }),
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'],
-            resources: [
-              `arn:aws:secretsmanager:${props.env.region}:${props.env.account}:secret:${constants.projectName}/${props.envName}/*`,
-              `arn:aws:secretsmanager:${props.env.region}:${props.env.account}:secret:ecf/${props.envName}/*`,
-            ],
-          }),
-        ],
-      }),
-    },
   });
 
 const getRepos = (scope: Construct) => {
