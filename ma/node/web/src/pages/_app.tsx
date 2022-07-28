@@ -17,16 +17,18 @@ function MyApp({
   pageProps: { session, ...pageProps },
 }: CustomAppProps) {
   return (
-    <SessionProvider session={pageProps.session} refetchInterval={0}>
-      <AuthGuard>
-        <Head>
-          <title>ecforce ma</title>
-        </Head>
-        <AppUtilityProvider noFrame={Component.noFrame}>
-          <Component {...pageProps} />
-        </AppUtilityProvider>
-      </AuthGuard>
-    </SessionProvider>
+    <>
+      <Head>
+        <title>ecforce ma</title>
+      </Head>
+      <SessionProvider session={pageProps.session} refetchInterval={0}>
+        <AuthGuard>
+          <AppUtilityProvider noFrame={Component.noFrame}>
+            <Component {...pageProps} />
+          </AppUtilityProvider>
+        </AuthGuard>
+      </SessionProvider>
+    </>
   );
 }
 
