@@ -10,7 +10,8 @@
     "dev": "turbo run dev --parallel",
     "clear-modules": "npm exec --workspaces -- npx rimraf node_modules && npx rimraf node_modules",
     "lint": "turbo run lint",
-    "sls": "npx -w sls sls"
+    "sls": "npx -w sls sls",
+    "postinstall": "npx -w sls prisma generate"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.31.0",
