@@ -26,24 +26,31 @@ const segment = createRouter()
           {
             "id": "1",
             "token": "15407622-2adb-4f47-a1c9-5c23bbe57b64",
-            "name": "segment A",
-            "user_counts": 1,
-            "line_counts": 1
+            "name": "segment A - 村上",
+            "userCounts": 1,
+            "lineCounts": 1
           },
           {
             "id": "2",
             "token": "6c118f31-510f-4560-aa78-d6934e39dca4",
-            "name": "segment B",
-            "user_counts": 3,
-            "line_counts": 3
+            "name": "segment B - ハヴィ、河端、菊池",
+            "userCounts": 3,
+            "lineCounts": 3
+          },
+          {
+            "id": "3",
+            "token": "54703b4b-c618-4088-80ea-49c5c99d5b7e",
+            "name": "segment C - 中川",
+            "userCounts": 1,
+            "lineCounts": 1
           }
         ],
         "meta": {
-          "total_count": 3,
+          "totalCount": 4,
           "page": 1,
-          "per": 2,
-          "count": 2,
-          "total_pages": 2
+          "per": 3,
+          "count": 3,
+          "totalPages": 2
         },
         links: {
           "self": "http://localhost:5050/local/segment.list?input={\"page\":1}",
