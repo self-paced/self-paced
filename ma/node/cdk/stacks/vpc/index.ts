@@ -24,7 +24,8 @@ export class Vpc extends Stack {
   }
 }
 
-const vpcName = (props: Config) => `${constants.projectName}-${props.envName}-vpc`;
+const vpcName = (props: Config) =>
+  `${constants.projectName}-${props.envName}-vpc`;
 
 /**
  * Get the vpc object to use in other stacks
