@@ -6,6 +6,7 @@ import { AppRouter } from '../../../sls/src/functions/trpc/routers';
 import AppUtilityProvider from '../components/AppUtilityProvider';
 import { SessionProvider } from 'next-auth/react';
 import AuthGuard from '../components/AuthGuard';
+import Head from 'next/head';
 
 type CustomAppProps = Omit<AppProps, 'Component'> & {
   Component: NextPage<{}, any>;
@@ -16,13 +17,18 @@ function MyApp({
   pageProps: { session, ...pageProps },
 }: CustomAppProps) {
   return (
-    <SessionProvider session={pageProps.session} refetchInterval={0}>
-      <AuthGuard>
-        <AppUtilityProvider noFrame={Component.noFrame}>
-          <Component {...pageProps} />
-        </AppUtilityProvider>
-      </AuthGuard>
-    </SessionProvider>
+    <>
+      <Head>
+        <title>ecforce ma</title>
+      </Head>
+      <SessionProvider session={pageProps.session} refetchInterval={0}>
+        <AuthGuard>
+          <AppUtilityProvider noFrame={Component.noFrame}>
+            <Component {...pageProps} />
+          </AppUtilityProvider>
+        </AuthGuard>
+      </SessionProvider>
+    </>
   );
 }
 
