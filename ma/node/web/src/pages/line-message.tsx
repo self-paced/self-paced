@@ -1,20 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { NextPage } from 'next';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { trpc } from '../../utils/trpc';
+import { trpc } from '../utils/trpc';
 import {
   Card,
   Radio,
   Checkbox,
   Button,
   Select,
-  TextArea,
   InputLabel,
 } from '@super_studio/ecforce_ui_albers';
 import { ChangeEventHandler, useState } from 'react';
-
-const MESSAGES_SCHEMA = z.array(z.string().min(1)).min(1).max(5);
+import LineMessageInput, {
+  LineMessageInputEventHandler,
+  lineMessageInputSchema,
+  LineMessageInputValue,
+} from '../components/LineMessageInput';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -49,13 +51,13 @@ const MESSAGES_SCHEMA = z.array(z.string().min(1)).min(1).max(5);
 // } as const;
 
 const lineSchema = z.object({
-  messages: MESSAGES_SCHEMA,
+  messages: lineMessageInputSchema,
   gender: z.array(z.enum(['male', 'female'])),
   // age: z.nativeEnum(AgeEnum).nullish(), // TODO: 年齢の対応
 });
 
 const ecfSchema = z.object({
-  messages: MESSAGES_SCHEMA,
+  messages: lineMessageInputSchema,
   segmentId: z.string().min(1),
 });
 
@@ -93,20 +95,21 @@ const TypeSelector: React.FC<{
 
 const EcfForm: React.FC<{
   type: 'ecf' | 'line';
-  defaultMessage: string;
+  defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
-  onMessageChange: ChangeEventHandler<HTMLInputElement>;
+  onMessageChange: LineMessageInputEventHandler;
   segments: { token: string; name: string; userCounts: number }[];
-}> = ({ type, defaultMessage, onTypeChange, onMessageChange, segments }) => {
+}> = ({ type, defaultMessages, onTypeChange, onMessageChange, segments }) => {
   const {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<EcfSchema>({
     resolver: zodResolver(ecfSchema),
     defaultValues: {
-      messages: [defaultMessage],
+      messages: defaultMessages,
     },
   });
   const segmentId = watch('segmentId');
@@ -114,10 +117,11 @@ const EcfForm: React.FC<{
   const publisher = trpc.useMutation('publisher.push');
 
   const onSubmit: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate({
-      segmentId: segmentId,
-      messages: data.messages,
-    });
+    console.log(data);
+    // await publisher.mutate({
+    //   segmentId: segmentId,
+    //   messages: data.messages,
+    // });
   };
 
   return (
@@ -150,12 +154,27 @@ const EcfForm: React.FC<{
       </Card>
       <div className="mt-6" />
       <Card header="配信内容">
-        <TextArea {...register('messages.0')} onChange={onMessageChange} />
+        <Controller
+          control={control}
+          name="messages"
+          render={({ field: { name, onChange } }) => (
+            <LineMessageInput
+              name={name}
+              onChange={(e) => {
+                onChange(e);
+                onMessageChange(e);
+              }}
+              value={defaultMessages}
+            />
+          )}
+        />
       </Card>
       <div className="mt-6" />
       <Card>
         <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-          <Button type="submit" variant="secondary" label="送信" />
+          <Button type="submit" variant="secondary">
+            送信
+          </Button>
         </div>
       </Card>
     </form>
@@ -164,28 +183,29 @@ const EcfForm: React.FC<{
 
 const LineForm: React.FC<{
   type: 'ecf' | 'line';
-  defaultMessage: string;
+  defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
-  onMessageChange: ChangeEventHandler<HTMLInputElement>;
-}> = ({ type, defaultMessage, onTypeChange, onMessageChange }) => {
+  onMessageChange: LineMessageInputEventHandler;
+}> = ({ type, defaultMessages, onTypeChange, onMessageChange }) => {
   const narrowcast = trpc.useMutation('line.narrowcast');
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<LineSchema>({
     resolver: zodResolver(lineSchema),
     defaultValues: {
-      messages: [defaultMessage],
+      messages: defaultMessages,
       gender: [],
     },
   });
 
   const onSubmit: SubmitHandler<LineSchema> = async (data) => {
-    await narrowcast.mutate({
-      messages: data.messages,
-      gender: data.gender.length === 1 ? data.gender[0] : undefined,
-    });
+    // await narrowcast.mutate({
+    //   messages: data.messages,
+    //   gender: data.gender.length === 1 ? data.gender[0] : undefined,
+    // });
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -209,12 +229,27 @@ const LineForm: React.FC<{
       </Card>
       <div className="mt-6" />
       <Card header="配信内容">
-        <TextArea {...register('messages.0')} onChange={onMessageChange} />
+        <Controller
+          control={control}
+          name="messages"
+          render={({ field: { name, onChange } }) => (
+            <LineMessageInput
+              name={name}
+              onChange={(e) => {
+                onChange(e);
+                onMessageChange(e);
+              }}
+              value={defaultMessages}
+            />
+          )}
+        />
       </Card>
       <div className="mt-6" />
       <Card>
         <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-          <Button type="submit" variant="secondary" label="送信" />
+          <Button type="submit" variant="secondary">
+            送信
+          </Button>
         </div>
       </Card>
     </form>
@@ -223,7 +258,15 @@ const LineForm: React.FC<{
 
 const Home: NextPage = () => {
   const [type, setType] = useState('ecf');
-  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<LineMessageInputValue>([
+    {
+      key: 1,
+      details: {
+        type: 'text',
+        text: '',
+      },
+    },
+  ]);
 
   const segments = trpc.useQuery(['segment.list', { page: 1 }]);
 
@@ -234,8 +277,8 @@ const Home: NextPage = () => {
   const handleTypeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setType(e.target.value);
   };
-  const handleMessageChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    setMessage(e.target.value);
+  const handleMessageChange: LineMessageInputEventHandler = (e) => {
+    setMessages(e.target.value);
   };
 
   return (
@@ -243,7 +286,7 @@ const Home: NextPage = () => {
       {type === 'ecf' && (
         <EcfForm
           type={type}
-          defaultMessage={message}
+          defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
           segments={segments.data.segments.data}
@@ -252,7 +295,7 @@ const Home: NextPage = () => {
       {type === 'line' && (
         <LineForm
           type={type}
-          defaultMessage={message}
+          defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
         />
