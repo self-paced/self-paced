@@ -9,9 +9,6 @@ const Home: NextPage = () => {
   const users = trpc.useQuery(['user.list', { name: 'test' }]);
   const showDialog = useDialog();
 
-  const all = trpc.useQuery(['user.all']);
-  console.log(all.data);
-
   if (users.error) {
     return <div>Error: {users.error.message}</div>;
   }
