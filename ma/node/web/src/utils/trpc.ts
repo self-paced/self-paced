@@ -9,5 +9,11 @@ export const trpc = createReactQueryHooks<AppRouter>();
  * SSRの場合はこちらのクライアントを利用してください。
  */
 export const serverSideClient = createTRPCClient<AppRouter>({
-  url: 'http://localhost:5050/local',
+  url: `${process.env.NEXT_PUBLIC_BACKEND_URL}`,
+  fetch(url, options) {
+    return fetch(url, {
+      ...options,
+      credentials: 'include',
+    });
+  },
 });
