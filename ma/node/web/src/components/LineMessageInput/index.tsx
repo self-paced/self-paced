@@ -11,8 +11,11 @@ import {
   Button,
   InputLabel,
   TextField,
+  Select,
 } from '@super_studio/ecforce_ui_albers';
 import { z } from 'zod';
+
+const MAX_MESSAGES = 5;
 
 const lineTextMessageSchema = z.object({
   type: z.literal('text'),
@@ -43,7 +46,7 @@ export const lineMessageInputSchema = z
     })
   )
   .min(1)
-  .max(5);
+  .max(MAX_MESSAGES);
 
 export type LineMessageInputValue = z.infer<typeof lineMessageInputSchema>;
 export type LineTextMessage = z.infer<typeof lineTextMessageSchema>;
@@ -117,8 +120,34 @@ const LineMessageInput: React.FC<{
       {messages.map((message, i) => (
         <div key={message.key}>
           {/* HEADER */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
             <div className="font-bold">{`メッセージ #${i + 1}`}</div>
+            <Select
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const type = e.target.value;
+                const newMessages = [...messages];
+                if (type === 'text') {
+                  newMessages[i].details = { type, text: '' };
+                } else if (type === 'image') {
+                  newMessages[i].details = {
+                    type,
+                    originalContentUrl: '',
+                    previewImageUrl: '',
+                  };
+                } else if (type === 'video') {
+                  newMessages[i].details = {
+                    type,
+                    originalContentUrl: '',
+                    previewImageUrl: '',
+                  };
+                }
+                handleChange(newMessages);
+              }}
+            >
+              <option value="text">テキスト</option>
+              <option value="image">画像</option>
+              <option value="video">動画</option>
+            </Select>
             <div className="grow" />
             <Button
               icon
@@ -243,7 +272,7 @@ const LineMessageInput: React.FC<{
                 },
               });
           }}
-          disabled={messages.length >= 5}
+          disabled={messages.length >= MAX_MESSAGES}
         >
           <MdAdd />
           追加

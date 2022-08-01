@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { trpc } from '../utils/trpc';
 import {
   Card,
+  CardHead,
+  CardBody,
   Radio,
   Checkbox,
   Button,
@@ -126,56 +128,63 @@ const EcfForm: React.FC<{
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Card header="配信対象">
-        <InputLabel>配信対象</InputLabel>
-        <div>
-          <TypeSelector type={type} onChange={onTypeChange} />
-        </div>
-        <div className="mt-3">
-          <InputLabel>配信対象検索条件</InputLabel>
-          <Select {...register('segmentId')}>
-            <option value="">選択してください</option>
-            {segments.map((segment) => (
-              <option key={segment.token} value={segment.token}>
-                {segment.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="mt-3">
-          <InputLabel>配信人数カウント</InputLabel>
-          <div className="text-xs">
-            {segmentId
-              ? segments.find((segment) => segment.token === segmentId)
-                  ?.userCounts + '人'
-              : '-'}
+      <Card>
+        <CardHead>配信対象</CardHead>
+        <CardBody>
+          <div>
+            <TypeSelector type={type} onChange={onTypeChange} />
           </div>
-        </div>
-      </Card>
-      <div className="mt-6" />
-      <Card header="配信内容">
-        <Controller
-          control={control}
-          name="messages"
-          render={({ field: { name, onChange } }) => (
-            <LineMessageInput
-              name={name}
-              onChange={(e) => {
-                onChange(e);
-                onMessageChange(e);
-              }}
-              value={defaultMessages}
-            />
-          )}
-        />
+          <div className="mt-3">
+            <InputLabel>配信対象検索条件</InputLabel>
+            <Select {...register('segmentId')}>
+              <option value="">選択してください</option>
+              {segments.map((segment) => (
+                <option key={segment.token} value={segment.token}>
+                  {segment.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="mt-3">
+            <InputLabel>配信人数カウント</InputLabel>
+            <div className="text-xs">
+              {segmentId
+                ? segments.find((segment) => segment.token === segmentId)
+                    ?.userCounts + '人'
+                : '-'}
+            </div>
+          </div>
+        </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
-        <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-          <Button type="submit" variant="secondary">
-            送信
-          </Button>
-        </div>
+        <CardHead>配信内容</CardHead>
+        <CardBody>
+          <Controller
+            control={control}
+            name="messages"
+            render={({ field: { name, onChange } }) => (
+              <LineMessageInput
+                name={name}
+                onChange={(e) => {
+                  onChange(e);
+                  onMessageChange(e);
+                }}
+                value={defaultMessages}
+              />
+            )}
+          />
+        </CardBody>
+      </Card>
+      <div className="mt-6" />
+      <Card>
+        <CardBody>
+          <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
+            <Button type="submit" variant="secondary">
+              送信
+            </Button>
+          </div>
+        </CardBody>
       </Card>
     </form>
   );
