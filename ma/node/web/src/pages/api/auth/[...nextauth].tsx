@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
           token: credentials?.token,
           domain: credentials?.domain,
         };
-        const url = 'http://localhost:5050/local/auth.token';
+        const url = process.env.SLS_URL + '/auth.token';
 
         const res = await fetch(url, {
           method: 'POST',
