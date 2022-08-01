@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "2.9.6",
-    "@super_studio/ecforce_ui_albers": "git+https://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:x-oauth-basic@github.com/super-studio/ecforce_ui_albers.git",
     "@trpc/client": "9.25.3",
+    "@super_studio/ecforce_ui_albers": "git+https://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:x-oauth-basic@github.com/super-studio/ecforce_ui_albers.git",
     "@trpc/next": "9.25.3",
     "@trpc/react": "9.25.3",
     "cookies-next": "2.1.1",
