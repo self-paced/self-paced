@@ -38,6 +38,7 @@ const serverlessConfiguration: AWS = {
         '${self:custom.config.${self:custom.stage}.NODE_ENV, "production"}',
       ENV: '${self:custom.stage}',
       REGION: '${self:custom.region}',
+      LINE_TOKEN: 'dummy',
     },
     lambdaHashingVersion: '20201221',
   },
