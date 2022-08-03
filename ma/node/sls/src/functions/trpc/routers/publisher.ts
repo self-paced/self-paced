@@ -2,15 +2,80 @@ import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
 import config from '@libs/config';
 import { Client } from '@line/bot-sdk';
+import { TRPCError } from '@trpc/server';
 
 const client = new Client({
   channelAccessToken: config.lineToken,
 });
 
+const MAX_MESSAGES = 5;
+const MAX_CAROUSEL_COLUMNS = 10;
+const MAX_CAROUSEL_ACTIONS = 3;
+
+const lineTextMessageSchema = z.object({
+  type: z.literal('text'),
+  text: z.string().min(1),
+});
+const lineImageMessageSchema = z.object({
+  type: z.literal('image'),
+  originalContentUrl: z.string().url(),
+  previewImageUrl: z.string().url(),
+});
+const lineVideoMessageSchema = z.object({
+  type: z.literal('video'),
+  originalContentUrl: z.string().url(),
+  previewImageUrl: z.string().url(),
+});
+const lineCarouselMessageSchema = z.object({
+  type: z.literal('template'),
+  altText: z.string().min(1),
+  template: z.object({
+    type: z.literal('carousel'),
+    columns: z
+      .array(
+        z.object({
+          thumbnailImageUrl: z.string().url(),
+          imageBackgroundColor: z.string().optional(),
+          title: z.string().optional(),
+          text: z.string().min(1),
+          defaultAction: z.object({
+            type: z.literal('uri'),
+            label: z.string().min(1),
+            uri: z.string().url(),
+          }),
+          actions: z
+            .array(
+              z.object({
+                type: z.literal('uri'),
+                label: z.string().min(1),
+                uri: z.string().min(1),
+              })
+            )
+            .min(1)
+            .max(MAX_CAROUSEL_ACTIONS),
+        })
+      )
+      .min(1)
+      .max(MAX_CAROUSEL_COLUMNS),
+  }),
+});
+
+export const lineMessageSchema = z
+  .array(
+    z.union([
+      lineTextMessageSchema,
+      lineImageMessageSchema,
+      lineVideoMessageSchema,
+      lineCarouselMessageSchema,
+    ])
+  )
+  .min(1)
+  .max(MAX_MESSAGES);
+
 const publisher = createRouter().mutation('push', {
   input: z.object({
     segmentId: z.string(),
-    messages: z.array(z.string()).min(1).max(5),
+    messages: lineMessageSchema,
   }),
   resolve: async ({ input }) => {
     console.log(input.segmentId);
@@ -50,19 +115,16 @@ const publisher = createRouter().mutation('push', {
       default:
         return false;
     }
-
-    await Promise.all(
-      userIds.map(async (userId) => {
-        await client.pushMessage(
-          userId,
-          input.messages.map((message) => ({
-            type: 'text',
-            text: message,
-          }))
-        );
-      })
-    );
-
+    try {
+      await Promise.all(
+        userIds.map(async (userId) => {
+          await client.pushMessage(userId, input.messages);
+        })
+      );
+    } catch (e) {
+      console.error(e);
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+    }
     return true;
   },
 });

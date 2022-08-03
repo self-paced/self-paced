@@ -119,11 +119,10 @@ const EcfForm: React.FC<{
   const publisher = trpc.useMutation('publisher.push');
 
   const onSubmit: SubmitHandler<EcfSchema> = async (data) => {
-    console.log(data);
-    // await publisher.mutate({
-    //   segmentId: segmentId,
-    //   messages: data.messages,
-    // });
+    await publisher.mutate({
+      segmentId: segmentId,
+      messages: data.messages.map((message) => message.details),
+    });
   };
 
   return (
@@ -131,6 +130,7 @@ const EcfForm: React.FC<{
       <Card>
         <CardHead>配信対象</CardHead>
         <CardBody>
+          <InputLabel>配信対象</InputLabel>
           <div>
             <TypeSelector type={type} onChange={onTypeChange} />
           </div>
@@ -211,47 +211,53 @@ const LineForm: React.FC<{
   });
 
   const onSubmit: SubmitHandler<LineSchema> = async (data) => {
-    // await narrowcast.mutate({
-    //   messages: data.messages,
-    //   gender: data.gender.length === 1 ? data.gender[0] : undefined,
-    // });
+    await narrowcast.mutate({
+      messages: data.messages.map((message) => message.details),
+      gender: data.gender.length === 1 ? data.gender[0] : undefined,
+    });
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Card header="配信対象">
-        <InputLabel>配信対象</InputLabel>
-        <div>
-          <TypeSelector type={type} onChange={onTypeChange} />
-        </div>
-        <div className="mt-3">
-          <InputLabel>性別</InputLabel>
-          <div className="text-xs">
-            <Checkbox {...register('gender')} value="male" id="male">
-              男性
-            </Checkbox>
-            <div className="inline mr-8"></div>
-            <Checkbox {...register('gender')} value="female" id="female">
-              女性
-            </Checkbox>
+      <Card>
+        <CardHead>配信対象</CardHead>
+        <CardBody>
+          <InputLabel>配信対象</InputLabel>
+          <div>
+            <TypeSelector type={type} onChange={onTypeChange} />
           </div>
-        </div>
+          <div className="mt-3">
+            <InputLabel>性別</InputLabel>
+            <div className="text-xs">
+              <Checkbox {...register('gender')} value="male" id="male">
+                男性
+              </Checkbox>
+              <div className="inline mr-8"></div>
+              <Checkbox {...register('gender')} value="female" id="female">
+                女性
+              </Checkbox>
+            </div>
+          </div>
+        </CardBody>
       </Card>
       <div className="mt-6" />
-      <Card header="配信内容">
-        <Controller
-          control={control}
-          name="messages"
-          render={({ field: { name, onChange } }) => (
-            <LineMessageInput
-              name={name}
-              onChange={(e) => {
-                onChange(e);
-                onMessageChange(e);
-              }}
-              value={defaultMessages}
-            />
-          )}
-        />
+      <Card>
+        <CardHead>配信内容</CardHead>
+        <CardBody>
+          <Controller
+            control={control}
+            name="messages"
+            render={({ field: { name, onChange } }) => (
+              <LineMessageInput
+                name={name}
+                onChange={(e) => {
+                  onChange(e);
+                  onMessageChange(e);
+                }}
+                value={defaultMessages}
+              />
+            )}
+          />
+        </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
