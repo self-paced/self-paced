@@ -39,9 +39,6 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    console.log('env:' + process.env.NODE_ENV);
-    console.log('URL:' + process.env.NEXT_PUBLIC_BACKEND_URL);
-
     const url =
       process.env.NODE_ENV === 'production'
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}`
