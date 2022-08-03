@@ -44,8 +44,15 @@ export default withTRPC<AppRouter>({
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}`
         : 'http://localhost:5050/local';
 
+    ctx?.res?.setHeader('Access-Control-Allow-Origin', '*');
+
     return {
       url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Header': 'Content-Type',
+      },
       /**
        * @link https://react-query.tanstack.com/reference/QueryClient
        */
@@ -56,4 +63,17 @@ export default withTRPC<AppRouter>({
    * @link https://trpc.io/docs/ssr
    */
   ssr: true,
+  responseMeta({ clientErrors, ctx }) {
+    if (clientErrors.length) {
+      return {
+        status: clientErrors[0].data?.httpStatus ?? 500,
+      };
+    }
+    const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
+
+    return {
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': `s-maxage=1, stale-while-revalidate=${ONE_DAY_IN_SECONDS}`,
+    };
+  },
 })(MyApp);
