@@ -10,10 +10,4 @@ export const trpc = createReactQueryHooks<AppRouter>();
  */
 export const serverSideClient = createTRPCClient<AppRouter>({
   url: `${process.env.NEXT_PUBLIC_BACKEND_URL}`,
-  fetch(url, options) {
-    return fetch(url, {
-      ...options,
-      credentials: 'include',
-    });
-  },
 });

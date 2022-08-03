@@ -13,9 +13,6 @@ export function getAPIBaseInfo(rawDir: string) {
       'X-Api-Key',
       'X-Amz-Security-Token',
       'X-Amz-User-Agent',
-      'Access-Control-Allow-Methods',
-      'Access-Control-Allow-Header',
-      'Access-Control-Allow-Origin',
     ],
   };
   return { handlerDir, path, cors };
