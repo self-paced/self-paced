@@ -45,6 +45,8 @@ export default withTRPC<AppRouter>({
         : 'http://localhost:5050/local';
 
     ctx?.res?.setHeader('Access-Control-Allow-Origin', '*');
+    ctx?.res?.setHeader('Access-Control-Allow-Methods', '*');
+    ctx?.res?.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     return {
       url,
