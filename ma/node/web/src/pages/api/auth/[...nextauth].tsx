@@ -15,7 +15,10 @@ export const authOptions: NextAuthOptions = {
           token: credentials?.token,
           domain: credentials?.domain,
         };
-        const url = process.env.TRPC_URL + '/auth.token';
+
+        const url = process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}/api/trpc/auth.token`
+          : 'http://localhost:4040/api/trpc/auth.token';
 
         const res = await fetch(url, {
           method: 'POST',
