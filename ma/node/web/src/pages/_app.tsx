@@ -42,7 +42,7 @@ export default withTRPC<AppRouter>({
     const url =
       process.env.NODE_ENV === 'production'
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}`
-        : 'http://localhost:4040/api/trpc';
+        : '/api/trpc';
 
     return {
       url,

@@ -10,7 +10,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     async onUnauthenticated() {
       if (loginTryCount === 0) {
         await signIn('credentials', {
-          token: token,
+          token: 'hoge',
           domain: 'ec-force.com',
           redirect: false,
         });
