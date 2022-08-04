@@ -38,9 +38,10 @@ export default withTRPC<AppRouter>({
      * If you want to use SSR, you need to use the server's full URL
      * @link https://trpc.io/docs/ssr
      */
+
     const url =
       process.env.NODE_ENV === 'production'
-        ? `https://dummy.com/local`
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}`
         : 'http://localhost:4040/api/trpc';
 
     return {
