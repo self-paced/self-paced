@@ -32,6 +32,16 @@ function MyApp({
   );
 }
 
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Browserの場合は、現在のURLを利用
+    return '';
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSRの場合はVERCELのURLを利用
+
+  return `http://localhost:4040`; // devの場合はlocalhostを利用
+};
+
 export default withTRPC<AppRouter>({
   config({ ctx }) {
     /**
@@ -39,10 +49,7 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    const url =
-      process.env.NODE_ENV === 'production'
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}`
-        : 'http://localhost:5050/local';
+    const url = `${getBaseUrl()}/api/trpc`;
 
     return {
       url,
