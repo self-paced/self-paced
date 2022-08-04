@@ -3,12 +3,12 @@ import { z } from 'zod';
 import config from '@libs/config';
 import { Client, DemographicFilterObject } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
+import { lineMessageSchema } from './publisher';
 
 const client = new Client({
   channelAccessToken: config.lineToken,
 });
 
-const MESSAGES_SCHEMA = z.array(z.string()).min(1).max(5);
 const AGE_SCHEMA = z.union([
   z.literal('age_15'),
   z.literal('age_20'),
@@ -24,46 +24,29 @@ const line = createRouter()
   .mutation('push', {
     input: z.object({
       userId: z.string(),
-      messages: MESSAGES_SCHEMA,
+      messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.pushMessage(
-        input.userId,
-        input.messages.map((message) => ({
-          type: 'text',
-          text: message,
-        }))
-      );
+      await client.pushMessage(input.userId, input.messages);
       return true;
     },
   })
   .mutation('multicast', {
     input: z.object({
       userIds: z.array(z.string()).min(1),
-      messages: MESSAGES_SCHEMA,
+      messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.multicast(
-        input.userIds,
-        input.messages.map((message) => ({
-          type: 'text',
-          text: message,
-        }))
-      );
+      await client.multicast(input.userIds, input.messages);
       return true;
     },
   })
   .mutation('broadcast', {
     input: z.object({
-      messages: MESSAGES_SCHEMA,
+      messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.broadcast(
-        input.messages.map((message) => ({
-          type: 'text',
-          text: message,
-        }))
-      );
+      await client.broadcast(input.messages);
       return true;
     },
   })
@@ -73,7 +56,7 @@ const line = createRouter()
       age: z
         .object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() })
         .nullish(),
-      messages: MESSAGES_SCHEMA,
+      messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
       const demographicFilter: DemographicFilterObject = {
@@ -95,14 +78,8 @@ const line = createRouter()
       }
       try {
         await client.narrowcast(
-          input.messages.map((message) => ({
-            type: 'text',
-            text: message,
-          })),
-          {
-            type: 'audience',
-            audienceGroupId: 4656785539347,
-          },
+          input.messages,
+          undefined,
           demographicFilter.and.length
             ? {
                 demographic: demographicFilter,
