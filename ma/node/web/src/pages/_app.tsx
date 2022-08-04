@@ -41,7 +41,7 @@ export default withTRPC<AppRouter>({
     const url =
       process.env.NODE_ENV === 'production'
         ? `https://dummy.com/local`
-        : 'http://localhost:5050/local';
+        : 'http://localhost:4040/api/trpc';
 
     return {
       url,
