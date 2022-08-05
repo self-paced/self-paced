@@ -28,6 +28,7 @@ export type AnyMessageTypeDetails = z.infer<typeof anyMessageTypeSchema>;
 export type MessageComponent<T extends AnyMessageTypeDetails> = React.FC<{
   messageDetails: T;
   onChange?: (v: T) => void | Promise<void>;
+  errors?: Partial<T>;
 }>;
 
 const MessageType: {

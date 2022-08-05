@@ -8,7 +8,11 @@ import {
 } from 'react-icons/md';
 import { Button, Select } from '@super_studio/ecforce_ui_albers';
 import { z } from 'zod';
-import MessageType, { anyMessageTypeSchema } from './MessageType';
+import MessageType, {
+  AnyMessageTypeDetails,
+  anyMessageTypeSchema,
+} from './MessageType';
+import { EcfSchema } from '../../pages/line-message';
 
 const MAX_MESSAGES = 5;
 
@@ -38,8 +42,9 @@ export type LineMessageInputEventHandler = (
 const LineMessageInput: React.FC<{
   name: string;
   value?: LineMessageInputValue;
+  errors: Partial<EcfSchema>;
   onChange?: LineMessageInputEventHandler;
-}> = ({ name, onChange, value }) => {
+}> = ({ name, onChange, value, errors }) => {
   const [messages, setMessages] = useState<LineMessageInputValue>(
     value ?? [
       {
@@ -49,7 +54,6 @@ const LineMessageInput: React.FC<{
     ]
   );
   const [parent] = useAutoAnimate<HTMLDivElement>();
-
   const handleMove = (index: number, shift: 1 | -1) => {
     const newMessages = [...messages];
     newMessages[index] = messages[index + shift];
@@ -151,6 +155,12 @@ const LineMessageInput: React.FC<{
                   newMessages[i].details = v;
                   handleChange(newMessages);
                 }}
+                errors={
+                  errors.messages
+                    ? (errors.messages[i]
+                        ?.details as Partial<AnyMessageTypeDetails>)
+                    : undefined
+                }
               />
             </div>
           </div>

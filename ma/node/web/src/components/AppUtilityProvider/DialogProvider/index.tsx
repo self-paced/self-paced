@@ -4,6 +4,7 @@ import Dialog from './Dialog';
 interface DialogOptions {
   title: string;
   message?: string;
+  noCancelButton?: boolean;
 }
 
 interface PromiseInfo {
@@ -50,6 +51,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
         body={options.message}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+        noCancelButton={options.noCancelButton}
       />
       <DialogContext.Provider value={showDialog}>
         {children}

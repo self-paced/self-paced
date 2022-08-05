@@ -9,6 +9,7 @@ import {
   MdDelete,
 } from 'react-icons/md';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import v from '../../../utils/validation';
 
 const MAX_COLUMNS = 10;
 const MAX_ACTIONS = 3;
@@ -21,21 +22,42 @@ export const lineCarouselMessageSchema = z.object({
     columns: z
       .array(
         z.object({
-          thumbnailImageUrl: z.string().url(),
+          thumbnailImageUrl: z
+            .string()
+            .min(1, { message: v.MESSAGES.required('画像URL') })
+            .url({ message: v.MESSAGES.url('画像URL') }),
           imageBackgroundColor: z.string().optional(),
-          title: z.string().optional(),
-          text: z.string().min(1),
+          title: z
+            .string()
+            .min(1, { message: v.MESSAGES.required('タイトル') }),
+          text: z
+            .string()
+            .min(1, { message: v.MESSAGES.required('カラムの詳細') }),
           defaultAction: z.object({
             type: z.literal('uri'),
-            label: z.string().min(1),
-            uri: z.string().url(),
+            label: z
+              .string()
+              .min(1, { message: v.MESSAGES.required('ラベル') }),
+            uri: z
+              .string()
+              .min(1, {
+                message: v.MESSAGES.required('デフォルトアクションのURL'),
+              })
+              .url({ message: v.MESSAGES.url('デフォルトアクションのURL') }),
           }),
           actions: z
             .array(
               z.object({
                 type: z.literal('uri'),
-                label: z.string().min(1),
-                uri: z.string().min(1),
+                label: z.string().min(1, {
+                  message: v.MESSAGES.required('アクションのラベル'),
+                }),
+                uri: z
+                  .string()
+                  .min(1, {
+                    message: v.MESSAGES.required('アクションのURL'),
+                  })
+                  .url({ message: v.MESSAGES.url('アクションのURL') }),
               })
             )
             .min(1)
@@ -43,7 +65,20 @@ export const lineCarouselMessageSchema = z.object({
         })
       )
       .min(1)
-      .max(MAX_COLUMNS),
+      .max(MAX_COLUMNS)
+      .refine(
+        (columns) => {
+          // すべてのカラムは同じアクション数になっていることを確認
+          const numberOfActions = columns[0].actions.length;
+          for (let i = 0; i < columns.length; i++) {
+            if (columns[i].actions.length !== numberOfActions) {
+              return false;
+            }
+          }
+          return true;
+        },
+        { message: 'カルーセルのカラムのアクション数を揃えてください。' }
+      ),
   }),
 });
 
@@ -97,6 +132,7 @@ export const DEFAULT_CAROUSEL_MESSAGE = Object.freeze<LineCarouselMessageType>({
 const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
   messageDetails,
   onChange,
+  errors,
 }) => {
   const [columns, setColumns] = useState<ColumnType[]>(
     messageDetails.template.columns.map((column, index) => {
@@ -215,6 +251,9 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].thumbnailImageUrl = e.target.value;
                 handleChange(newColumns);
               }}
+              error={
+                !!errors?.template?.columns?.[columnIndex]?.thumbnailImageUrl
+              }
             />
             <InputLabel>タイトル</InputLabel>
             <TextField
@@ -226,6 +265,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].title = e.target.value;
                 handleChange(newColumns);
               }}
+              error={!!errors?.template?.columns?.[columnIndex]?.title}
             />
             <InputLabel>詳細</InputLabel>
             <TextField
@@ -237,6 +277,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].text = e.target.value;
                 handleChange(newColumns);
               }}
+              error={!!errors?.template?.columns?.[columnIndex]?.text}
             />
             <InputLabel>デフォルトURL</InputLabel>
             <TextField
@@ -248,6 +289,9 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].defaultAction.uri = e.target.value;
                 handleChange(newColumns);
               }}
+              error={
+                !!errors?.template?.columns?.[columnIndex]?.defaultAction?.uri
+              }
             />
             {/* ACTIONS */}
             <Actions
@@ -263,6 +307,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].actions = newActions;
                 handleChange(newColumns);
               }}
+              errors={errors}
             />
           </div>
         </div>
@@ -307,7 +352,8 @@ const Actions: React.FC<{
     shift: 1 | -1
   ) => void;
   onChange: (newActions: ActionType[]) => void;
-}> = ({ columnIndex, actions, onMoveAction, onChange }) => {
+  errors?: Partial<LineCarouselMessageType>;
+}> = ({ columnIndex, actions, onMoveAction, onChange, errors }) => {
   const [parent] = useAutoAnimate<HTMLDivElement>();
   return (
     <div ref={parent}>
@@ -367,6 +413,11 @@ const Actions: React.FC<{
                 newActions[actionIndex].label = e.target.value;
                 onChange(newActions);
               }}
+              error={
+                !!errors?.template?.columns?.[columnIndex]?.actions?.[
+                  actionIndex
+                ]?.label
+              }
             />
             <InputLabel>URL</InputLabel>
             <TextField
@@ -378,6 +429,11 @@ const Actions: React.FC<{
                 newActions[actionIndex].uri = e.target.value;
                 onChange(newActions);
               }}
+              error={
+                !!errors?.template?.columns?.[columnIndex]?.actions?.[
+                  actionIndex
+                ]?.uri
+              }
             />
           </div>
         </div>
