@@ -4,9 +4,9 @@ import { Config, constants } from '../../lib/config';
 import { getVpc } from '../vpc';
 // import { prepareFargateTask } from './task';
 // import { prepareFargateService } from './service';
-import { prepareRds } from './sls-rds';
+import { prepareRdsProxy } from './rds-proxy';
 
-export class SlsDb extends Stack {
+export class RdsProxy extends Stack {
   constructor(scope: Construct, id: string, props: Config) {
     super(scope, id, props);
     main(this, props);
@@ -16,24 +16,16 @@ export class SlsDb extends Stack {
 const main = async (scope: Construct, props: Config) => {
   const vpc = getVpc(scope, props);
 
-  const dbSecret = prepareDbSecret(scope, props);
+  const dbSecret = prepareRdsProxySecret(scope, props);
 
-  // const taskDef = await prepareFargateTask(scope, props, dbSecret);
-
-  // const albFargateService = prepareFargateService(scope, props, vpc, taskDef);
-
-  // await prepareRds(scope, props, vpc, dbSecret, [
-  //   albFargateService.connections.securityGroups[0],
-  // ]);
-
-  await prepareRds(scope, props, vpc, dbSecret);
+  await prepareRdsProxy(scope, props, vpc, dbSecret);
 };
 
 // todo 一旦secretを使用しない
-const prepareDbSecret = (scope: Construct, props: Config) => {
+const prepareRdsProxySecret = (scope: Construct, props: Config) => {
   return new secretsmanager.Secret(scope, `maSlsDBSecret`, {
-    secretName: `${constants.projectName}/${props.envName}/maSls-db`,
-    description: `CDK generated ma sls DB secret`,
+    secretName: `${constants.projectName}/${props.envName}/maBation`,
+    description: `CDK generated ma bation secret`,
     generateSecretString: {
       secretStringTemplate: JSON.stringify({
         username: 'ma',

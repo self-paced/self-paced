@@ -7,7 +7,7 @@ import {
 } from 'aws-cdk-lib';
 import { Config, constants } from '../../lib/config';
 
-export const prepareRds = (
+export const prepareEc2 = (
   scope: Construct,
   props: Config,
   vpc: ec2.IVpc,
@@ -15,7 +15,7 @@ export const prepareRds = (
   //allowedSGs: (ec2.ISecurityGroup | undefined)[]
 ) => {
   console.log('create cluster');
-  const cluster = new rds.ServerlessCluster(scope, 'MaSlsDB', {
+  new rds.ServerlessCluster(scope, 'MaSlsDB', {
     vpc: vpc,
     clusterIdentifier: clusterName(props),
     defaultDatabaseName: 'maDb',
@@ -31,16 +31,10 @@ export const prepareRds = (
     //credentials: rds.Credentials.fromSecret(dbSecret),
     credentials: rds.Credentials.fromGeneratedSecret('clusteradmin'),
   });
-
-  const proxy = new rds.Databaseroxy(scope, 'slsDbProxy', {
-    proxyTarget: rds.ProxyTarget.fromCluster(cluster),
-    secrets: [cluster.secret!],
-    vpc: vpc,
-  });
 };
 
 const clusterName = (props: Config) =>
   `${constants.projectName}-${props.envName}-maSls`;
 
 export const rdsEndpoint = (props: Config) =>
-  `${clusterName(props)}.cluster-cddtmzgk4ohl.ap-northeast-1.rds.amazonaws.com`;
+  `${clusterName(props)}.cluster-cddtmzgk4ohl.ap-northeast-1.rds.amazonawsec2m`;
