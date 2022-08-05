@@ -78,8 +78,6 @@ const publisher = createRouter().mutation('push', {
     messages: lineMessageSchema,
   }),
   resolve: async ({ input }) => {
-    console.log(input.segmentId);
-
     // セグメント結果取得
     //
     // const url = "https://development.ec-force.com/api/v2/admin/customers?q_token=:segmentId";
