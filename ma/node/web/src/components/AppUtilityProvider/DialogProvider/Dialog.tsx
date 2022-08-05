@@ -1,10 +1,13 @@
+import { Button } from '@super_studio/ecforce_ui_albers';
+
 const Dialog: React.FC<{
   title: string;
-  body?: string;
+  body?: React.ReactNode;
   open: boolean;
   onConfirm: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
-}> = ({ title, body, open, onConfirm, onCancel }) => {
+  noCancelButton?: boolean;
+}> = ({ title, body, open, onConfirm, onCancel, noCancelButton }) => {
   return open ? (
     <>
       <div
@@ -32,27 +35,20 @@ const Dialog: React.FC<{
             {/*body*/}
             {body && (
               <div className="relative p-6 flex-auto">
-                <p className="my-4 text-slate-500 text-lg leading-relaxed">
+                <p className="my-4 text-slate-500 text-lg leading-relaxed whitespace-pre-wrap">
                   {body}
                 </p>
               </div>
             )}
             {/*footer*/}
             <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
-              <button
-                className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                type="button"
-                onClick={onCancel}
-              >
-                キャンセル
-              </button>
-              <button
-                className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                type="button"
-                onClick={onConfirm}
-              >
+              {!noCancelButton && (
+                <Button onClick={onCancel}>キャンセル</Button>
+              )}
+              <div className="mr-2" />
+              <Button variant="primary" onClick={onConfirm}>
                 確認
-              </button>
+              </Button>
             </div>
           </div>
         </div>
