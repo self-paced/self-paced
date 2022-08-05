@@ -6,8 +6,6 @@ const segment = createRouter().query('list', {
     page: z.number(),
   }),
   resolve: ({ input }) => {
-    console.log(input.page);
-
     // セグメント一覧取得
     //
     // const url = "https://development.ec-force.com/api/v2/admin/customer_segments?page=input.page";
