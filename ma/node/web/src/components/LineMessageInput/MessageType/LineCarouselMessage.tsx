@@ -252,7 +252,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 handleChange(newColumns);
               }}
               error={
-                !!errors?.template?.columns[columnIndex]?.thumbnailImageUrl
+                !!errors?.template?.columns?.[columnIndex]?.thumbnailImageUrl
               }
             />
             <InputLabel>タイトル</InputLabel>
@@ -265,7 +265,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].title = e.target.value;
                 handleChange(newColumns);
               }}
-              error={!!errors?.template?.columns[columnIndex]?.title}
+              error={!!errors?.template?.columns?.[columnIndex]?.title}
             />
             <InputLabel>詳細</InputLabel>
             <TextField
@@ -277,7 +277,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 newColumns[columnIndex].text = e.target.value;
                 handleChange(newColumns);
               }}
-              error={!!errors?.template?.columns[columnIndex]?.text}
+              error={!!errors?.template?.columns?.[columnIndex]?.text}
             />
             <InputLabel>デフォルトURL</InputLabel>
             <TextField
@@ -290,7 +290,7 @@ const LineCarouselMessage: MessageComponent<LineCarouselMessageType> = ({
                 handleChange(newColumns);
               }}
               error={
-                !!errors?.template?.columns[columnIndex]?.defaultAction?.uri
+                !!errors?.template?.columns?.[columnIndex]?.defaultAction?.uri
               }
             />
             {/* ACTIONS */}
@@ -414,8 +414,9 @@ const Actions: React.FC<{
                 onChange(newActions);
               }}
               error={
-                !!errors?.template?.columns[columnIndex]?.actions[actionIndex]
-                  ?.label
+                !!errors?.template?.columns?.[columnIndex]?.actions?.[
+                  actionIndex
+                ]?.label
               }
             />
             <InputLabel>URL</InputLabel>
@@ -429,8 +430,9 @@ const Actions: React.FC<{
                 onChange(newActions);
               }}
               error={
-                !!errors?.template?.columns[columnIndex]?.actions[actionIndex]
-                  ?.uri
+                !!errors?.template?.columns?.[columnIndex]?.actions?.[
+                  actionIndex
+                ]?.uri
               }
             />
           </div>
