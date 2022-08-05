@@ -32,7 +32,7 @@ function MyApp({
   );
 }
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     // Browserの場合は、現在のURLを利用
     return '';

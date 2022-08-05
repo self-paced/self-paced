@@ -1,5 +1,6 @@
 import { createReactQueryHooks, createTRPCClient } from '@trpc/react';
 import type { AppRouter } from '../../../sls/src/functions/trpc/routers';
+import { getBaseUrl } from '../pages/_app';
 
 export const trpc = createReactQueryHooks<AppRouter>();
 // => { useQuery: ..., useMutation: ...}
@@ -9,5 +10,5 @@ export const trpc = createReactQueryHooks<AppRouter>();
  * SSRの場合はこちらのクライアントを利用してください。
  */
 export const serverSideClient = createTRPCClient<AppRouter>({
-  url: `${process.env.NEXT_PUBLIC_BACKEND_URL}`,
+  url: `${getBaseUrl()}/api/trpc`,
 });
