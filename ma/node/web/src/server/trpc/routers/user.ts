@@ -21,7 +21,6 @@ const user = createRouter()
       return [input];
     },
   });
-// todo prisma例
 // .query('all', {
 //   async resolve({ ctx }) {
 //     return await ctx.prisma.post.findMany();

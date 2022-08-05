@@ -1,11 +1,10 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import config from '../../../../src/libs/config';
 import { Client } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 
 const client = new Client({
-  channelAccessToken: config.lineToken,
+  channelAccessToken: process.env.LINE_TOKEN!,
 });
 
 const MAX_MESSAGES = 5;
