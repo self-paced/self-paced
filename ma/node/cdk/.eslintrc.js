@@ -5,7 +5,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'max-lines-per-function': [
       'warn',
-      { max: 50, skipBlankLines: true, skipComments: true },
+      { max: 100, skipBlankLines: true, skipComments: true },
     ],
     'no-lonely-if': 'error',
     complexity: ['warn', { max: 20 }],
