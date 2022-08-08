@@ -41,6 +41,7 @@ const prepareDbSecret = (scope: Construct, props: Config) => {
       generateStringKey: 'password',
       excludePunctuation: true,
       passwordLength: 16,
+      includeSpace: false,
     },
   });
 };

@@ -4,8 +4,13 @@ import {
   aws_rds as rds,
   aws_ec2 as ec2,
   aws_secretsmanager as secretsmanager,
+  aws_lambda as lambda,
+  Duration,
+  CustomResource,
+  custom_resources as customresources,
 } from 'aws-cdk-lib';
 import { Config, constants } from '../../lib/config';
+import { readdirSync } from 'fs';
 
 export const prepareRds = (
   scope: Construct,
@@ -47,7 +52,7 @@ export const prepareRds = (
   );
 
   // create Bastion server
-  const host = new ec2.BastionHostLinux(scope, 'RDSProxy to DB', {
+  const host = new ec2.BastionHostLinux(scope, 'MaRDSProxy', {
     vpc,
     instanceType: ec2.InstanceType.of(
       ec2.InstanceClass.T4G,
@@ -62,27 +67,28 @@ export const prepareRds = (
   host.instance.addUserData('yum -y update', 'yum install -y mysql jq');
 
   // RDSの認証情報
-  const databaseCredentialsSecret = new secretsmanager.Secret(
-    scope,
-    'DBCredentialsSecret',
-    {
-      secretName: 'ma-sls-rds-credentials',
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          username: 'syscdk',
-        }),
-        excludePunctuation: true,
-        includeSpace: false,
-        generateStringKey: 'password',
-      },
-    }
-  );
+  // const databaseCredentialsSecret = new secretsmanager.Secret(
+  //   scope,
+  //   'DBCredentialsSecret',
+  //   {
+  //     secretName: 'ma-sls-rds-credentials',
+  //     generateSecretString: {
+  //       secretStringTemplate: JSON.stringify({
+  //         username: 'syscdk',
+  //       }),
+  //       excludePunctuation: true,
+  //       includeSpace: false,
+  //       generateStringKey: 'password',
+  //     },
+  //   }
+  // );
 
   // create RDS
   const cluster = new rds.DatabaseCluster(scope, 'MaSlsDB', {
     engine: rds.DatabaseClusterEngine.auroraMysql({
-      version: rds.AuroraMysqlEngineVersion.VER_2_08_1,
+      version: rds.AuroraMysqlEngineVersion.VER_3_01_0,
     }),
+    defaultDatabaseName: 'ma-db',
     instanceProps: {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
@@ -94,18 +100,60 @@ export const prepareRds = (
       },
       securityGroups: [dbConnectionGroup],
     },
-
     removalPolicy: RemovalPolicy.SNAPSHOT,
-    credentials: rds.Credentials.fromSecret(databaseCredentialsSecret),
+    credentials: rds.Credentials.fromSecret(dbSecret),
   });
 
+  if (!cluster.secret) {
+    throw new Error('DB not use secret');
+  }
+
   // create RDS proxy
-  const proxy = new rds.DatabaseProxy(scope, 'slsDbProxy', {
+  new rds.DatabaseProxy(scope, 'SlsDbProxy', {
     proxyTarget: rds.ProxyTarget.fromCluster(cluster),
-    secrets: [databaseCredentialsSecret],
+    secrets: [dbSecret],
     securityGroups: [dbConnectionGroup],
     vpc: vpc,
     maxConnectionsPercent: 80,
+  });
+
+  console.log(cluster.secret.secretValue);
+
+  // Migration
+  const migrateFunction = new lambda.DockerImageFunction(
+    scope,
+    'migrateSlsDB',
+    {
+      vpc,
+      architecture: lambda.Architecture.ARM_64,
+      timeout: Duration.minutes(5),
+      code: lambda.DockerImageCode.fromImageAsset(
+        __dirname + './../../../sls/.'
+      ),
+      environment: {
+        DB_CONNECTION: cluster.secret.secretValue.toString(),
+      },
+    }
+  );
+  cluster.connections.allowDefaultPortFrom(migrateFunction);
+
+  // Lambda will migrate every schema changes
+  const provider = new customresources.Provider(scope, 'SlsDbProvider', {
+    onEventHandler: migrateFunction,
+  });
+
+  const lastMigrationId = readdirSync(
+    __dirname + '/../../../sls/prisma/migrations'
+  )
+    .filter((name) => name !== 'migration_lock.toml')
+    .sort()
+    .reverse()[0];
+
+  new CustomResource(scope, 'Custom::Migration', {
+    serviceToken: provider.serviceToken,
+    properties: {
+      lastMigrationId,
+    },
   });
 };
 

@@ -14,15 +14,11 @@ export const prepareFargateService = (
 ) => {
   const alb = prepareAlb(scope, props, vpc);
 
-  console.log('vpc:' + vpc);
-
-  console.log('ecs cluster');
   const ecsCluster = new ecs.Cluster(scope, 'MaSlsDbCluster', {
     clusterName: `${constants.projectName}-${props.envName}-maSlsDb-cluster`,
     vpc: vpc,
   });
 
-  console.log('security group');
   const securityGroups: ec2.ISecurityGroup[] = [];
   securityGroups.push(
     new ec2.SecurityGroup(scope, 'FargateServiceSg', {
