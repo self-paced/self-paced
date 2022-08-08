@@ -86,13 +86,13 @@ export const prepareRds = (
   // create RDS
   const cluster = new rds.DatabaseCluster(scope, 'MaSlsDB', {
     engine: rds.DatabaseClusterEngine.auroraMysql({
-      version: rds.AuroraMysqlEngineVersion.VER_3_01_0,
+      version: rds.AuroraMysqlEngineVersion.VER_2_08_1,
     }),
-    defaultDatabaseName: 'ma-db',
+    defaultDatabaseName: 'maDb',
     instanceProps: {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE2,
+        ec2.InstanceClass.BURSTABLE3,
         ec2.InstanceSize.SMALL
       ),
       vpcSubnets: {
@@ -160,5 +160,5 @@ export const prepareRds = (
 const clusterName = (props: Config) =>
   `${constants.projectName}-${props.envName}-maSls`;
 
-export const rdsEndpoint = (props: Config) =>
-  `${clusterName(props)}.cluster-cddtmzgk4ohl.ap-northeast-1.rds.amazonaws.com`;
+// export const rdsEndpoint = (props: Config) =>
+//   `${clusterName(props)}.cluster-cddtmzgk4ohl.ap-northeast-1.rds.amazonaws.com`;
