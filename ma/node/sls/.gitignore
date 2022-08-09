@@ -7,3 +7,6 @@ node_modules
 # SERVERLESS STUFF
 .env
 .serverless
+
+# migrations
+prisma/migrations/*

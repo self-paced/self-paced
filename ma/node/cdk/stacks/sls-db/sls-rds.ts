@@ -66,23 +66,6 @@ export const prepareRds = (
 
   host.instance.addUserData('yum -y update', 'yum install -y mysql jq');
 
-  // RDSの認証情報
-  // const databaseCredentialsSecret = new secretsmanager.Secret(
-  //   scope,
-  //   'DBCredentialsSecret',
-  //   {
-  //     secretName: 'ma-sls-rds-credentials',
-  //     generateSecretString: {
-  //       secretStringTemplate: JSON.stringify({
-  //         username: 'syscdk',
-  //       }),
-  //       excludePunctuation: true,
-  //       includeSpace: false,
-  //       generateStringKey: 'password',
-  //     },
-  //   }
-  // );
-
   // create RDS
   const cluster = new rds.DatabaseCluster(scope, 'MaSlsDB', {
     engine: rds.DatabaseClusterEngine.auroraMysql({

@@ -20,12 +20,12 @@ const user = createRouter()
       // ユーザ取得
       return [input];
     },
+  })
+  // todo prisma例
+  .query('all', {
+    async resolve({ ctx }) {
+      return await ctx.prisma.post.findMany();
+    },
   });
-// todo prisma例
-// .query('all', {
-//   async resolve({ ctx }) {
-//     return await ctx.prisma.post.findMany();
-//   },
-// });
 
 export default user;
