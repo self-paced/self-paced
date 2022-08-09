@@ -35,7 +35,7 @@ const lineCarouselMessageSchema = z.object({
         z.object({
           thumbnailImageUrl: z.string().url(),
           imageBackgroundColor: z.string().optional(),
-          title: z.string().optional(),
+          title: z.string().min(1),
           text: z.string().min(1),
           defaultAction: z.object({
             type: z.literal('uri'),
