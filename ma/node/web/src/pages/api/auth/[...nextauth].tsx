@@ -1,3 +1,4 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -58,4 +59,15 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export default NextAuth(authOptions);
+const nextAuthHandler = NextAuth(authOptions);
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('NEXT_AUTH');
+  console.log(process.env.NEXTAUTH_URL);
+  console.log(process.env.VERCEL_URL);
+  if (process.env.NEXTAUTH_URL) {
+    req.headers['x-forwarded-host'] = new URL(process.env.NEXTAUTH_URL).host;
+  }
+
+  return nextAuthHandler(req, res);
+}
