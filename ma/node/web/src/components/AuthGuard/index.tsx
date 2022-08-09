@@ -16,7 +16,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         });
         setLoginTryCount(loginTryCount + 1);
       } else {
-        window.location.href = 'http://localhost:3500/login';
+        window.location.href = 'http://localhost:3500/admins/sign_in';
       }
     },
   });
