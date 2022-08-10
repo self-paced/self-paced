@@ -109,6 +109,7 @@ const EcfForm: React.FC<{
   defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
+  onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
   segments: { token: string; name: string; userCounts: number }[];
 }> = ({
@@ -116,6 +117,7 @@ const EcfForm: React.FC<{
   defaultMessages,
   onTypeChange,
   onMessageChange,
+  onError,
   onValidationError,
   segments,
 }) => {
@@ -137,10 +139,17 @@ const EcfForm: React.FC<{
   const publisher = trpc.useMutation('publisher.push');
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate({
-      segmentId: segmentId,
-      messages: data.messages.map((message) => message.details),
-    });
+    await publisher.mutate(
+      {
+        segmentId: segmentId,
+        messages: data.messages.map((message) => message.details),
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+      }
+    );
   };
 
   const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
@@ -224,12 +233,14 @@ const LineForm: React.FC<{
   defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
+  onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
 }> = ({
   type,
   defaultMessages,
   onTypeChange,
   onMessageChange,
+  onError,
   onValidationError,
 }) => {
   const narrowcast = trpc.useMutation('line.narrowcast');
@@ -248,10 +259,17 @@ const LineForm: React.FC<{
   });
 
   const handleValid: SubmitHandler<LineSchema> = async (data) => {
-    await narrowcast.mutate({
-      messages: data.messages.map((message) => message.details),
-      gender: data.gender.length === 1 ? data.gender[0] : undefined,
-    });
+    await narrowcast.mutate(
+      {
+        messages: data.messages.map((message) => message.details),
+        gender: data.gender.length === 1 ? data.gender[0] : undefined,
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+      }
+    );
   };
 
   const handleInvalid: SubmitErrorHandler<EcfSchema> = () => {
@@ -345,6 +363,13 @@ const Page: NextPage = () => {
   const handleMessageChange: LineMessageInputEventHandler = (e) => {
     setMessages(e.target.value);
   };
+  const handleError = () => {
+    showDialog({
+      title: '送信エラー',
+      message: 'エラーが発生しました。',
+      noCancelButton: true,
+    });
+  };
   const handleValidationError = (e: z.ZodIssue[]) => {
     const displayedErrorFields: (string | number)[] = [];
     // 各フィールドの1つ目のエラーを表示する
@@ -374,6 +399,7 @@ const Page: NextPage = () => {
           defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          onError={handleError}
           onValidationError={handleValidationError}
           segments={segments.data.segments.data}
         />
@@ -384,6 +410,7 @@ const Page: NextPage = () => {
           defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          onError={handleError}
           onValidationError={handleValidationError}
         />
       )}
