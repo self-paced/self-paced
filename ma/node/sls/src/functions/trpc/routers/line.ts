@@ -1,12 +1,12 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import config from '../../../../src/libs/config';
 import { Client, DemographicFilterObject } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import { lineMessageSchema } from './publisher';
+import { env } from '../../../libs/config/env';
 
 const client = new Client({
-  channelAccessToken: config.lineToken,
+  channelAccessToken: env.LINE_TOKEN,
 });
 
 const AGE_SCHEMA = z.union([
