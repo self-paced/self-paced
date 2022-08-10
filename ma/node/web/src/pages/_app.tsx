@@ -21,7 +21,11 @@ function MyApp({
       <Head>
         <title>ecforce ma</title>
       </Head>
-      <SessionProvider session={pageProps.session} refetchInterval={0}>
+      <SessionProvider
+        session={pageProps.session}
+        refetchInterval={0}
+        basePath={process.env.BASE_PATH + '/api/auth'}
+      >
         <AuthGuard>
           <AppUtilityProvider noFrame={Component.noFrame}>
             <Component {...pageProps} />
@@ -35,11 +39,12 @@ function MyApp({
 export const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     // Browserの場合は、現在のURLを利用
-    return '';
+    return process.env.BASE_PATH;
   }
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSRの場合はVERCELのURLを利用
+  if (process.env.VERCEL_URL)
+    return `https://${process.env.VERCEL_URL}${process.env.BASE_PATH}`; // SSRの場合はVERCELのURLを利用
 
-  return `http://localhost:4040`; // devの場合はlocalhostを利用
+  return `http://localhost:4040${process.env.BASE_PATH}`; // devの場合はlocalhostを利用
 };
 
 export default withTRPC<AppRouter>({
