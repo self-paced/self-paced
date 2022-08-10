@@ -54,7 +54,7 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    const url = `${getBaseUrl()}/api/trpc`;
+    const url = process.env.NEXT_PUBLIC_TRPC_URL ?? `${getBaseUrl()}/sls/dev`;
 
     return {
       url,
