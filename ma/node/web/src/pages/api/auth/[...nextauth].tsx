@@ -17,7 +17,9 @@ export const authOptions: NextAuthOptions = {
           domain: credentials?.domain,
         };
 
-        const url = `${getBaseUrl()}/api/trpc/auth.token`;
+        const url = process.env.NEXT_PUBLIC_TRPC_URL
+          ? `${process.env.NEXT_PUBLIC_TRPC_URL}/auth.token`
+          : `${getBaseUrl()}/api/trpc/auth.token`;
 
         const res = await fetch(url, {
           method: 'POST',

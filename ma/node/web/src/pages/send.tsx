@@ -78,19 +78,33 @@ const Home: NextPage = () => {
         Object.entries(data.targets).forEach(([name, isSelected]) => {
           if (isSelected) userIds.push(USER_MAP[name]);
         });
-        // await multicast.mutate({ messages: data.messages, userIds });
+        await multicast.mutate({
+          messages: data.messages.map((message) => ({
+            type: 'text',
+            text: message,
+          })),
+          userIds,
+        });
         break;
       // すべての友達に送信
       case 'broadcast':
-        // await broadcast.mutate({ messages: data.messages });
+        await broadcast.mutate({
+          messages: data.messages.map((message) => ({
+            type: 'text',
+            text: message,
+          })),
+        });
         break;
       // 条件付きで送信
       case 'narrowcast':
-        // await narrowcast.mutate({
-        //   messages: data.messages,
-        //   age: data.age,
-        //   gender: data.gender,
-        // });
+        await narrowcast.mutate({
+          messages: data.messages.map((message) => ({
+            type: 'text',
+            text: message,
+          })),
+          age: data.age,
+          gender: data.gender,
+        });
         break;
     }
   };
