@@ -7,15 +7,15 @@ const nextConfig = {
     // パブリック環境変数（ブラウザーで取得可能）
     BASE_PATH: process.env.BASE_PATH,
   },
-  // redirects() {
-  //   return [
-  //     {
-  //       source: '/',
-  //       destination: '/line-message',
-  //       permanent: true,
-  //     },
-  //   ];
-  // },
+  redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/line-message',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
