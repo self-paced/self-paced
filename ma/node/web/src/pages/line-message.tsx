@@ -1,6 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { NextPage } from 'next';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import {
+  Controller,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 import { z } from 'zod';
 import { trpc } from '../utils/trpc';
 import {
@@ -19,6 +24,8 @@ import LineMessageInput, {
   lineMessageInputSchema,
   LineMessageInputValue,
 } from '../components/LineMessageInput';
+import v from '../utils/validation';
+import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -60,11 +67,13 @@ const lineSchema = z.object({
 
 const ecfSchema = z.object({
   messages: lineMessageInputSchema,
-  segmentId: z.string().min(1),
+  segmentId: z
+    .string()
+    .min(1, { message: v.MESSAGES.required('配信対象検索条件') }),
 });
 
-type EcfSchema = z.infer<typeof ecfSchema>;
-type LineSchema = z.infer<typeof lineSchema>;
+export type EcfSchema = z.infer<typeof ecfSchema>;
+export type LineSchema = z.infer<typeof lineSchema>;
 
 const TypeSelector: React.FC<{
   type: 'ecf' | 'line';
@@ -100,14 +109,25 @@ const EcfForm: React.FC<{
   defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
+  onError: (message: string) => void;
+  onValidationError: (error: z.ZodIssue[]) => void;
   segments: { token: string; name: string; userCounts: number }[];
-}> = ({ type, defaultMessages, onTypeChange, onMessageChange, segments }) => {
+}> = ({
+  type,
+  defaultMessages,
+  onTypeChange,
+  onMessageChange,
+  onError,
+  onValidationError,
+  segments,
+}) => {
   const {
     register,
     handleSubmit,
     watch,
     control,
-    formState: { errors },
+    getValues,
+    formState: { errors, isSubmitting },
   } = useForm<EcfSchema>({
     resolver: zodResolver(ecfSchema),
     defaultValues: {
@@ -118,15 +138,32 @@ const EcfForm: React.FC<{
 
   const publisher = trpc.useMutation('publisher.push');
 
-  const onSubmit: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate({
-      segmentId: segmentId,
-      messages: data.messages.map((message) => message.details),
-    });
+  const handleValid: SubmitHandler<EcfSchema> = async (data) => {
+    await publisher.mutate(
+      {
+        segmentId: segmentId,
+        messages: data.messages.map((message) => message.details),
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+      }
+    );
+  };
+
+  const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
+    try {
+      ecfSchema.parse(getValues());
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      }
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
       <Card>
         <CardHead>配信対象</CardHead>
         <CardBody>
@@ -136,7 +173,7 @@ const EcfForm: React.FC<{
           </div>
           <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
-            <Select {...register('segmentId')}>
+            <Select {...register('segmentId')} error={!!errors.segmentId}>
               <option value="">選択してください</option>
               {segments.map((segment) => (
                 <option key={segment.token} value={segment.token}>
@@ -171,6 +208,7 @@ const EcfForm: React.FC<{
                   onMessageChange(e);
                 }}
                 value={defaultMessages}
+                errors={errors as Partial<EcfSchema>}
               />
             )}
           />
@@ -195,11 +233,21 @@ const LineForm: React.FC<{
   defaultMessages: LineMessageInputValue;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
-}> = ({ type, defaultMessages, onTypeChange, onMessageChange }) => {
+  onError: (message: string) => void;
+  onValidationError: (error: z.ZodIssue[]) => void;
+}> = ({
+  type,
+  defaultMessages,
+  onTypeChange,
+  onMessageChange,
+  onError,
+  onValidationError,
+}) => {
   const narrowcast = trpc.useMutation('line.narrowcast');
   const {
     register,
     handleSubmit,
+    getValues,
     control,
     formState: { errors },
   } = useForm<LineSchema>({
@@ -210,14 +258,32 @@ const LineForm: React.FC<{
     },
   });
 
-  const onSubmit: SubmitHandler<LineSchema> = async (data) => {
-    await narrowcast.mutate({
-      messages: data.messages.map((message) => message.details),
-      gender: data.gender.length === 1 ? data.gender[0] : undefined,
-    });
+  const handleValid: SubmitHandler<LineSchema> = async (data) => {
+    await narrowcast.mutate(
+      {
+        messages: data.messages.map((message) => message.details),
+        gender: data.gender.length === 1 ? data.gender[0] : undefined,
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+      }
+    );
   };
+
+  const handleInvalid: SubmitErrorHandler<EcfSchema> = () => {
+    try {
+      lineSchema.parse(getValues());
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      }
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
       <Card>
         <CardHead>配信対象</CardHead>
         <CardBody>
@@ -254,6 +320,7 @@ const LineForm: React.FC<{
                   onMessageChange(e);
                 }}
                 value={defaultMessages}
+                errors={errors as Partial<LineSchema>}
               />
             )}
           />
@@ -271,7 +338,8 @@ const LineForm: React.FC<{
   );
 };
 
-const Home: NextPage = () => {
+const Page: NextPage = () => {
+  const showDialog = useDialog();
   const [type, setType] = useState('ecf');
   const [messages, setMessages] = useState<LineMessageInputValue>([
     {
@@ -295,6 +363,33 @@ const Home: NextPage = () => {
   const handleMessageChange: LineMessageInputEventHandler = (e) => {
     setMessages(e.target.value);
   };
+  const handleError = () => {
+    showDialog({
+      title: '送信エラー',
+      message: 'エラーが発生しました。',
+      noCancelButton: true,
+    });
+  };
+  const handleValidationError = (e: z.ZodIssue[]) => {
+    const displayedErrorFields: (string | number)[] = [];
+    // 各フィールドの1つ目のエラーを表示する
+    showDialog({
+      title: 'バリデーションエラー',
+      message: e
+        .filter((issue) => {
+          if (displayedErrorFields.includes(issue.path.join('.'))) {
+            return false;
+          }
+          displayedErrorFields.push(issue.path.join('.'));
+          return true;
+        })
+        .map((issue) => {
+          return '・' + issue.message;
+        })
+        .join('\n'),
+      noCancelButton: true,
+    });
+  };
 
   return (
     <div>
@@ -304,6 +399,8 @@ const Home: NextPage = () => {
           defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          onError={handleError}
+          onValidationError={handleValidationError}
           segments={segments.data.segments.data}
         />
       )}
@@ -313,10 +410,12 @@ const Home: NextPage = () => {
           defaultMessages={messages}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          onError={handleError}
+          onValidationError={handleValidationError}
         />
       )}
     </div>
   );
 };
 
-export default Home;
+export default Page;

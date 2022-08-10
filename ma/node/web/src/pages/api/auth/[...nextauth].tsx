@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { getBaseUrl } from '../../_app';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,9 +17,9 @@ export const authOptions: NextAuthOptions = {
           domain: credentials?.domain,
         };
 
-        const url = process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}/api/trpc/auth.token`
-          : 'http://localhost:4040/api/trpc/auth.token';
+        const url = process.env.NEXT_PUBLIC_TRPC_URL
+          ? `${process.env.NEXT_PUBLIC_TRPC_URL}/auth.token`
+          : `${getBaseUrl()}/api/trpc/auth.token`;
 
         const res = await fetch(url, {
           method: 'POST',
@@ -41,7 +42,7 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     // callback
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       if (user) {
         return {
           ...token,
@@ -50,7 +51,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session }) {
+    session({ session }) {
       session.user.name = 'hoge';
       session.user.isAdmin = true;
       return session;

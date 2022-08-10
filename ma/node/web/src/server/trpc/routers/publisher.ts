@@ -35,7 +35,7 @@ const lineCarouselMessageSchema = z.object({
         z.object({
           thumbnailImageUrl: z.string().url(),
           imageBackgroundColor: z.string().optional(),
-          title: z.string().optional(),
+          title: z.string().min(1),
           text: z.string().min(1),
           defaultAction: z.object({
             type: z.literal('uri'),
@@ -77,8 +77,6 @@ const publisher = createRouter().mutation('push', {
     messages: lineMessageSchema,
   }),
   resolve: async ({ input }) => {
-    console.log(input.segmentId);
-
     // セグメント結果取得
     //
     // const url = "https://development.ec-force.com/api/v2/admin/customers?q_token=:segmentId";
