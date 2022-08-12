@@ -136,9 +136,12 @@ const EcfForm: React.FC<{
       messages: defaultMessages,
     },
   });
+  const showDialog = useDialog();
+  const [testIdList, setTestIdList] = useState('');
   const segmentId = watch('segmentId');
 
   const publisher = trpc.useMutation('publisher.push');
+  const multicast = trpc.useMutation('line.multicast');
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
     await publisher.mutate(
@@ -154,18 +157,34 @@ const EcfForm: React.FC<{
     );
   };
 
-  const testSender: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate(
-      {
-        segmentId: segmentId,
-        messages: data.messages.map((message) => message.details),
-      },
-      {
-        onError: () => {
-          onError('エラーが発生しました。');
+  const sendTestMessage = async () => {
+    try {
+      const data = getValues();
+      lineMessageInputSchema.parse(data.messages);
+      await multicast.mutate(
+        {
+          messages: data.messages.map((message) => message.details),
+          userIds: testIdList.split(','),
         },
+        {
+          onError: () => {
+            onError('エラーが発生しました。');
+          },
+          onSuccess: () => {
+            showDialog({
+              title: 'テストメッセージ配信完了。',
+              noCancelButton: true,
+            });
+          },
+        }
+      );
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
       }
-    );
+    }
   };
 
   const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
@@ -174,6 +193,8 @@ const EcfForm: React.FC<{
     } catch (e) {
       if (e instanceof z.ZodError) {
         onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
       }
     }
   };
@@ -228,26 +249,20 @@ const EcfForm: React.FC<{
               />
             )}
           />
-          <div>
-            <TextField
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setTestIdList(e.target.value);
-              }}
-            />
-            <Button
-              type="submit"
-              variant="secondary"
-              onClick={async () => {
-                await multicast.mutate({
-                  messages: getValues().messages.map(
-                    (message) => message.details
-                  ),
-                  userIds: testIdList.split(','),
-                });
-              }}
-            >
-              テスト送信
-            </Button>
+          <div className="my-2">
+            <InputLabel>テスト配信</InputLabel>
+            <div className="flex items-center gap-2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setTestIdList(e.target.value);
+                  }}
+                />
+              </div>
+              <Button variant="secondary" onClick={sendTestMessage}>
+                テスト送信
+              </Button>
+            </div>
           </div>
         </CardBody>
       </Card>
@@ -280,6 +295,7 @@ const LineForm: React.FC<{
   onError,
   onValidationError,
 }) => {
+  const showDialog = useDialog();
   const [testIdList, setTestIdList] = useState('');
   const narrowcast = trpc.useMutation('line.narrowcast');
   const multicast = trpc.useMutation('line.multicast');
@@ -296,6 +312,36 @@ const LineForm: React.FC<{
       gender: [],
     },
   });
+
+  const sendTestMessage = async () => {
+    try {
+      const data = getValues();
+      lineMessageInputSchema.parse(data.messages);
+      await multicast.mutate(
+        {
+          messages: data.messages.map((message) => message.details),
+          userIds: testIdList.split(','),
+        },
+        {
+          onError: () => {
+            onError('エラーが発生しました。');
+          },
+          onSuccess: () => {
+            showDialog({
+              title: 'テストメッセージ配信完了。',
+              noCancelButton: true,
+            });
+          },
+        }
+      );
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
+      }
+    }
+  };
 
   const handleValid: SubmitHandler<LineSchema> = async (data) => {
     await narrowcast.mutate(
@@ -317,6 +363,8 @@ const LineForm: React.FC<{
     } catch (e) {
       if (e instanceof z.ZodError) {
         onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
       }
     }
   };
@@ -363,26 +411,20 @@ const LineForm: React.FC<{
               />
             )}
           />
-          <div>
-            <TextField
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setTestIdList(e.target.value);
-              }}
-            />
-            <Button
-              type="submit"
-              variant="secondary"
-              onClick={async () => {
-                await multicast.mutate({
-                  messages: getValues().messages.map(
-                    (message) => message.details
-                  ),
-                  userIds: testIdList.split(','),
-                });
-              }}
-            >
-              テスト送信
-            </Button>
+          <div className="my-2">
+            <InputLabel>テスト配信</InputLabel>
+            <div className="flex items-center gap-2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setTestIdList(e.target.value);
+                  }}
+                />
+              </div>
+              <Button variant="secondary" onClick={sendTestMessage}>
+                テスト送信
+              </Button>
+            </div>
           </div>
         </CardBody>
       </Card>
