@@ -17,9 +17,9 @@ import {
   Button,
   Select,
   InputLabel,
-  TextField
+  TextField,
 } from '@super_studio/ecforce_ui_albers';
-import {ChangeEvent, ChangeEventHandler, useState} from 'react';
+import { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import LineMessageInput, {
   LineMessageInputEventHandler,
   lineMessageInputSchema,
@@ -27,7 +27,7 @@ import LineMessageInput, {
 } from '../components/LineMessageInput';
 import v from '../utils/validation';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
-import {splitLink} from '@trpc/client/dist/declarations/src/links/splitLink';
+import { splitLink } from '@trpc/client/dist/declarations/src/links/splitLink';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -234,17 +234,22 @@ const EcfForm: React.FC<{
                 setTestIdList(e.target.value);
               }}
             />
-            <Button type="submit" variant="secondary"
-                    onClick={async () => {
-                      await multicast.mutate({
-                        messages: getValues().messages.map((message) => message.details),
-                        userIds: testIdList.split(','),
-                      });
-                    }}>
+            <Button
+              type="submit"
+              variant="secondary"
+              onClick={async () => {
+                await multicast.mutate({
+                  messages: getValues().messages.map(
+                    (message) => message.details
+                  ),
+                  userIds: testIdList.split(','),
+                });
+              }}
+            >
               テスト送信
             </Button>
           </div>
-      </CardBody>
+        </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
@@ -275,7 +280,7 @@ const LineForm: React.FC<{
   onError,
   onValidationError,
 }) => {
-  const [testIdList, setTestIdList] = useState('')
+  const [testIdList, setTestIdList] = useState('');
   const narrowcast = trpc.useMutation('line.narrowcast');
   const multicast = trpc.useMutation('line.multicast');
   const {
@@ -364,13 +369,18 @@ const LineForm: React.FC<{
                 setTestIdList(e.target.value);
               }}
             />
-            <Button type="submit" variant="secondary"
-                    onClick={async () => {
-                      await multicast.mutate({
-                        messages: getValues().messages.map((message) => message.details),
-                        userIds: testIdList.split(','),
-                      });
-                    }}>
+            <Button
+              type="submit"
+              variant="secondary"
+              onClick={async () => {
+                await multicast.mutate({
+                  messages: getValues().messages.map(
+                    (message) => message.details
+                  ),
+                  userIds: testIdList.split(','),
+                });
+              }}
+            >
               テスト送信
             </Button>
           </div>
