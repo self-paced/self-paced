@@ -27,7 +27,7 @@ import LineMessageInput, {
 } from '../components/LineMessageInput';
 import v from '../utils/validation';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
-import { splitLink } from '@trpc/client/dist/declarations/src/links/splitLink';
+import Router from 'next/router';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -143,20 +143,6 @@ const EcfForm: React.FC<{
   const publisher = trpc.useMutation('publisher.push');
   const multicast = trpc.useMutation('line.multicast');
 
-  const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate(
-      {
-        segmentId: segmentId,
-        messages: data.messages.map((message) => message.details),
-      },
-      {
-        onError: () => {
-          onError('エラーが発生しました。');
-        },
-      }
-    );
-  };
-
   const sendTestMessage = async () => {
     try {
       const data = getValues();
@@ -185,6 +171,23 @@ const EcfForm: React.FC<{
         onError('エラーが発生しました。');
       }
     }
+  };
+
+  const handleValid: SubmitHandler<EcfSchema> = async (data) => {
+    await publisher.mutate(
+      {
+        segmentId: segmentId,
+        messages: data.messages.map((message) => message.details),
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.replace('/send-complete');
+        },
+      }
+    );
   };
 
   const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
@@ -270,7 +273,7 @@ const EcfForm: React.FC<{
       <Card>
         <CardBody>
           <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="secondary" disabled={isSubmitting}>
               送信
             </Button>
           </div>
@@ -304,7 +307,7 @@ const LineForm: React.FC<{
     handleSubmit,
     getValues,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LineSchema>({
     resolver: zodResolver(lineSchema),
     defaultValues: {
@@ -352,6 +355,9 @@ const LineForm: React.FC<{
       {
         onError: () => {
           onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.replace('/send-complete');
         },
       }
     );
@@ -431,7 +437,7 @@ const LineForm: React.FC<{
       <div className="mt-6" />
       <Card>
         <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="secondary" disabled={isSubmitting}>
             送信
           </Button>
         </div>
