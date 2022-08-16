@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { Client } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import { env } from '../../../libs/config/env';
+import ecforceApi from '../../../libs/helpers/ecforceApi';
 
 const client = new Client({
   channelAccessToken: env.LINE_TOKEN,
@@ -74,51 +75,32 @@ export const lineMessageSchema = z
 
 const publisher = createRouter().mutation('push', {
   input: z.object({
-    segmentId: z.string(),
+    token: z.string().min(1),
     messages: lineMessageSchema,
   }),
-  resolve: async ({ input }) => {
-    // セグメント結果取得
-    //
-    // const url = "https://development.ec-force.com/api/v2/admin/customers?q_token=:segmentId";
-
-    // const res = await fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   }
-    // });
-
-    // const userIds = await res.json();
-
-    let userIds = [];
-
-    switch (input.segmentId) {
-      case '15407622-2adb-4f47-a1c9-5c23bbe57b64':
-        // 村上
-        userIds = ['U047bb714204750b1fac84038db302a12'];
-        break;
-      case '6c118f31-510f-4560-aa78-d6934e39dca4':
-        // ハヴィ、河端、菊池
-        userIds = [
-          'Uabe224d99d896c04a0fc5730a8c58cb4',
-          'U54e5269306edf7d6a33fe44099a02fe2',
-          'U97e07eaecdc08925a9bec89f31216e08',
-        ];
-        break;
-      case '54703b4b-c618-4088-80ea-49c5c99d5b7e':
-        // 中川
-        userIds = ['U2b5ef79a4c8085f615df92b7753a9e83'];
-        break;
-      default:
-        return false;
-    }
+  resolve: async ({ input, ctx }) => {
+    let page = 1;
+    let totalPages: number;
     try {
-      await Promise.all(
-        userIds.map(async (userId) => {
-          await client.pushMessage(userId, input.messages);
-        })
-      );
+      // page loop: セグメントのすべての顧客を取得する
+      do {
+        const res = await ecforceApi.listCustomersFromSegment(ctx, {
+          token: input.token,
+          page,
+        });
+        totalPages = res.meta.total_pages;
+        // customer loop: ページのすべての顧客に対してメッセージを送信する
+        await Promise.all(
+          res.data.map(async (customer) => {
+            if (customer.attributes.line_id) {
+              await client.pushMessage(
+                customer.attributes.line_id,
+                input.messages
+              );
+            }
+          })
+        );
+      } while (page++ < totalPages);
     } catch (e) {
       console.error(e);
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
