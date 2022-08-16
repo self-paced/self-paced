@@ -1,27 +1,62 @@
-import { SegmentListResponse } from '../../functions/trpc/routers/segment';
-import ecforceApi from './ecforceApi';
+import { CustomerItem, EcforceResponse, SegmentItem } from './ecforceApi';
 
-export const dSegmentListResponse: SegmentListResponse = [
-  {
-    id: 1,
-    token: '15407622-2adb-4f47-a1c9-5c23bbe57b64',
-    name: 'segment A - 村上',
+const dMeta = {
+  meta: {
+    total_count: 1,
+    page: 1,
+    per: 100,
+    count: 1,
+    total_pages: 1,
   },
-  {
-    id: 2,
-    token: '6c118f31-510f-4560-aa78-d6934e39dca4',
-    name: 'segment B - ハヴィ、河端、菊池',
+  links: {
+    self: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=100',
+    prev: null,
+    first: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=1',
+    next: 'https://demo35.ec-force.com/api/v2/admin/customers?page=&per=100',
+    last: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=100',
   },
-  {
-    id: 3,
-    token: '54703b4b-c618-4088-80ea-49c5c99d5b7e',
-    name: 'segment C - 中川',
-  },
-];
+};
 
-const dCustomer: Awaited<
-  ReturnType<typeof ecforceApi.listCustomersFromSegment>
->['data'][0] = {
+export const dListSegmentsResponse: EcforceResponse<SegmentItem[]> = {
+  data: [
+    {
+      id: '1',
+      type: 'search_query',
+      attributes: {
+        id: 1,
+        token: '15407622-2adb-4f47-a1c9-5c23bbe57b64',
+        name: 'segment A - 村上',
+        created_at: '2022/08/15 20:08:06',
+        updated_at: '2022/08/15 20:08:06',
+      },
+    },
+    {
+      id: '2',
+      type: 'search_query',
+      attributes: {
+        id: 2,
+        token: '6c118f31-510f-4560-aa78-d6934e39dca4',
+        name: 'segment B - ハヴィ、河端、菊池',
+        created_at: '2022/08/15 20:08:06',
+        updated_at: '2022/08/15 20:08:06',
+      },
+    },
+    {
+      id: '3',
+      type: 'search_query',
+      attributes: {
+        id: 3,
+        token: '54703b4b-c618-4088-80ea-49c5c99d5b7e',
+        name: 'segment C - 中川',
+        created_at: '2022/08/15 20:08:06',
+        updated_at: '2022/08/15 20:08:06',
+      },
+    },
+  ],
+  ...dMeta,
+};
+
+const dCustomer: CustomerItem = {
   id: '1',
   type: 'customer',
   attributes: {
@@ -82,27 +117,8 @@ const dCustomer: Awaited<
   },
 };
 
-const dMeta = {
-  meta: {
-    total_count: 1,
-    page: 1,
-    per: 100,
-    count: 1,
-    total_pages: 1,
-  },
-  links: {
-    self: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=100',
-    prev: null,
-    first: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=1',
-    next: 'https://demo35.ec-force.com/api/v2/admin/customers?page=&per=100',
-    last: 'https://demo35.ec-force.com/api/v2/admin/customers?page=1&per=100',
-  },
-};
-
-export const dCustomerListResponse: {
-  [key: string]: Awaited<
-    ReturnType<typeof ecforceApi.listCustomersFromSegment>
-  >;
+export const dListCustomersFromSegmentResponse: {
+  [key: string]: EcforceResponse<CustomerItem[]>;
 } = {
   '15407622-2adb-4f47-a1c9-5c23bbe57b64': {
     data: [
