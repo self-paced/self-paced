@@ -3,8 +3,7 @@ import { z } from 'zod';
 import { Client } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import { env } from '../../../libs/config/env';
-import ecforceApi from '@libs/helpers/ecforceApi';
-import { dCustomerListResponse } from '@libs/helpers/dummyData';
+import ecforceApi from '../../../libs/helpers/ecforceApi';
 
 const client = new Client({
   channelAccessToken: env.LINE_TOKEN,
@@ -85,13 +84,10 @@ const publisher = createRouter().mutation('push', {
     try {
       // page loop: セグメントのすべての顧客を取得する
       do {
-        const res =
-          process.env.NODE_ENV === 'development'
-            ? dCustomerListResponse[input.token]
-            : await ecforceApi.listCustomersFromSegment(ctx, {
-                token: input.token,
-                page,
-              });
+        const res = await ecforceApi.listCustomersFromSegment(ctx, {
+          token: input.token,
+          page,
+        });
         totalPages = res.meta.total_pages;
         // customer loop: ページのすべての顧客に対してメッセージを送信する
         await Promise.all(
