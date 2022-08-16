@@ -55,7 +55,8 @@ export default withTRPC<AppRouter>({
      */
 
     const url =
-      process.env.NEXT_PUBLIC_TRPC_URL ?? `${getBaseUrl()}/sls/dev/trpc`; // TODO: 環境変数の自動設定
+      process.env.NEXT_PUBLIC_TRPC_URL ??
+      `${getBaseUrl()}${process.env.NEXT_PUBLIC_TRPC_PATH}`; // TODO: 環境変数の自動設定
 
     return {
       url,
