@@ -74,10 +74,11 @@ export const lineMessageSchema = z
 
 const publisher = createRouter().mutation('push', {
   input: z.object({
+    title: z.string().min(1),
     segmentId: z.string(),
     messages: lineMessageSchema,
   }),
-  resolve: async ({ input }) => {
+  resolve: async ({ input, ctx }) => {
     // セグメント結果取得
     //
     // const url = "https://development.ec-force.com/api/v2/admin/customers?q_token=:segmentId";
@@ -116,6 +117,13 @@ const publisher = createRouter().mutation('push', {
     try {
       await Promise.all(
         userIds.map(async (userId) => {
+          await ctx.prisma.messageEvent.create({
+            data: {
+              title: input.title,
+              content: JSON.stringify(input.messages),
+            },
+          });
+
           await client.pushMessage(userId, input.messages);
         })
       );

@@ -59,6 +59,7 @@ const line = createRouter()
   })
   .mutation('narrowcast', {
     input: z.object({
+      title: z.string().min(1),
       gender: z.union([z.literal('male'), z.literal('female')]).nullish(),
       age: z
         .object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() })

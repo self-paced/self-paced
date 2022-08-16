@@ -62,12 +62,14 @@ import Router from 'next/router';
 // } as const;
 
 const lineSchema = z.object({
+  title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
   messages: lineMessageInputSchema,
   gender: z.array(z.enum(['male', 'female'])),
   // age: z.nativeEnum(AgeEnum).nullish(), // TODO: 年齢の対応
 });
 
 const ecfSchema = z.object({
+  title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
   messages: lineMessageInputSchema,
   segmentId: z
     .string()
@@ -107,16 +109,20 @@ const TypeSelector: React.FC<{
 };
 
 const EcfForm: React.FC<{
+  title: string;
   type: 'ecf' | 'line';
   defaultMessages: LineMessageInputValue;
+  onTitleChange: ChangeEventHandler<HTMLInputElement>;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
   segments: { token: string; name: string; userCounts: number }[];
 }> = ({
+  title,
   type,
   defaultMessages,
+  onTitleChange,
   onTypeChange,
   onMessageChange,
   onError,
@@ -128,11 +134,13 @@ const EcfForm: React.FC<{
     handleSubmit,
     watch,
     control,
+    setValue,
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<EcfSchema>({
     resolver: zodResolver(ecfSchema),
     defaultValues: {
+      title: title,
       messages: defaultMessages,
     },
   });
@@ -149,6 +157,7 @@ const EcfForm: React.FC<{
       lineMessageInputSchema.parse(data.messages);
       await multicast.mutate(
         {
+          title: data.title,
           messages: data.messages.map((message) => message.details),
           userIds: testIdList.split(','),
         },
@@ -174,8 +183,10 @@ const EcfForm: React.FC<{
   };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
+    console.log(data);
     await publisher.mutate(
       {
+        title: data.title,
         segmentId: segmentId,
         messages: data.messages.map((message) => message.details),
       },
@@ -237,6 +248,21 @@ const EcfForm: React.FC<{
       <Card>
         <CardHead>配信内容</CardHead>
         <CardBody>
+          <div className="mb-4">
+            <InputLabel>配信タイトル</InputLabel>
+            <div className="flex item-center gap2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setValue('title', title);
+                    onTitleChange(e);
+                  }}
+                  name="title"
+                  error={!!errors.title}
+                />
+              </div>
+            </div>
+          </div>
           <Controller
             control={control}
             name="messages"
@@ -284,15 +310,19 @@ const EcfForm: React.FC<{
 };
 
 const LineForm: React.FC<{
+  title: string;
   type: 'ecf' | 'line';
   defaultMessages: LineMessageInputValue;
+  onTitleChange: ChangeEventHandler<HTMLInputElement>;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
 }> = ({
+  title,
   type,
   defaultMessages,
+  onTitleChange,
   onTypeChange,
   onMessageChange,
   onError,
@@ -305,6 +335,7 @@ const LineForm: React.FC<{
   const {
     register,
     handleSubmit,
+    setValue,
     getValues,
     control,
     formState: { errors, isSubmitting },
@@ -322,6 +353,7 @@ const LineForm: React.FC<{
       lineMessageInputSchema.parse(data.messages);
       await multicast.mutate(
         {
+          title: data.title,
           messages: data.messages.map((message) => message.details),
           userIds: testIdList.split(','),
         },
@@ -349,6 +381,7 @@ const LineForm: React.FC<{
   const handleValid: SubmitHandler<LineSchema> = async (data) => {
     await narrowcast.mutate(
       {
+        title: data.title,
         messages: data.messages.map((message) => message.details),
         gender: data.gender.length === 1 ? data.gender[0] : undefined,
       },
@@ -402,6 +435,21 @@ const LineForm: React.FC<{
       <Card>
         <CardHead>配信内容</CardHead>
         <CardBody>
+          <div className="mb-4">
+            <InputLabel>配信タイトル</InputLabel>
+            <div className="flex item-center gap2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setValue('title', title);
+                    onTitleChange(e);
+                  }}
+                  name="title"
+                  error={!!errors.title}
+                />
+              </div>
+            </div>
+          </div>
           <Controller
             control={control}
             name="messages"
@@ -449,6 +497,7 @@ const LineForm: React.FC<{
 const Page: NextPage = () => {
   const showDialog = useDialog();
   const [type, setType] = useState('ecf');
+  const [title, setTitle] = useState('');
   const [messages, setMessages] = useState<LineMessageInputValue>([
     {
       key: 1,
@@ -465,6 +514,9 @@ const Page: NextPage = () => {
     return <div>Loading...</div>;
   }
 
+  const handleTitleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setTitle(e.target.value);
+  };
   const handleTypeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setType(e.target.value);
   };
@@ -503,8 +555,10 @@ const Page: NextPage = () => {
     <div>
       {type === 'ecf' && (
         <EcfForm
+          title={title}
           type={type}
           defaultMessages={messages}
+          onTitleChange={handleTitleChange}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
           onError={handleError}
@@ -514,8 +568,10 @@ const Page: NextPage = () => {
       )}
       {type === 'line' && (
         <LineForm
+          title={title}
           type={type}
           defaultMessages={messages}
+          onTitleChange={handleTitleChange}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
           onError={handleError}
