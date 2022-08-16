@@ -5,6 +5,8 @@ import { z } from 'zod';
 import CustomButton from '../components/CustomButton';
 import { trpc } from '../utils/trpc';
 
+// TODO: いらない画面をすべて削除する
+
 const MESSAGES_SCHEMA = z.array(z.string()).min(1).max(5);
 const AGE_SCHEMA = z.union([
   z.literal('age_15'),

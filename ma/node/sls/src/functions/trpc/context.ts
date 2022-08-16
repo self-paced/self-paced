@@ -1,15 +1,24 @@
-import { inferAsyncReturnType } from '@trpc/server';
-import { CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
-import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { inferAsyncReturnType, TRPCError } from '@trpc/server';
+import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { getToken } from 'next-auth/jwt';
 
 // todo prismaを使用するときにコメントアウトを外す
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // 各リクエストの作られます
-export const createContext =
-  ({}: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) => ({
-    // prisma を使用するときにコメントアウトを外す
+export const createContext = async ({
+  req,
+  res,
+}: CreateExpressContextOptions) => {
+  const jwt = await getToken({ req });
+  if (!jwt)
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Unauthorized' });
+  return {
+    req,
+    res,
+    jwt,
     prisma,
-  });
+  };
+};
 export type Context = inferAsyncReturnType<typeof createContext>;

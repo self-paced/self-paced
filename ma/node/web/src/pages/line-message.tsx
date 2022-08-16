@@ -17,8 +17,9 @@ import {
   Button,
   Select,
   InputLabel,
+  TextField,
 } from '@super_studio/ecforce_ui_albers';
-import { ChangeEventHandler, useState } from 'react';
+import { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import LineMessageInput, {
   LineMessageInputEventHandler,
   lineMessageInputSchema,
@@ -26,6 +27,7 @@ import LineMessageInput, {
 } from '../components/LineMessageInput';
 import v from '../utils/validation';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
+import Router from 'next/router';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -67,7 +69,7 @@ const lineSchema = z.object({
 
 const ecfSchema = z.object({
   messages: lineMessageInputSchema,
-  segmentId: z
+  segmentToken: z
     .string()
     .min(1, { message: v.MESSAGES.required('配信対象検索条件') }),
 });
@@ -111,7 +113,7 @@ const EcfForm: React.FC<{
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
-  segments: { token: string; name: string; userCounts: number }[];
+  segments: { token: string; name: string }[];
 }> = ({
   type,
   defaultMessages,
@@ -134,19 +136,55 @@ const EcfForm: React.FC<{
       messages: defaultMessages,
     },
   });
-  const segmentId = watch('segmentId');
+  const showDialog = useDialog();
+  const [testIdList, setTestIdList] = useState('');
+  const segmentToken = watch('segmentToken');
 
   const publisher = trpc.useMutation('publisher.push');
+  const multicast = trpc.useMutation('line.multicast');
+
+  const sendTestMessage = async () => {
+    try {
+      const data = getValues();
+      lineMessageInputSchema.parse(data.messages);
+      await multicast.mutate(
+        {
+          messages: data.messages.map((message) => message.details),
+          userIds: testIdList.split(','),
+        },
+        {
+          onError: () => {
+            onError('エラーが発生しました。');
+          },
+          onSuccess: () => {
+            showDialog({
+              title: 'テストメッセージ配信完了。',
+              noCancelButton: true,
+            });
+          },
+        }
+      );
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
+      }
+    }
+  };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
     await publisher.mutate(
       {
-        segmentId: segmentId,
+        token: segmentToken,
         messages: data.messages.map((message) => message.details),
       },
       {
         onError: () => {
           onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.replace('/send-complete');
         },
       }
     );
@@ -158,6 +196,8 @@ const EcfForm: React.FC<{
     } catch (e) {
       if (e instanceof z.ZodError) {
         onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
       }
     }
   };
@@ -173,7 +213,7 @@ const EcfForm: React.FC<{
           </div>
           <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
-            <Select {...register('segmentId')} error={!!errors.segmentId}>
+            <Select {...register('segmentToken')} error={!!errors.segmentToken}>
               <option value="">選択してください</option>
               {segments.map((segment) => (
                 <option key={segment.token} value={segment.token}>
@@ -181,15 +221,6 @@ const EcfForm: React.FC<{
                 </option>
               ))}
             </Select>
-          </div>
-          <div className="mt-3">
-            <InputLabel>配信人数カウント</InputLabel>
-            <div className="text-xs">
-              {segmentId
-                ? segments.find((segment) => segment.token === segmentId)
-                    ?.userCounts + '人'
-                : '-'}
-            </div>
           </div>
         </CardBody>
       </Card>
@@ -212,13 +243,28 @@ const EcfForm: React.FC<{
               />
             )}
           />
+          <div className="my-2">
+            <InputLabel>テスト配信</InputLabel>
+            <div className="flex items-center gap-2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setTestIdList(e.target.value);
+                  }}
+                />
+              </div>
+              <Button variant="secondary" onClick={sendTestMessage}>
+                テスト送信
+              </Button>
+            </div>
+          </div>
         </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
         <CardBody>
           <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="secondary" disabled={isSubmitting}>
               送信
             </Button>
           </div>
@@ -243,13 +289,16 @@ const LineForm: React.FC<{
   onError,
   onValidationError,
 }) => {
+  const showDialog = useDialog();
+  const [testIdList, setTestIdList] = useState('');
   const narrowcast = trpc.useMutation('line.narrowcast');
+  const multicast = trpc.useMutation('line.multicast');
   const {
     register,
     handleSubmit,
     getValues,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LineSchema>({
     resolver: zodResolver(lineSchema),
     defaultValues: {
@@ -257,6 +306,36 @@ const LineForm: React.FC<{
       gender: [],
     },
   });
+
+  const sendTestMessage = async () => {
+    try {
+      const data = getValues();
+      lineMessageInputSchema.parse(data.messages);
+      await multicast.mutate(
+        {
+          messages: data.messages.map((message) => message.details),
+          userIds: testIdList.split(','),
+        },
+        {
+          onError: () => {
+            onError('エラーが発生しました。');
+          },
+          onSuccess: () => {
+            showDialog({
+              title: 'テストメッセージ配信完了。',
+              noCancelButton: true,
+            });
+          },
+        }
+      );
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
+      }
+    }
+  };
 
   const handleValid: SubmitHandler<LineSchema> = async (data) => {
     await narrowcast.mutate(
@@ -268,6 +347,9 @@ const LineForm: React.FC<{
         onError: () => {
           onError('エラーが発生しました。');
         },
+        onSuccess: async () => {
+          await Router.replace('/send-complete');
+        },
       }
     );
   };
@@ -278,6 +360,8 @@ const LineForm: React.FC<{
     } catch (e) {
       if (e instanceof z.ZodError) {
         onValidationError(e.issues);
+      } else {
+        onError('エラーが発生しました。');
       }
     }
   };
@@ -324,12 +408,27 @@ const LineForm: React.FC<{
               />
             )}
           />
+          <div className="my-2">
+            <InputLabel>テスト配信</InputLabel>
+            <div className="flex items-center gap-2">
+              <div className="grow">
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setTestIdList(e.target.value);
+                  }}
+                />
+              </div>
+              <Button variant="secondary" onClick={sendTestMessage}>
+                テスト送信
+              </Button>
+            </div>
+          </div>
         </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
         <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="secondary" disabled={isSubmitting}>
             送信
           </Button>
         </div>
@@ -351,7 +450,7 @@ const Page: NextPage = () => {
     },
   ]);
 
-  const segments = trpc.useQuery(['segment.list', { page: 1 }]);
+  const segments = trpc.useQuery(['segment.list']);
 
   if (!segments.data) {
     return <div>Loading...</div>;
@@ -401,7 +500,7 @@ const Page: NextPage = () => {
           onMessageChange={handleMessageChange}
           onError={handleError}
           onValidationError={handleValidationError}
-          segments={segments.data.segments.data}
+          segments={segments.data}
         />
       )}
       {type === 'line' && (
