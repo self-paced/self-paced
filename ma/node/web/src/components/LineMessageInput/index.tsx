@@ -26,7 +26,12 @@ export const lineMessageInputSchema = z
   .min(1)
   .max(MAX_MESSAGES);
 
+export const messageTitleInputSchema = z.string().min(1);
+
 export type LineMessageInputValue = z.infer<typeof lineMessageInputSchema>;
+export type MessageEventTitleInputValue = z.infer<
+  typeof messageTitleInputSchema
+>;
 
 interface LineMessageInputEvent {
   target: {

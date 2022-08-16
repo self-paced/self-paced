@@ -33,11 +33,18 @@ const line = createRouter()
   })
   .mutation('multicast', {
     input: z.object({
+      title: z.string().min(1),
       userIds: z.array(z.string()).min(1),
       messages: lineMessageSchema,
     }),
-    resolve: async ({ input }) => {
+    resolve: async ({ input, ctx }) => {
       await client.multicast(input.userIds, input.messages);
+      await ctx.prisma.messageEvent.create({
+        data: {
+          title: 'titile',
+          content: "{'test': 'test2'}",
+        },
+      });
       return true;
     },
   })
