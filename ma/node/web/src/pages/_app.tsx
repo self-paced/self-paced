@@ -54,10 +54,17 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    const url = process.env.NEXT_PUBLIC_TRPC_URL ?? `${getBaseUrl()}/sls/dev`;
+    const url =
+      process.env.NEXT_PUBLIC_TRPC_URL ?? `${getBaseUrl()}/sls/dev/trpc`; // TODO: 環境変数の自動設定
 
     return {
       url,
+      fetch(url, options) {
+        return fetch(url, {
+          ...options,
+          credentials: 'include',
+        });
+      },
       /**
        * @link https://react-query.tanstack.com/reference/QueryClient
        */

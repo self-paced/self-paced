@@ -1,8 +1,21 @@
-import { awsLambdaRequestHandler } from '@trpc/server/adapters/aws-lambda';
 import { createContext } from './context';
-import { appRouter } from './routers';
+import { Handler } from 'aws-lambda';
+import serverlessExpress from '@vendia/serverless-express';
+import * as trpcExpress from '@trpc/server/adapters/express';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import { AppRouter, appRouter } from './routers';
+import 'next'; // こちらのエラー対応： https://github.com/nextauthjs/next-auth/discussions/4606
 
-export const main = awsLambdaRequestHandler({
-  router: appRouter,
-  createContext,
-});
+const app = express();
+app.use(cookieParser());
+
+app.use(
+  '/trpc',
+  trpcExpress.createExpressMiddleware<AppRouter>({
+    router: appRouter,
+    createContext,
+  })
+);
+
+export const main: Handler = serverlessExpress({ app });

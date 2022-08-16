@@ -10,5 +10,5 @@ export const trpc = createReactQueryHooks<AppRouter>();
  * SSRの場合はこちらのクライアントを利用してください。
  */
 export const serverSideClient = createTRPCClient<AppRouter>({
-  url: `${getBaseUrl()}/api/trpc`,
+  url: `${getBaseUrl()}/sls/dev/trpc`,
 });

@@ -113,7 +113,7 @@ const EcfForm: React.FC<{
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
-  segments: { token: string; name: string; userCounts: number }[];
+  segments: { token: string; name: string }[];
 }> = ({
   type,
   defaultMessages,
@@ -221,15 +221,6 @@ const EcfForm: React.FC<{
                 </option>
               ))}
             </Select>
-          </div>
-          <div className="mt-3">
-            <InputLabel>配信人数カウント</InputLabel>
-            <div className="text-xs">
-              {segmentId
-                ? segments.find((segment) => segment.token === segmentId)
-                    ?.userCounts + '人'
-                : '-'}
-            </div>
           </div>
         </CardBody>
       </Card>
@@ -509,7 +500,7 @@ const Page: NextPage = () => {
           onMessageChange={handleMessageChange}
           onError={handleError}
           onValidationError={handleValidationError}
-          segments={segments.data.segments.data}
+          segments={segments.data}
         />
       )}
       {type === 'line' && (
