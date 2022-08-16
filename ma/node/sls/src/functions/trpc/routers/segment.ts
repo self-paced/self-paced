@@ -1,32 +1,31 @@
 import { createRouter } from '../../trpc/createRouter';
-import { z } from 'zod';
 import { env } from '../../../libs/config/env';
-import { dummyData } from '../../../libs/helpers/dummyData';
+import { dSegmentListResponse } from '../../../libs/helpers/dummyData';
+import ecforceApi from '@libs/helpers/ecforceApi';
+import { z } from 'zod';
+
+const segmentListResponseSchema = z.array(
+  z.object({
+    id: z.number(),
+    token: z.string().min(1),
+    name: z.string().min(1),
+  })
+);
+
+export type SegmentListResponse = z.infer<typeof segmentListResponseSchema>;
 
 const segment = createRouter().query('list', {
-  input: z.object({
-    page: z.number(),
-  }),
-  resolve: async ({ input, ctx: { req, jwt } }) => {
+  output: segmentListResponseSchema,
+  resolve: async ({ ctx }) => {
     if (env.NODE_ENV === 'development') {
-      return dummyData.segments;
+      return dSegmentListResponse;
     }
-    // セグメント一覧取得
-    const url = `${req.headers.origin}/api/v2/admin/search_queries?page=${input.page}&per=100&type=customer`;
-
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Token token="${jwt.ecfToken}"`,
-      },
-    });
-    const json = await res.json();
-    return json.data.map((segment: any) => ({
+    const res = await ecforceApi.listSegments(ctx);
+    return res.data.map((segment) => ({
       id: segment.attributes.id,
       token: segment.attributes.token,
       name: segment.attributes.name,
-    })) as typeof dummyData.segments;
+    }));
   },
 });
 
