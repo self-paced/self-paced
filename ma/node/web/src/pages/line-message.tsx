@@ -252,13 +252,20 @@ const EcfForm: React.FC<{
             <InputLabel>配信タイトル</InputLabel>
             <div className="flex item-center gap2">
               <div className="grow">
-                <TextField
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setValue('title', title);
-                    onTitleChange(e);
-                  }}
+                <Controller
+                  control={control}
                   name="title"
-                  error={!!errors.title}
+                  render={({ field: { name, onChange } }) => (
+                    <TextField
+                      name={name}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        onChange(e);
+                        onTitleChange(e);
+                      }}
+                      value={title}
+                      error={!!errors.title}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -439,13 +446,20 @@ const LineForm: React.FC<{
             <InputLabel>配信タイトル</InputLabel>
             <div className="flex item-center gap2">
               <div className="grow">
-                <TextField
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setValue('title', title);
-                    onTitleChange(e);
-                  }}
+                <Controller
+                  control={control}
                   name="title"
-                  error={!!errors.title}
+                  render={({ field: { name, onChange } }) => (
+                    <TextField
+                      name={name}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        onChange(e);
+                        onTitleChange(e);
+                      }}
+                      value={title}
+                      errors={errors as Partial<LineSchema>}
+                    />
+                  )}
                 />
               </div>
             </div>

@@ -41,8 +41,8 @@ const line = createRouter()
       await client.multicast(input.userIds, input.messages);
       await ctx.prisma.messageEvent.create({
         data: {
-          title: 'titile',
-          content: "{'test': 'test2'}",
+          title: input.title,
+          content: JSON.stringify(input.messages),
         },
       });
       return true;
