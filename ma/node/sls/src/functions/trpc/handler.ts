@@ -9,6 +9,7 @@ import 'next'; // こちらのエラー対応： https://github.com/nextauthjs/n
 
 const app = express();
 app.use(cookieParser());
+app.use(express.json());
 
 app.use(
   '/trpc',
