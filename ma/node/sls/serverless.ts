@@ -39,6 +39,7 @@ const serverlessConfiguration: AWS = {
       ENV: '${self:custom.stage}',
       REGION: '${self:custom.region}',
       LINE_TOKEN: '${env:LINE_TOKEN}',
+      NEXTAUTH_SECRET: '${env:NEXTAUTH_SECRET}',
     },
     lambdaHashingVersion: '20201221',
   },
