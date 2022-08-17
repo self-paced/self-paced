@@ -5,7 +5,6 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { AppRouter, appRouter } from './routers';
-import 'next'; // こちらのエラー対応： https://github.com/nextauthjs/next-auth/discussions/4606
 
 const app = express();
 app.use(cookieParser());
