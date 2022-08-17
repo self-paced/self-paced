@@ -1,7 +1,5 @@
 import NextAuth, { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import jwt from 'jsonwebtoken';
-import { JWT } from 'next-auth/jwt';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -49,14 +47,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  jwt: {
-    encode({ secret, token }) {
-      return token ? jwt.sign(token, secret) : '';
-    },
-    decode({ secret, token }) {
-      return token ? (jwt.verify(token, secret) as JWT) : null;
-    },
-  },
   callbacks: {
     // callback
     jwt({ token, user }) {
