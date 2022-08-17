@@ -47,7 +47,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-
   callbacks: {
     // callback
     jwt({ token, user }) {
