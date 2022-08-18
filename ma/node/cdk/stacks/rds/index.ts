@@ -2,11 +2,9 @@ import { Construct } from 'constructs';
 import { Stack, aws_secretsmanager as secretsmanager } from 'aws-cdk-lib';
 import { Config, constants } from '../../lib/config';
 import { getVpc } from '../vpc';
-// import { prepareFargateTask } from './task';
-// import { prepareFargateService } from './service';
-import { prepareRds } from './sls-rds';
+import { prepareRds } from './rds';
 
-export class SlsDb extends Stack {
+export class Rds extends Stack {
   constructor(scope: Construct, id: string, props: Config) {
     super(scope, id, props);
     main(this, props);
@@ -18,22 +16,13 @@ const main = async (scope: Construct, props: Config) => {
 
   const dbSecret = prepareDbSecret(scope, props);
 
-  // const taskDef = await prepareFargateTask(scope, props, dbSecret);
-
-  // const albFargateService = prepareFargateService(scope, props, vpc, taskDef);
-
-  // await prepareRds(scope, props, vpc, dbSecret, [
-  //   albFargateService.connections.securityGroups[0],
-  // ]);
-
   await prepareRds(scope, props, vpc, dbSecret);
 };
 
-// todo 一旦secretを使用しない
 const prepareDbSecret = (scope: Construct, props: Config) => {
-  return new secretsmanager.Secret(scope, `maSlsDBSecret`, {
-    secretName: `${constants.projectName}/${props.envName}/maSls-db`,
-    description: `CDK generated ma sls DB secret`,
+  return new secretsmanager.Secret(scope, `maDBSecret`, {
+    secretName: `${constants.projectName}/${props.envName}/ma-db`,
+    description: `CDK generated ma DB secret`,
     generateSecretString: {
       secretStringTemplate: JSON.stringify({
         username: 'ma',
