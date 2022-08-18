@@ -53,6 +53,7 @@ export const prepareRds = (
 
   // create Bastion server
   const host = new ec2.BastionHostLinux(scope, 'MaRDSProxy', {
+    instanceName: `${constants.projectName}-${props.envName}-Bastion`,
     vpc,
     instanceType: ec2.InstanceType.of(
       ec2.InstanceClass.T4G,
@@ -67,11 +68,12 @@ export const prepareRds = (
   host.instance.addUserData('yum -y update', 'yum install -y mysql jq');
 
   // create RDS
-  const cluster = new rds.DatabaseCluster(scope, 'MaSlsDB', {
+  const cluster = new rds.DatabaseCluster(scope, 'MaDB', {
+    instanceIdentifierBase: clusterName(props),
     engine: rds.DatabaseClusterEngine.auroraMysql({
       version: rds.AuroraMysqlEngineVersion.VER_2_08_1,
     }),
-    defaultDatabaseName: 'maDb',
+    defaultDatabaseName: 'ma',
     instanceProps: {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
@@ -79,7 +81,7 @@ export const prepareRds = (
         ec2.InstanceSize.SMALL
       ),
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
       securityGroups: [dbConnectionGroup],
     },
@@ -93,6 +95,7 @@ export const prepareRds = (
 
   // create RDS proxy
   new rds.DatabaseProxy(scope, 'SlsDbProxy', {
+    dbProxyName: `${clusterName(props)}-proxy`,
     proxyTarget: rds.ProxyTarget.fromCluster(cluster),
     secrets: [dbSecret],
     securityGroups: [dbConnectionGroup],
@@ -100,8 +103,7 @@ export const prepareRds = (
     maxConnectionsPercent: 80,
   });
 
-  console.log(cluster.secret.secretValue);
-
+  // TODO: マイグレーション処理をバッチかLambdaに移行する
   // Migration
   const migrateFunction = new lambda.DockerImageFunction(
     scope,
@@ -141,7 +143,4 @@ export const prepareRds = (
 };
 
 const clusterName = (props: Config) =>
-  `${constants.projectName}-${props.envName}-maSls`;
-
-// export const rdsEndpoint = (props: Config) =>
-//   `${clusterName(props)}.cluster-cddtmzgk4ohl.ap-northeast-1.rds.amazonaws.com`;
+  `${constants.projectName}-${props.envName}`;
