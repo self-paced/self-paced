@@ -1,6 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import axios, { AxiosRequestHeaders } from 'axios';
 import { Context } from '../../functions/trpc/context';
+import config from '../config';
 import {
   dListCustomersFromSegmentResponse,
   dListSegmentsResponse,
@@ -116,7 +117,7 @@ export type CustomerItem = {
 const ecforceApi = {
   listSegments: async (ctx: Context) => {
     const url = `${ctx.req.headers.origin}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
-    return process.env.NODE_ENV === 'development'
+    return config.nodeEnv === 'development'
       ? dListSegmentsResponse
       : await callEcforceApi<SegmentItem[]>(ctx, {
           url,
@@ -128,7 +129,7 @@ const ecforceApi = {
     input: { page: number; token: string }
   ) => {
     const url = `${ctx.req.headers.origin}/api/v2/admin/customers?per=100&page=${input.page}&q[token]=${input.token}`;
-    return process.env.NODE_ENV === 'development'
+    return config.nodeEnv === 'development'
       ? dListCustomersFromSegmentResponse[input.token]
       : await callEcforceApi<CustomerItem[]>(ctx, {
           url,

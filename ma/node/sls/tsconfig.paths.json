@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@functions/*": ["src/functions/*", "prisma/*"],
-      "@libs/*": ["src/libs/*"]
-    }
-  }
-}
