@@ -63,6 +63,7 @@ import Router from 'next/router';
 
 const lineSchema = z.object({
   title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
+
   messages: lineMessageInputSchema,
   gender: z.array(z.enum(['male', 'female'])),
   // age: z.nativeEnum(AgeEnum).nullish(), // TODO: 年齢の対応
@@ -70,6 +71,7 @@ const lineSchema = z.object({
 
 const ecfSchema = z.object({
   title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
+
   messages: lineMessageInputSchema,
   segmentToken: z
     .string()
@@ -185,6 +187,7 @@ const EcfForm: React.FC<{
     await publisher.mutate(
       {
         title: data.title,
+
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
       },
@@ -237,28 +240,6 @@ const EcfForm: React.FC<{
       <Card>
         <CardHead>配信内容</CardHead>
         <CardBody>
-          <div className="mb-4">
-            <InputLabel>配信タイトル</InputLabel>
-            <div className="flex item-center gap2">
-              <div className="grow">
-                <Controller
-                  control={control}
-                  name="title"
-                  render={({ field: { name, onChange } }) => (
-                    <TextField
-                      name={name}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        onChange(e);
-                        onTitleChange(e);
-                      }}
-                      value={title}
-                      error={!!errors.title}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
           <Controller
             control={control}
             name="messages"
@@ -331,7 +312,6 @@ const LineForm: React.FC<{
   const {
     register,
     handleSubmit,
-    setValue,
     getValues,
     control,
     formState: { errors, isSubmitting },

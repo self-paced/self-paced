@@ -110,6 +110,7 @@ const publisher = createRouter().mutation('push', {
             });
           })(),
         ]);
+
       } while (page++ < totalPages);
     } catch (e) {
       console.error(e);
