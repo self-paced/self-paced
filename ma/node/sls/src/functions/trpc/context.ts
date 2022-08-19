@@ -1,8 +1,6 @@
 import { inferAsyncReturnType, TRPCError } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { decode } from 'next-auth/jwt';
-
-// todo prismaを使用するときにコメントアウトを外す
 import { PrismaClient } from '@prisma/client';
 import config from '../../libs/config';
 const prisma = new PrismaClient();
