@@ -134,7 +134,6 @@ const EcfForm: React.FC<{
     handleSubmit,
     watch,
     control,
-    setValue,
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<EcfSchema>({
@@ -447,7 +446,7 @@ const LineForm: React.FC<{
                         onTitleChange(e);
                       }}
                       value={title}
-                      errors={errors as Partial<LineSchema>}
+                      error={!!errors.title}
                     />
                   )}
                 />

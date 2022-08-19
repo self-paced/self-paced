@@ -91,24 +91,25 @@ const publisher = createRouter().mutation('push', {
         });
         totalPages = res.meta.total_pages;
         // customer loop: ページのすべての顧客に対してメッセージを送信する
-        await Promise.all(
-          res.data.map(async (customer) => {
-            if (customer.attributes.line_id) {
-              await client.pushMessage(
-                customer.attributes.line_id,
-                input.messages
-              );
-            }
-          })
-        ).then(() => {
-          return ctx.prisma.messageEvent.create({
-            data: {
-              title: input.title,
-              content: JSON.stringify(input.messages),
-              segment_id: input.token,
-            },
-          });
-        });
+        await Promise.all([
+          (async () => {
+            res.data.map(async (customer) => {
+              if (customer.attributes.line_id) {
+                await client.pushMessage(
+                  customer.attributes.line_id,
+                  input.messages
+                );
+              }
+            });
+            await ctx.prisma.messageEvent.create({
+              data: {
+                title: input.title,
+                content: JSON.stringify(input.messages),
+                segment_id: input.token,
+              },
+            });
+          })(),
+        ]);
       } while (page++ < totalPages);
     } catch (e) {
       console.error(e);

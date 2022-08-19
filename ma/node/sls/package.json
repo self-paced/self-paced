@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@line/bot-sdk": "7.5.0",
-    "@prisma/client": "^4.2.1",
+    "@prisma/client": "4.2.1",
     "@trpc/server": "9.25.3",
     "@vendia/serverless-express": "4.10.1",
     "aws-sdk": "2.1160.0",
