@@ -5,8 +5,6 @@ node_modules
 .webpack
 
 # SERVERLESS STUFF
-.env
+.env*
+!.env.example
 .serverless
-
-# migrations
-prisma/migrations/*

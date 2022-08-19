@@ -1,12 +1,10 @@
 import type { AWS } from '@serverless/typescript';
-import trpc from '@functions/trpc';
-import { allConfigs } from '@libs/config';
-import { SLSVPC } from '@libs/helpers/serverlessHelper';
+import trpc from './src/functions/trpc';
+import config, { env } from './src/libs/config';
 
 const serverlessConfiguration: AWS = {
   service: 'sls',
   frameworkVersion: '3',
-  useDotenv: true,
   package: {
     individually: true,
   },
@@ -19,7 +17,6 @@ const serverlessConfiguration: AWS = {
         forceExclude: 'aws-sdk',
       },
     },
-    config: allConfigs,
   },
   plugins: ['serverless-webpack', 'serverless-offline'],
   provider: {
@@ -30,17 +27,12 @@ const serverlessConfiguration: AWS = {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
     },
-    vpc: '${self:custom.config.${self:custom.stage}.vpc}' as unknown as SLSVPC,
+    vpc: config.vpc,
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      NODE_ENV:
-        '${self:custom.config.${self:custom.stage}.NODE_ENV, "production"}',
       ENV: '${self:custom.stage}',
       REGION: '${self:custom.region}',
-      DATABASE_URL:
-        'mysql://${self:custom.config.${self:custom.stage}.dbUser}:${self:custom.config.${self:custom.stage}.dbPassword}@${self:custom.config.${self:custom.stage}.dbEndpoint}:${self:custom.config.${self:custom.stage}.dbPort}/${self:custom.config.${self:custom.stage}.database}',
-      LINE_TOKEN: '${env:LINE_TOKEN}',
-      NEXTAUTH_SECRET: '${env:NEXTAUTH_SECRET}',
+      ...env,
     },
     lambdaHashingVersion: '20201221',
   },

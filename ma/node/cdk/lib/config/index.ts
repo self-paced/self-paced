@@ -6,7 +6,6 @@ export interface Config extends StackProps {
   readonly env: Environment;
   readonly envName: EnvName;
   readonly azCount: number;
-  readonly maSlsDbCertArn: string;
 }
 
 export type EnvName = 'dev' | 'prd';

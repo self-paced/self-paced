@@ -2,11 +2,11 @@ import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
 import { Client } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
-import { env } from '../../../libs/config/env';
 import ecforceApi from '../../../libs/helpers/ecforceApi';
+import config from '../../../libs/config';
 
 const client = new Client({
-  channelAccessToken: env.LINE_TOKEN,
+  channelAccessToken: config.lineToken,
 });
 
 const MAX_MESSAGES = 5;
