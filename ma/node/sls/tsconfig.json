@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "removeComments": true,
     "sourceMap": true,
-    "lib": ["esnext", "DOM"],
+    "lib": ["esnext"],
     "module": "commonjs",
     "target": "es2022"
   },
