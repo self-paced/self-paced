@@ -37,9 +37,10 @@ const serverlessConfiguration: AWS = {
         '${self:custom.config.${self:custom.stage}.NODE_ENV, "production"}',
       ENV: '${self:custom.stage}',
       REGION: '${self:custom.region}',
-      LINE_TOKEN: '${self:custom.config.${self:custom.stage}.lineToken}',
       DATABASE_URL:
         'mysql://${self:custom.config.${self:custom.stage}.dbUser}:${self:custom.config.${self:custom.stage}.dbPassword}@${self:custom.config.${self:custom.stage}.dbEndpoint}:${self:custom.config.${self:custom.stage}.dbPort}/${self:custom.config.${self:custom.stage}.database}',
+      LINE_TOKEN: '${env:LINE_TOKEN}',
+      NEXTAUTH_SECRET: '${env:NEXTAUTH_SECRET}',
     },
     lambdaHashingVersion: '20201221',
   },
