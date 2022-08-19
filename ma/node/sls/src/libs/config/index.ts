@@ -43,3 +43,5 @@ const config = {
 } as const;
 
 export default config;
+
+export const env = _env.data;
