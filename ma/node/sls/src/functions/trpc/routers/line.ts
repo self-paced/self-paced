@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { Client, DemographicFilterObject } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import { lineMessageSchema } from './publisher';
-import { env } from '../../../libs/config/env';
+import config from '../../../libs/config';
 
 const client = new Client({
-  channelAccessToken: env.LINE_TOKEN,
+  channelAccessToken: config.lineToken,
 });
 
 const AGE_SCHEMA = z.union([

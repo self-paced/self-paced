@@ -26,10 +26,5 @@ const user = createRouter()
       return await ctx.prisma.post.findMany();
     },
   });
-// .query('all', {
-//   async resolve({ ctx }) {
-//     return await ctx.prisma.post.findMany();
-//   },
-// });
 
 export default user;

@@ -6,7 +6,7 @@ export class Vpc extends Stack {
   constructor(scope: Construct, id: string, props: Config) {
     super(scope, id, props);
 
-    new ec2.Vpc(this, 'Vpc', {
+    const vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: props.azCount,
       cidr: '10.10.0.0/16',
       vpcName: vpcName(props),
@@ -15,11 +15,38 @@ export class Vpc extends Stack {
           name: 'public',
           subnetType: ec2.SubnetType.PUBLIC,
         },
-        // {
-        //   name: 'isolated',
-        //   subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-        // },
+        {
+          cidrMask: 24,
+          name: 'application',
+          subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+        },
+        {
+          cidrMask: 28,
+          name: 'rds',
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+        },
       ],
+    });
+
+    // VPCコンストラクトでサブネットのCidrBlockの設定ができないため、以下の上書きで設定します。
+    vpc.publicSubnets.forEach((subnet, index) => {
+      const cfnSubnet = subnet.node.defaultChild as ec2.CfnSubnet;
+      cfnSubnet.addPropertyOverride('CidrBlock', `10.10.${10 + index}.0/24`);
+    });
+    vpc.privateSubnets.forEach((subnet, index) => {
+      const cfnSubnet = subnet.node.defaultChild as ec2.CfnSubnet;
+      cfnSubnet.addPropertyOverride('CidrBlock', `10.10.${20 + index}.0/24`);
+    });
+
+    // ECRエンドポイント
+    vpc.addInterfaceEndpoint('ecr-endpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR,
+    });
+    vpc.addInterfaceEndpoint('ecr-dkr-endpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
+    });
+    vpc.addGatewayEndpoint('s3-endpoint', {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
     });
   }
 }
