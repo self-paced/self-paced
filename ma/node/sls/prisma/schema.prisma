@@ -20,6 +20,7 @@ model MessageEvent {
   id String @id @default(uuid())
   title String @db.VarChar(100)
   content Json
+  segment_id String @db.VarChar(100)
   created_at  DateTime @default(now()) @db.Timestamp(0)
   updated_at  DateTime @default(now()) @updatedAt @db.Timestamp(0)
 }

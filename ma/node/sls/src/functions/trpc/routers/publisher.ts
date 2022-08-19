@@ -117,16 +117,18 @@ const publisher = createRouter().mutation('push', {
     try {
       await Promise.all(
         userIds.map(async (userId) => {
-          await ctx.prisma.messageEvent.create({
-            data: {
-              title: input.title,
-              content: JSON.stringify(input.messages),
-            },
-          });
-
           await client.pushMessage(userId, input.messages);
         })
-      );
+      ).then(() => {
+        console.log('here');
+        return ctx.prisma.messageEvent.create({
+          data: {
+            title: input.title,
+            content: JSON.stringify(input.messages),
+            segment_id: input.segmentId,
+          },
+        });
+      });
     } catch (e) {
       console.error(e);
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
