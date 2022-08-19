@@ -4,13 +4,8 @@ import {
   aws_rds as rds,
   aws_ec2 as ec2,
   aws_secretsmanager as secretsmanager,
-  aws_lambda as lambda,
-  Duration,
-  CustomResource,
-  custom_resources as customresources,
 } from 'aws-cdk-lib';
 import { Config, constants } from '../../lib/config';
-import { readdirSync } from 'fs';
 
 export const prepareRds = (
   scope: Construct,
@@ -101,44 +96,6 @@ export const prepareRds = (
     securityGroups: [dbConnectionGroup],
     vpc: vpc,
     maxConnectionsPercent: 80,
-  });
-
-  // TODO: マイグレーション処理をバッチかLambdaに移行する
-  // Migration
-  const migrateFunction = new lambda.DockerImageFunction(
-    scope,
-    'migrateSlsDB',
-    {
-      vpc,
-      architecture: lambda.Architecture.ARM_64,
-      timeout: Duration.minutes(5),
-      code: lambda.DockerImageCode.fromImageAsset(
-        __dirname + './../../../sls/.'
-      ),
-      environment: {
-        DB_CONNECTION: cluster.secret.secretValue.toString(),
-      },
-    }
-  );
-  cluster.connections.allowDefaultPortFrom(migrateFunction);
-
-  // Lambda will migrate every schema changes
-  const provider = new customresources.Provider(scope, 'SlsDbProvider', {
-    onEventHandler: migrateFunction,
-  });
-
-  const lastMigrationId = readdirSync(
-    __dirname + '/../../../sls/prisma/migrations'
-  )
-    .filter((name) => name !== 'migration_lock.toml')
-    .sort()
-    .reverse()[0];
-
-  new CustomResource(scope, 'Custom::Migration', {
-    serviceToken: provider.serviceToken,
-    properties: {
-      lastMigrationId,
-    },
   });
 };
 
