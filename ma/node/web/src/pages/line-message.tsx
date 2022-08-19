@@ -71,7 +71,7 @@ const lineSchema = z.object({
 const ecfSchema = z.object({
   title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
   messages: lineMessageInputSchema,
-  segmentId: z
+  segmentToken: z
     .string()
     .min(1, { message: v.MESSAGES.required('配信対象検索条件') }),
 });
@@ -117,7 +117,7 @@ const EcfForm: React.FC<{
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
-  segments: { token: string; name: string; userCounts: number }[];
+  segments: { token: string; name: string }[];
 }> = ({
   title,
   type,
@@ -146,7 +146,7 @@ const EcfForm: React.FC<{
   });
   const showDialog = useDialog();
   const [testIdList, setTestIdList] = useState('');
-  const segmentId = watch('segmentId');
+  const segmentToken = watch('segmentToken');
 
   const publisher = trpc.useMutation('publisher.push');
   const multicast = trpc.useMutation('line.multicast');
@@ -183,11 +183,10 @@ const EcfForm: React.FC<{
   };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    console.log(data);
     await publisher.mutate(
       {
         title: data.title,
-        segmentId: segmentId,
+        token: segmentToken,
         messages: data.messages.map((message) => message.details),
       },
       {
@@ -224,7 +223,7 @@ const EcfForm: React.FC<{
           </div>
           <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
-            <Select {...register('segmentId')} error={!!errors.segmentId}>
+            <Select {...register('segmentToken')} error={!!errors.segmentToken}>
               <option value="">選択してください</option>
               {segments.map((segment) => (
                 <option key={segment.token} value={segment.token}>
@@ -232,15 +231,6 @@ const EcfForm: React.FC<{
                 </option>
               ))}
             </Select>
-          </div>
-          <div className="mt-3">
-            <InputLabel>配信人数カウント</InputLabel>
-            <div className="text-xs">
-              {segmentId
-                ? segments.find((segment) => segment.token === segmentId)
-                    ?.userCounts + '人'
-                : '-'}
-            </div>
           </div>
         </CardBody>
       </Card>
@@ -522,7 +512,7 @@ const Page: NextPage = () => {
     },
   ]);
 
-  const segments = trpc.useQuery(['segment.list', { page: 1 }]);
+  const segments = trpc.useQuery(['segment.list']);
 
   if (!segments.data) {
     return <div>Loading...</div>;
@@ -577,7 +567,7 @@ const Page: NextPage = () => {
           onMessageChange={handleMessageChange}
           onError={handleError}
           onValidationError={handleValidationError}
-          segments={segments.data.segments.data}
+          segments={segments.data}
         />
       )}
       {type === 'line' && (

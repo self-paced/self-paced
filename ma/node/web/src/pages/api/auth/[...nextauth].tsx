@@ -1,60 +1,57 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth, { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { getBaseUrl } from '../../_app';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
 
-      credentials: {
-        token: { label: 'Token', type: 'text' },
-        domain: { label: 'Domain', type: 'text' },
-      },
-      async authorize(credentials, req) {
-        const payload = {
-          token: credentials?.token,
-          domain: credentials?.domain,
-        };
-
-        const url = process.env.NEXT_PUBLIC_TRPC_URL
-          ? `${process.env.NEXT_PUBLIC_TRPC_URL}/auth.token`
-          : `${getBaseUrl()}/api/trpc/auth.token`;
-
-        const res = await fetch(url, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        const user = await res.json();
-
-        if (res.ok && user) {
+      credentials: {},
+      async authorize(_credentials, req) {
+        if (process.env.NODE_ENV === 'development') {
+          const user: User = {
+            id: 1,
+            email: 'ma@super-studio.jp',
+            ecfToken: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+          }; // local dummy user
           return user;
+        }
+        try {
+          if (!req.headers?.origin) throw new Error('origin header not found');
+          const url = `${req.headers.origin}/api/v2/admins/sign_in_with_cookie`;
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              cookie: req.headers?.cookie,
+            },
+          });
+
+          if (res.ok) {
+            const ecfUser = await res.json();
+            const user: User = {
+              id: ecfUser.id,
+              email: ecfUser.email,
+              ecfToken: ecfUser.authentication_token,
+            };
+            return user;
+          } else {
+            console.error(res);
+            throw new Error('failed to authorize');
+          }
+        } catch (e) {
+          console.error(e);
         }
 
         return null;
       },
     }),
   ],
-
   callbacks: {
     // callback
     jwt({ token, user }) {
-      if (user) {
-        return {
-          ...token,
-          accessToken: user,
-        };
-      }
+      user && (token.ecfToken = user.ecfToken);
       return token;
-    },
-    session({ session }) {
-      session.user.name = 'hoge';
-      session.user.isAdmin = true;
-      return session;
     },
   },
 };

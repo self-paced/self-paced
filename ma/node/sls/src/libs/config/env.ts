@@ -4,6 +4,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(['development', 'test', 'production']),
   LINE_TOKEN: z.string().min(1),
+  NEXTAUTH_SECRET: z.string().min(1),
 });
 
 const _env = envSchema.safeParse(process.env);

@@ -37,7 +37,7 @@ const line = createRouter()
       userIds: z.array(z.string()).min(1),
       messages: lineMessageSchema,
     }),
-    resolve: async ({ input, ctx }) => {
+    resolve: async ({ input }) => {
       await client.multicast(input.userIds, input.messages);
       return true;
     },
