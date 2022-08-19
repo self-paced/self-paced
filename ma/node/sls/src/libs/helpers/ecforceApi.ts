@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import axios, { AxiosRequestHeaders } from 'axios';
 import { Context } from '../../functions/trpc/context';
 import {
   dListCustomersFromSegmentResponse,
@@ -7,17 +8,18 @@ import {
 
 const callEcforceApi = async <T>(
   ctx: Context,
-  params: { url: string; method: string; headers?: HeadersInit }
+  params: { url: string; method: string; headers?: AxiosRequestHeaders }
 ) => {
   const { jwt } = ctx;
-  const res = await fetch(params.url, {
+  const res = await axios(params.url, {
     method: params.method,
     headers: {
       Authorization: `Token token="${jwt.ecfToken}"`,
       ...params.headers,
     },
   });
-  return (await res.json()) as EcforceResponse<T>;
+
+  return res.data as EcforceResponse<T>;
 };
 
 export type EcforceResponse<T> = {
