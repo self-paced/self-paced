@@ -240,6 +240,28 @@ const EcfForm: React.FC<{
       <Card>
         <CardHead>配信内容</CardHead>
         <CardBody>
+          <div className="mb-4">
+            <InputLabel>配信タイトル</InputLabel>
+            <div className="flex item-center gap2">
+              <div className="grow">
+                <Controller
+                  control={control}
+                  name="title"
+                  render={({ field: { name, onChange } }) => (
+                    <TextField
+                      name={name}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        onChange(e);
+                        onTitleChange(e);
+                      }}
+                      value={title}
+                      error={!!errors.title}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </div>
           <Controller
             control={control}
             name="messages"
