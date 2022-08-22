@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 
 interface RowData {
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface ColumnDef {
