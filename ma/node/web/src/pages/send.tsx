@@ -20,6 +20,7 @@ const AGE_SCHEMA = z.union([
 ]);
 
 const schema = z.object({
+  title: z.string().min(1).max(50),
   messages: MESSAGES_SCHEMA,
   type: z.union([
     z.literal('broadcast'),
@@ -81,6 +82,7 @@ const Home: NextPage = () => {
           if (isSelected) userIds.push(USER_MAP[name]);
         });
         await multicast.mutate({
+          title: data.title,
           messages: data.messages.map((message) => ({
             type: 'text',
             text: message,
@@ -100,6 +102,7 @@ const Home: NextPage = () => {
       // 条件付きで送信
       case 'narrowcast':
         await narrowcast.mutate({
+          title: data.title,
           messages: data.messages.map((message) => ({
             type: 'text',
             text: message,
@@ -113,6 +116,9 @@ const Home: NextPage = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-2">
+        <input {...register('title')} placeholder="title" />
+      </div>
       <div>
         <textarea {...register('messages.0')} />
       </div>
