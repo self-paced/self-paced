@@ -1,6 +1,7 @@
 import { inferAsyncReturnType, TRPCError } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { decode } from 'next-auth/jwt';
+
 import { PrismaClient } from '@prisma/client';
 import config from '../../libs/config';
 const prisma = new PrismaClient();
@@ -22,7 +23,6 @@ export const createContext = async ({
     res,
     prisma,
     jwt: jwtPayload,
-    // prisma,
   };
 };
 export type Context = inferAsyncReturnType<typeof createContext>;
