@@ -1,13 +1,17 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 import CustomButton from '../components/CustomButton';
+import Table from '../components/Table';
+import { Badge, TextLink } from '@super_studio/ecforce_ui_albers';
 import { trpc } from '../utils/trpc';
 
 const Home: NextPage = () => {
   // サンプルクエリー
   const users = trpc.useQuery(['user.list', { name: 'test' }]);
   const showDialog = useDialog();
+  const [page, setPage] = useState(1);
 
   if (users.error) {
     return <div>Error: {users.error.message}</div>;
@@ -46,6 +50,33 @@ const Home: NextPage = () => {
           <CustomButton>Go to Send Page</CustomButton>
         </a>
       </Link>
+      <Table
+        data={[
+          { header1: 'aa', header2: 'header2', header3: 'header3' },
+          { header1: 'header1', header2: 'vv', header3: 'header3' },
+          { header1: 'header1', header2: 'header2', header3: 'cc' },
+        ]}
+        columnDefs={[
+          { field: 'header1' },
+          {
+            field: 'header2',
+            sortable: true,
+            render: (row) => <Badge status="success" label={row.header2} />,
+          },
+          {
+            field: 'header3',
+            sortable: true,
+            render: (row) => <TextLink href="#">{row.header3}</TextLink>,
+          },
+        ]}
+        onSort={(sortData) => {
+          console.log(sortData);
+        }}
+        page={page}
+        pageSize={10}
+        totalItems={100}
+        onPageChange={(page) => setPage(page)}
+      />
     </div>
   );
 };
