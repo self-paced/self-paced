@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@line/bot-sdk": "7.5.0",
-    "@prisma/client": "4.1.0",
+    "@prisma/client": "4.2.1",
     "@trpc/server": "9.25.3",
     "@vendia/serverless-express": "4.10.1",
     "aws-sdk": "2.1160.0",
@@ -44,7 +44,7 @@
     "babel-loader": "8.2.5",
     "copy-webpack-plugin": "11.0.0",
     "fork-ts-checker-webpack-plugin": "7.2.11",
-    "prisma": "4.1.0",
+    "prisma": "4.2.1",
     "serverless": "3.19.0",
     "serverless-offline": "8.8.0",
     "serverless-webpack": "5.7.1",

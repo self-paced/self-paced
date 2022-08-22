@@ -75,6 +75,7 @@ export const lineMessageSchema = z
 
 const publisher = createRouter().mutation('push', {
   input: z.object({
+    title: z.string().min(1),
     token: z.string().min(1),
     messages: lineMessageSchema,
   }),
@@ -101,6 +102,14 @@ const publisher = createRouter().mutation('push', {
           })
         );
       } while (page++ < totalPages);
+
+      await ctx.prisma.messageEvent.create({
+        data: {
+          title: input.title,
+          content: JSON.stringify(input.messages),
+          segment_id: input.token,
+        },
+      });
     } catch (e) {
       console.error(e);
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
