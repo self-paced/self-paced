@@ -4,12 +4,14 @@ import user from './user';
 import segment from './segment';
 import publisher from './publisher';
 import auth from './auth';
+import message from './message';
 
 export const appRouter = createRouter()
   .merge('line.', line)
   .merge('user.', user)
   .merge('segment.', segment)
   .merge('publisher.', publisher)
-  .merge('auth.', auth);
+  .merge('auth.', auth)
+  .merge('message.', message);
 // APIの型定義をExport
 export type AppRouter = typeof appRouter;

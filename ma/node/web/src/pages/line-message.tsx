@@ -16,6 +16,7 @@ import {
   Checkbox,
   Button,
   Select,
+  setValue,
   InputLabel,
   TextField,
 } from '@super_studio/ecforce_ui_albers';
@@ -71,7 +72,7 @@ const lineSchema = z.object({
 
 const ecfSchema = z.object({
   title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
-
+  segmentTitle: z.string().min(1),
   messages: lineMessageInputSchema,
   segmentToken: z
     .string()
@@ -80,6 +81,13 @@ const ecfSchema = z.object({
 
 export type EcfSchema = z.infer<typeof ecfSchema>;
 export type LineSchema = z.infer<typeof lineSchema>;
+type HTMLInputElementExtension = HTMLInputElement & {
+  selectedOptions: selectedOptions[];
+};
+
+type selectedOptions = {
+  text: string;
+};
 
 const TypeSelector: React.FC<{
   type: 'ecf' | 'line';
@@ -135,6 +143,7 @@ const EcfForm: React.FC<{
     register,
     handleSubmit,
     watch,
+    setValue,
     control,
     getValues,
     formState: { errors, isSubmitting },
@@ -187,7 +196,7 @@ const EcfForm: React.FC<{
     await publisher.mutate(
       {
         title: data.title,
-
+        segmentTitle: data.segmentTitle,
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
       },
@@ -214,6 +223,10 @@ const EcfForm: React.FC<{
     }
   };
 
+  const handleSegumentChange = (e: ChangeEvent<HTMLInputElementExtension>) => {
+    setValue('segmentTitle', e.target.selectedOptions[0].text);
+  };
+
   return (
     <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
       <Card>
@@ -225,7 +238,11 @@ const EcfForm: React.FC<{
           </div>
           <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
-            <Select {...register('segmentToken')} error={!!errors.segmentToken}>
+            <Select
+              {...register('segmentToken')}
+              error={!!errors.segmentToken}
+              onChange={handleSegumentChange}
+            >
               <option value="">選択してください</option>
               {segments.map((segment) => (
                 <option key={segment.token} value={segment.token}>

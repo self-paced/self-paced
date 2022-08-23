@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE `MessageEvent` ADD COLUMN `segment_id` VARCHAR(100) NOT NULL;
+ALTER TABLE `MessageEvent` ADD COLUMN `segment_id` VARCHAR(100) NOT NULL after id;
