@@ -47,8 +47,8 @@ const Table: React.FC<{
   const [sortData, setSortData] = useState<SortData>({});
 
   const Pages = () => (
-    <div className="flex justify-end my-2">
-      {page && pageSize && totalItems && (
+    <div className="flex justify-end my-3">
+      {page && pageSize && totalItems !== undefined && (
         <Pagination
           page={page}
           totalItems={totalItems}

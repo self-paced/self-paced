@@ -196,7 +196,7 @@ const EcfForm: React.FC<{
           onError('エラーが発生しました。');
         },
         onSuccess: async () => {
-          await Router.replace('/send-complete');
+          await Router.push('/message-events');
         },
       }
     );

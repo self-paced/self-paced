@@ -107,7 +107,7 @@ const publisher = createRouter().mutation('push', {
         data: {
           title: input.title,
           content: JSON.stringify(input.messages),
-          segment_id: input.token,
+          segmentId: input.token,
         },
       });
     } catch (e) {

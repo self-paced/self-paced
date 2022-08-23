@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "source .env && sls offline --stage local --httpPort 5050",
-    "prisma:migrate": "npx prisma migrate dev --name init",
+    "prisma:migrate": "npx prisma migrate dev",
     "deploy:dev": "source .env.dev && sls deploy --stage dev",
     "deploy:prd": "source .env.prd && sls deploy --stage prd",
     "postinstall": "prisma generate"
