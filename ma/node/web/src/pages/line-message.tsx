@@ -16,7 +16,6 @@ import {
   Checkbox,
   Button,
   Select,
-  setValue,
   InputLabel,
   TextField,
 } from '@super_studio/ecforce_ui_albers';
@@ -25,7 +24,7 @@ import LineMessageInput, {
   LineMessageInputEventHandler,
   lineMessageInputSchema,
   LineMessageInputValue,
-} from '../components/LineMessageInput';
+} from '../components/LineMessage/Input';
 import v from '../utils/validation';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 import Router from 'next/router';

@@ -1,22 +1,7 @@
-import { z } from 'zod';
 import { InputLabel, TextField } from '@super_studio/ecforce_ui_albers';
-import { MessageComponent } from '.';
+import { MessageComponent } from '../MessageType';
 import { ChangeEvent } from 'react';
-import v from '../../../utils/validation';
-
-export const lineVideoMessageSchema = z.object({
-  type: z.literal('video'),
-  originalContentUrl: z
-    .string()
-    .min(1, { message: v.MESSAGES.required('動画URL') })
-    .url({ message: v.MESSAGES.url('動画URL') }),
-  previewImageUrl: z
-    .string()
-    .min(1, { message: v.MESSAGES.required('プレビュー画像URL') })
-    .url({ message: v.MESSAGES.url('プレビュー画像URL') }),
-});
-
-export type LineVideoMessageType = z.infer<typeof lineVideoMessageSchema>;
+import LineVideoMessageType from '../MessageType/LineVideoMessageType';
 
 export const DEFAULT_VIDEO_MESSAGE = Object.freeze<LineVideoMessageType>({
   type: 'video',
@@ -24,7 +9,7 @@ export const DEFAULT_VIDEO_MESSAGE = Object.freeze<LineVideoMessageType>({
   previewImageUrl: '',
 });
 
-const LineVideoMessage: MessageComponent<LineVideoMessageType> = ({
+const LineVideoMessageInput: MessageComponent<LineVideoMessageType> = ({
   messageDetails,
   onChange,
   errors,
@@ -55,4 +40,4 @@ const LineVideoMessage: MessageComponent<LineVideoMessageType> = ({
   );
 };
 
-export default LineVideoMessage;
+export default LineVideoMessageInput;

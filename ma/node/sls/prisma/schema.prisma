@@ -14,9 +14,9 @@ datasource db {
 model MessageEvent {
   id String @id @default(uuid())
   title String @db.VarChar(100)
-  segument_title String @db.VarChar(100)
-  content Json
   segmentId String @db.VarChar(100)
+  segmentTitle String @db.VarChar(100)
+  content Json
   createdAt  DateTime @default(now()) @db.Timestamp(0)
   updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
 }

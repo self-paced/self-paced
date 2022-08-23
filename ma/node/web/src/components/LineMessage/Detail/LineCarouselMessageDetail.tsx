@@ -1,47 +1,10 @@
-import { MessageComponent } from '../.';
-import message from '../../../../../sls/src/functions/trpc/routers/message';
+/* eslint-disable @next/next/no-img-element */
+import { MessageComponent } from '../MessageType';
+import LineCarouselMessageType from '../MessageType/LineCarouselMessageType';
 
-type DefaultAction = {
-  label: string;
-  type: string;
-  uri: string;
-};
-
-type Action = {
-  label: string;
-  type: string;
-  uri: string;
-};
-
-type Column = {
-  title: string;
-  text: string;
-  thumbnailImageUrl: string;
-  actions: Action[];
-  defaultAction: DefaultAction;
-};
-
-type Template = {
-  type: string;
-  columns: Column[];
-};
-
-export type Carousel = {
-  altText: string;
-  type: string;
-  template: Template;
-};
-
-export const DEFAULT_CAROUSEL_MESSAGE = Object.freeze<Carousel>({
-  type: 'template',
-  altText: '',
-  template: {
-    type: '',
-    columns: [],
-  },
-});
-
-const LineMessage: MessageComponent<Carousel> = ({ messageDetails }) => {
+const LineCarouselMessageDetail: MessageComponent<LineCarouselMessageType> = ({
+  messageDetails,
+}) => {
   console.log(messageDetails);
   return (
     <div>
@@ -87,7 +50,7 @@ const LineMessage: MessageComponent<Carousel> = ({ messageDetails }) => {
 };
 
 const Actions: React.FC<{
-  actions: Action[];
+  actions: LineCarouselMessageType['template']['columns'][0]['actions'];
 }> = ({ actions }) => {
   return (
     <div>
@@ -102,4 +65,4 @@ const Actions: React.FC<{
   );
 };
 
-export default LineMessage;
+export default LineCarouselMessageDetail;

@@ -14,7 +14,7 @@ import {
 import { useRouter } from 'next/router';
 import MessageType, {
   AnyMessageTypeDetails,
-} from '../../components/LineMessage';
+} from '../../components/LineMessage/MessageType';
 
 const Page: NextPage = () => {
   const router = useRouter();
@@ -53,11 +53,11 @@ const Page: NextPage = () => {
               </DetailTableRow>
               <DetailTableRow>
                 <DetailTableHeader>配信セグメント</DetailTableHeader>
-                <DetailTableData>{event.data.segument_title}</DetailTableData>
+                <DetailTableData>{event.data.segmentTitle}</DetailTableData>
               </DetailTableRow>
               <DetailTableRow>
                 <DetailTableHeader>配信日時</DetailTableHeader>
-                <DetailTableData>{event.data.created_at}</DetailTableData>
+                <DetailTableData>{event.data.createdAt}</DetailTableData>
               </DetailTableRow>
               <DetailTableRow>
                 <DetailTableHeader>配信メッセージ</DetailTableHeader>
@@ -65,7 +65,7 @@ const Page: NextPage = () => {
                   {JSON.parse(event.data.content as string).map(
                     (message: AnyMessageTypeDetails, i: number) => {
                       const MessageComponent =
-                        MessageType[message.type].component;
+                        MessageType[message.type].detailComponent;
                       return (
                         <div key={i} className="mb-5">
                           <h3 className="font-bold">メッセージ #{i + 1}</h3>
