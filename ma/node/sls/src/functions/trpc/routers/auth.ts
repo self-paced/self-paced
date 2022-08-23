@@ -1,7 +1,7 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import ecforceApi from '@libs/helpers/ecforceApi';
+import ecforceApi from '../../../libs/helpers/ecforceApi';
 
 const JWTSchema = z.object({
   id: z.number(),
@@ -11,7 +11,8 @@ const JWTSchema = z.object({
 
 type JWT = z.infer<typeof JWTSchema>;
 
-const auth = createRouter().mutation('token', {
+const auth = createRouter().mutation('signInWithCookie', {
+  input: z.object({}).optional(),
   output: JWTSchema,
   resolve: async ({ ctx }) => {
     try {

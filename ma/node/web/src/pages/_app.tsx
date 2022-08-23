@@ -47,6 +47,13 @@ export const getBaseUrl = () => {
   return `http://localhost:4040${process.env.BASE_PATH}`; // devの場合はlocalhostを利用
 };
 
+export const getTRPCUrl = () => {
+  return (
+    process.env.NEXT_PUBLIC_TRPC_URL ??
+    `${getBaseUrl()}${process.env.NEXT_PUBLIC_TRPC_PATH}`
+  ); // TODO: 環境変数の自動設定
+};
+
 export default withTRPC<AppRouter>({
   config({ ctx }) {
     /**
@@ -54,9 +61,7 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    const url =
-      process.env.NEXT_PUBLIC_TRPC_URL ??
-      `${getBaseUrl()}${process.env.NEXT_PUBLIC_TRPC_PATH}`; // TODO: 環境変数の自動設定
+    const url = getTRPCUrl();
 
     return {
       url,

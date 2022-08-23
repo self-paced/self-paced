@@ -1,40 +1,26 @@
-import NextAuth, { NextAuthOptions, User } from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { getTRPCUrl } from '../../_app';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
-
       credentials: {},
       async authorize(_credentials, req) {
-        if (process.env.NODE_ENV === 'development') {
-          const user: User = {
-            id: 1,
-            email: 'ma@super-studio.jp',
-            ecfToken: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-          }; // local dummy user
-          return user;
-        }
         try {
           if (!req.headers?.origin) throw new Error('origin header not found');
-          const url = `${req.headers.origin}/api/v2/admins/sign_in_with_cookie`;
-
+          const url = `${getTRPCUrl()}/auth.signInWithCookie`;
           const res = await fetch(url, {
             method: 'POST',
             headers: {
-              cookie: req.headers?.cookie,
+              origin: req.headers.origin,
+              cookie: req.headers.cookie,
             },
           });
 
           if (res.ok) {
-            const ecfUser = await res.json();
-            const user: User = {
-              id: ecfUser.id,
-              email: ecfUser.email,
-              ecfToken: ecfUser.authentication_token,
-            };
-            return user;
+            return await res.json();
           } else {
             console.error(res);
             throw new Error('failed to authorize');
@@ -42,7 +28,6 @@ export const authOptions: NextAuthOptions = {
         } catch (e) {
           console.error(e);
         }
-
         return null;
       },
     }),
