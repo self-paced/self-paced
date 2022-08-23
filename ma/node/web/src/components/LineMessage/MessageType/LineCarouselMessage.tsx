@@ -87,7 +87,7 @@ const LineMessage: MessageComponent<Carousel> = ({ messageDetails }) => {
 };
 
 const Actions: React.FC<{
-  actions: ActionType[];
+  actions: Action[];
 }> = ({ actions }) => {
   return (
     <div>
