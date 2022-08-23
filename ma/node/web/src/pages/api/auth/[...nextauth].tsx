@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (res.ok) {
-            return await res.json();
+            return (await res.json()).result.data;
           } else {
             console.error(res);
             throw new Error('failed to authorize');

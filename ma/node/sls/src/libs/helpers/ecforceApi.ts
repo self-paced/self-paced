@@ -15,7 +15,7 @@ const callEcforceApi = async <T>(
   const res = await axios(params.url, {
     method: params.method,
     headers: {
-      Authorization: `Token token="${jwt.ecfToken}"`,
+      ...(jwt?.ecfToken && { Authorization: `Token token="${jwt.ecfToken}"` }),
       ...params.headers,
     },
   });
@@ -122,7 +122,7 @@ export type CustomerItem = {
 
 const ecforceApi = {
   signInWithCookie: async (ctx: Context) => {
-    const url = `${ctx.req.headers.origin}/api/v2/admin/sign_in_with_cookie`;
+    const url = `${ctx.req.headers.origin}/api/v2/admins/sign_in_with_cookie`;
     return process.env.NODE_ENV === 'development'
       ? dSignInWithCookieResponse
       : await callEcforceApi<EcfUser>(ctx, {
