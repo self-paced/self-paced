@@ -107,9 +107,9 @@ const publisher = createRouter().mutation('push', {
       await ctx.prisma.messageEvent.create({
         data: {
           title: input.title,
-          segument_title: input.segmentTitle,
+          segmentId: input.token,
+          segmentTitle: input.segmentTitle,
           content: JSON.stringify(input.messages),
-          segment_id: input.token,
         },
       });
     } catch (e) {

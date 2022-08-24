@@ -11,7 +11,7 @@ export const appRouter = createRouter()
   .merge('user.', user)
   .merge('segment.', segment)
   .merge('publisher.', publisher)
-  .merge('auth.', auth)
-  .merge('message.', message);
+  .merge('message.', message)
+  .merge('auth.', auth);
 // APIの型定義をExport
 export type AppRouter = typeof appRouter;

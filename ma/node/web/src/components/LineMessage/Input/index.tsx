@@ -11,8 +11,8 @@ import { z } from 'zod';
 import MessageType, {
   AnyMessageTypeDetails,
   anyMessageTypeSchema,
-} from './MessageType';
-import { EcfSchema } from '../../pages/line-message';
+} from '../MessageType';
+import { EcfSchema } from '../../../pages/line-message';
 
 const MAX_MESSAGES = 5;
 
@@ -82,7 +82,8 @@ const LineMessageInput: React.FC<{
   return (
     <div ref={parent}>
       {messages.map((message, i) => {
-        const MessageComponent = MessageType[message.details.type].component;
+        const MessageComponent =
+          MessageType[message.details.type].inputComponent;
         return (
           <div
             key={message.key}

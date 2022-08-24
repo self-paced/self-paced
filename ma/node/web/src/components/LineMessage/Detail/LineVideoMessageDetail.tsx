@@ -1,18 +1,10 @@
-import { MessageComponent } from '../.';
+/* eslint-disable @next/next/no-img-element */
+import { MessageComponent } from '../MessageType';
+import LineVideoMessageType from '../MessageType/LineVideoMessageType';
 
-export type Video = {
-  type: string;
-  originalContentUrl: string;
-  previewImageUrl: string;
-};
-
-export const DEFAULT_VIDEO_MESSAGE = Object.freeze<Video>({
-  type: 'video',
-  originalContentUrl: '',
-  previewImageUrl: '',
-});
-
-const LineMessage: MessageComponent<Video> = ({ messageDetails }) => {
+const LineVideoMessageDetail: MessageComponent<LineVideoMessageType> = ({
+  messageDetails,
+}) => {
   return (
     <div>
       <dl className="grid grid-cols-2">
@@ -34,4 +26,4 @@ const LineMessage: MessageComponent<Video> = ({ messageDetails }) => {
   );
 };
 
-export default LineMessage;
+export default LineVideoMessageDetail;

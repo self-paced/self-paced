@@ -1,19 +1,10 @@
-import { MessageComponent } from '../.';
-import Image from 'next/image';
+/* eslint-disable @next/next/no-img-element */
+import { MessageComponent } from '../MessageType';
+import LineImageMessageType from '../MessageType/LineImageMessageType';
 
-export type Image = {
-  type: string;
-  originalContentUrl: string;
-  previewImageUrl: string;
-};
-
-export const DEFAULT_IMAGE_MESSAGE = Object.freeze<Image>({
-  type: 'image',
-  originalContentUrl: '',
-  previewImageUrl: '',
-});
-
-const LineMessage: MessageComponent<Image> = ({ messageDetails }) => {
+const LineImageMessageDetail: MessageComponent<LineImageMessageType> = ({
+  messageDetails,
+}) => {
   return (
     <div>
       <dl className="grid grid-cols-2">
@@ -37,4 +28,4 @@ const LineMessage: MessageComponent<Image> = ({ messageDetails }) => {
   );
 };
 
-export default LineMessage;
+export default LineImageMessageDetail;
