@@ -18,7 +18,10 @@ export const createContext = async ({
   if (PUBLIC_PATHS.includes(req.url)) {
     jwtPayload = null;
   } else {
-    const token = req.cookies['next-auth.session-token'];
+    const token =
+      env.NODE_ENV === 'development'
+        ? req.cookies['next-auth.session-token']
+        : req.cookies['__Secure-next-auth.session-token'];
     jwtPayload = await decode({
       token,
       secret: env.NEXTAUTH_SECRET,

@@ -1,6 +1,5 @@
 /* eslint-disable max-lines-per-function */
 import axios, { AxiosRequestHeaders } from 'axios';
-import { IncomingHttpHeaders } from 'http';
 import { Context } from '../../functions/trpc/context';
 import {
   dListCustomersFromSegmentResponse,
@@ -123,8 +122,10 @@ export type CustomerItem = {
 
 const DEV_ORIGINS = ['http://localhost:4040', 'https://dev-ma.ec-force.com'];
 
-const getOrigin = (headers: IncomingHttpHeaders) => {
-  const origin = headers.origin;
+const getOrigin = (ctx: Context) => {
+  const origin =
+    ctx.req.headers.origin ??
+    `${new URL(ctx.req.headers.referer ?? '').origin}`;
   return DEV_ORIGINS.includes(origin ?? '')
     ? 'https://demo35.ec-force.com'
     : origin;
@@ -132,9 +133,7 @@ const getOrigin = (headers: IncomingHttpHeaders) => {
 
 const ecforceApi = {
   signInWithCookie: async (ctx: Context) => {
-    const url = `${getOrigin(
-      ctx.req.headers
-    )}/api/v2/admins/sign_in_with_cookie`;
+    const url = `${getOrigin(ctx)}/api/v2/admins/sign_in_with_cookie`;
     return process.env.NODE_ENV === 'development'
       ? dSignInWithCookieResponse
       : await callEcforceApi<EcfUser>(ctx, {
@@ -147,7 +146,7 @@ const ecforceApi = {
   },
   listSegments: async (ctx: Context) => {
     const url = `${getOrigin(
-      ctx.req.headers
+      ctx
     )}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
     return process.env.NODE_ENV === 'development'
       ? dListSegmentsResponse
@@ -160,11 +159,9 @@ const ecforceApi = {
     ctx: Context,
     input: { page: number; token: string }
   ) => {
-    const url = `${getOrigin(
-      ctx.req.headers
-    )}/api/v2/admin/customers?per=100&page=${input.page}&q[token]=${
-      input.token
-    }`;
+    const url = `${getOrigin(ctx)}/api/v2/admin/customers?per=100&page=${
+      input.page
+    }&q[token]=${input.token}`;
     return process.env.NODE_ENV === 'development'
       ? dListCustomersFromSegmentResponse[input.token]
       : await callEcforceApi<EcfPaginatedResponse<CustomerItem[]>>(ctx, {
