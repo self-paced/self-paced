@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/line-message',
+        destination: '/message-events',
         permanent: true,
       },
     ];

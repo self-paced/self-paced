@@ -18,6 +18,7 @@ import {
   Select,
   InputLabel,
   TextField,
+  FloatArea,
 } from '@super_studio/ecforce_ui_albers';
 import { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import LineMessageInput, {
@@ -217,6 +218,7 @@ const EcfForm: React.FC<{
 
   const handleSegmentChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setValue('segmentTitle', e.target.selectedOptions[0].text);
+    setValue('segmentToken', e.target.selectedOptions[0].value);
   };
 
   return (
@@ -304,15 +306,13 @@ const EcfForm: React.FC<{
         </CardBody>
       </Card>
       <div className="mt-6" />
-      <Card>
-        <CardBody>
-          <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
-            <Button type="submit" variant="secondary" disabled={isSubmitting}>
-              送信
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
+      <FloatArea
+        secondaryButton={
+          <Button type="submit" variant="secondary" disabled={isSubmitting}>
+            送信
+          </Button>
+        }
+      />
     </form>
   );
 };
@@ -497,13 +497,13 @@ const LineForm: React.FC<{
         </CardBody>
       </Card>
       <div className="mt-6" />
-      <Card>
-        <div className="text-right bg-[#F7F9FA] p-4 rounded-md">
+      <FloatArea
+        secondaryButton={
           <Button type="submit" variant="secondary" disabled={isSubmitting}>
             送信
           </Button>
-        </div>
-      </Card>
+        }
+      />
     </form>
   );
 };
