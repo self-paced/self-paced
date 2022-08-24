@@ -4,8 +4,7 @@ declare module 'next-auth' {
   interface User {
     id: number;
     ecfToken: string;
-    // todo req.headers が存在しない場合は undefined 処理が入ってるので後で直す
-    projectId: string | undefined;
+    projectId: string;
   }
 }
 declare module 'next-auth/jwt' {

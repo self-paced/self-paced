@@ -24,9 +24,15 @@ const auth = createRouter().mutation('signInWithCookie', {
   output: JWTSchema,
   resolve: async ({ ctx }) => {
     try {
-      const ecfUser = await ecforceApi.signInWithCookie(ctx);
       // todo 一旦ドメインとプロジェクトIDのマップで対応する 後々修正する
       const projectId = PROJECT_ID_MAP[getOrigin(ctx)];
+      if (!projectId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'projectId not found',
+        });
+      }
+      const ecfUser = await ecforceApi.signInWithCookie(ctx);
       const jwt: JWT = {
         id: ecfUser.id,
         email: ecfUser.email,
