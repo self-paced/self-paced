@@ -23,7 +23,7 @@ const user = createRouter()
   })
   .query('all', {
     async resolve({ ctx }) {
-      return await ctx.prisma.post.findMany();
+      return await ctx.prisma.messageEvent.findMany();
     },
   });
 
