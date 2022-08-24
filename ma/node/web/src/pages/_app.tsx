@@ -48,6 +48,7 @@ export const getBaseUrl = () => {
 };
 
 export const getTRPCUrl = () => {
+  console.log(process.env);
   return (
     process.env.NEXT_PUBLIC_TRPC_URL ??
     `${getBaseUrl()}${process.env.NEXT_PUBLIC_TRPC_PATH}`
