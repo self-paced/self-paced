@@ -28,6 +28,10 @@ const serverlessConfiguration: AWS = {
     name: 'aws',
     region: '${self:custom.region}' as any,
     runtime: 'nodejs14.x',
+    vpc: {
+      subnetIds: ['subnet-051a0adfb441729ad', 'subnet-091dec5cfa89b8ef2'],
+      securityGroupIds: ['sg-082e788f94ab711da', 'sg-0e1319b36b3d7ec22'],
+    },
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
