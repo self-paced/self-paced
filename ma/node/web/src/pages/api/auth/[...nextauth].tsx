@@ -32,20 +32,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  cookies: {
-    ...(process.env.VERCEL_ENV === 'preview' && {
-      sessionToken: {
-        name: `__Secure-next-auth.session-token`,
-        options: {
-          domain: '.ec-force.com',
-          httpOnly: true,
-          sameSite: 'lax',
-          path: '/',
-          secure: true,
-        },
-      },
-    }),
-  },
   callbacks: {
     // callback
     jwt({ token, user }) {
