@@ -14,7 +14,6 @@ const segmentListResponseSchema = z.array(
 const segment = createRouter().query('list', {
   output: segmentListResponseSchema,
   resolve: async ({ ctx }) => {
-    console.log(ctx);
     try {
       const res = await ecforceApi.listSegments(ctx);
       return res.data.map((segment) => ({
