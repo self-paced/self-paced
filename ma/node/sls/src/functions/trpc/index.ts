@@ -1,6 +1,6 @@
 import { getAPIBaseInfo } from '../../libs/helpers/lambdaHelper';
 
-const { handlerDir, cors } = getAPIBaseInfo(__dirname);
+const { handlerDir } = getAPIBaseInfo(__dirname);
 
 const slsFunc = {
   handler: `${handlerDir}/handler.main`,
@@ -9,14 +9,18 @@ const slsFunc = {
       http: {
         method: 'get',
         path: '{proxy+}',
-        cors: cors,
       },
     },
     {
       http: {
         method: 'post',
         path: '{proxy+}',
-        cors: cors,
+      },
+    },
+    {
+      http: {
+        method: 'options',
+        path: '{proxy+}',
       },
     },
   ],

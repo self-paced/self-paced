@@ -1,10 +1,10 @@
 /* eslint-disable max-lines-per-function */
 import axios, { AxiosRequestHeaders } from 'axios';
 import { Context } from '../../functions/trpc/context';
-import config from '../config';
 import {
   dListCustomersFromSegmentResponse,
   dListSegmentsResponse,
+  dSignInWithCookieResponse,
 } from './dummyData';
 
 const callEcforceApi = async <T>(
@@ -15,15 +15,15 @@ const callEcforceApi = async <T>(
   const res = await axios(params.url, {
     method: params.method,
     headers: {
-      Authorization: `Token token="${jwt.ecfToken}"`,
+      ...(jwt?.ecfToken && { Authorization: `Token token="${jwt.ecfToken}"` }),
       ...params.headers,
     },
   });
 
-  return res.data as EcforceResponse<T>;
+  return res.data as T;
 };
 
-export type EcforceResponse<T> = {
+export type EcfPaginatedResponse<T> = {
   data: T;
   meta: {
     total_count: number;
@@ -39,6 +39,12 @@ export type EcforceResponse<T> = {
     next: string | null;
     last: string;
   };
+};
+
+export type EcfUser = {
+  id: number;
+  email: string;
+  authentication_token: string;
 };
 
 export type SegmentItem = {
@@ -114,12 +120,37 @@ export type CustomerItem = {
   };
 };
 
+const DEV_ORIGINS = ['http://localhost:4040', 'https://dev-ma.ec-force.com'];
+
+export const getOrigin = (ctx: Context) => {
+  const origin =
+    ctx.req.headers.origin ??
+    `${new URL(ctx.req.headers.referer ?? '').origin}`;
+  return DEV_ORIGINS.includes(origin ?? '')
+    ? 'https://demo35.ec-force.com'
+    : origin;
+};
+
 const ecforceApi = {
+  signInWithCookie: async (ctx: Context) => {
+    const url = `${getOrigin(ctx)}/api/v2/admins/sign_in_with_cookie`;
+    return process.env.NODE_ENV === 'development'
+      ? dSignInWithCookieResponse
+      : await callEcforceApi<EcfUser>(ctx, {
+          url,
+          method: 'POST',
+          headers: {
+            cookie: ctx.req.headers?.cookie as string,
+          },
+        });
+  },
   listSegments: async (ctx: Context) => {
-    const url = `${ctx.req.headers.origin}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
-    return config.nodeEnv === 'development'
+    const url = `${getOrigin(
+      ctx
+    )}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
+    return process.env.NODE_ENV === 'development'
       ? dListSegmentsResponse
-      : await callEcforceApi<SegmentItem[]>(ctx, {
+      : await callEcforceApi<EcfPaginatedResponse<SegmentItem[]>>(ctx, {
           url,
           method: 'GET',
         });
@@ -128,10 +159,12 @@ const ecforceApi = {
     ctx: Context,
     input: { page: number; token: string }
   ) => {
-    const url = `${ctx.req.headers.origin}/api/v2/admin/customers?per=100&page=${input.page}&q[token]=${input.token}`;
-    return config.nodeEnv === 'development'
+    const url = `${getOrigin(ctx)}/api/v2/admin/customers?per=100&page=${
+      input.page
+    }&q[token]=${input.token}`;
+    return process.env.NODE_ENV === 'development'
       ? dListCustomersFromSegmentResponse[input.token]
-      : await callEcforceApi<CustomerItem[]>(ctx, {
+      : await callEcforceApi<EcfPaginatedResponse<CustomerItem[]>>(ctx, {
           url,
           method: 'GET',
         });

@@ -36,15 +36,22 @@ function MyApp({
   );
 }
 
-export const getBaseUrl = () => {
+export const getBaseUrl = (origin?: string) => {
   if (typeof window !== 'undefined') {
     // Browserの場合は、現在のURLを利用
     return process.env.BASE_PATH;
   }
-  if (process.env.VERCEL_URL)
-    return `https://${process.env.VERCEL_URL}${process.env.BASE_PATH}`; // SSRの場合はVERCELのURLを利用
+  if (process.env.VERCEL_URL && origin)
+    return `${origin}${process.env.BASE_PATH}`; // SSRの場合はVERCELのURLを利用
 
   return `http://localhost:4040${process.env.BASE_PATH}`; // devの場合はlocalhostを利用
+};
+
+export const getTRPCUrl = (origin?: string) => {
+  return (
+    process.env.NEXT_PUBLIC_TRPC_URL ??
+    `${getBaseUrl(origin)}${process.env.NEXT_PUBLIC_TRPC_PATH}`
+  ); // TODO: 環境変数の自動設定
 };
 
 export default withTRPC<AppRouter>({
@@ -54,9 +61,7 @@ export default withTRPC<AppRouter>({
      * @link https://trpc.io/docs/ssr
      */
 
-    const url =
-      process.env.NEXT_PUBLIC_TRPC_URL ??
-      `${getBaseUrl()}${process.env.NEXT_PUBLIC_TRPC_PATH}`; // TODO: 環境変数の自動設定
+    const url = getTRPCUrl();
 
     return {
       url,
