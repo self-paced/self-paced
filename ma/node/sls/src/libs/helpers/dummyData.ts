@@ -1,4 +1,9 @@
-import { CustomerItem, EcforceResponse, SegmentItem } from './ecforceApi';
+import {
+  CustomerItem,
+  EcfPaginatedResponse,
+  EcfUser,
+  SegmentItem,
+} from './ecforceApi';
 
 const dMeta = {
   meta: {
@@ -17,7 +22,13 @@ const dMeta = {
   },
 };
 
-export const dListSegmentsResponse: EcforceResponse<SegmentItem[]> = {
+export const dSignInWithCookieResponse: EcfUser = {
+  id: 1,
+  email: 'ma@super-studio.jp',
+  authentication_token: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+};
+
+export const dListSegmentsResponse: EcfPaginatedResponse<SegmentItem[]> = {
   data: [
     {
       id: '1',
@@ -129,7 +140,7 @@ const dCustomer: CustomerItem = {
 };
 
 export const dListCustomersFromSegmentResponse: {
-  [key: string]: EcforceResponse<CustomerItem[]>;
+  [key: string]: EcfPaginatedResponse<CustomerItem[]>;
 } = {
   '15407622-2adb-4f47-a1c9-5c23bbe57b64': {
     data: [

@@ -48,7 +48,7 @@ type ColumnType = Omit<
 
 export const DEFAULT_CAROUSEL_MESSAGE = Object.freeze<LineCarouselMessageType>({
   type: 'template',
-  altText: 'Carousel',
+  altText: '',
   template: {
     type: 'carousel',
     columns: [
@@ -63,6 +63,7 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
   onChange,
   errors,
 }) => {
+  const [altText, setAltText] = useState(messageDetails.altText);
   const [columns, setColumns] = useState<ColumnType[]>(
     messageDetails.template.columns.map((column, index) => {
       return {
@@ -77,11 +78,18 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
   );
   const [parent] = useAutoAnimate<HTMLDivElement>();
 
-  const handleChange = (newColumns: ColumnType[]) => {
+  const handleChange = (input: {
+    newColumns?: ColumnType[];
+    newAltText?: string;
+  }) => {
+    const newColumns = input.newColumns || columns;
+    const newAltText = input.newAltText || altText;
     setColumns(newColumns);
+    setAltText(newAltText);
     onChange &&
       onChange({
         ...messageDetails,
+        altText: newAltText,
         template: {
           ...messageDetails.template,
           columns: newColumns.map((column) => {
@@ -108,7 +116,7 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
     newColumns[columnIndex].actions[actionIndex + shift] = {
       ...columns[columnIndex].actions[actionIndex],
     };
-    handleChange(newColumns);
+    handleChange({ newColumns });
   };
 
   const handleMoveColumn = (columnIndex: number, shift: 1 | -1) => {
@@ -119,153 +127,165 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
     newColumns[columnIndex + shift] = {
       ...columns[columnIndex],
     };
-    handleChange(newColumns);
+    handleChange({ newColumns });
   };
 
   return (
-    <div ref={parent}>
-      {columns.map((column, columnIndex) => (
-        <div
-          key={column.key}
-          className="border-l-4 border-b-4 border-gray-200 pl-4 max-w-xl mb-2"
-        >
-          <div className="my-1">
-            {/* COLUMN HEADER */}
-            <div className="flex gap-1 items-center">
-              <div className="font-bold text-xs">
-                {`カラム #${columnIndex + 1}`}
+    <>
+      <div className="mb-2">
+        <InputLabel>通知のテキスト</InputLabel>
+        <TextField
+          value={altText}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            handleChange({ newAltText: e.target.value });
+          }}
+          error={errors?.altText}
+        />
+      </div>
+      <div ref={parent}>
+        {columns.map((column, columnIndex) => (
+          <div
+            key={column.key}
+            className="border-l-4 border-b-4 border-gray-200 pl-4 max-w-xl mb-2"
+          >
+            <div className="my-1">
+              {/* COLUMN HEADER */}
+              <div className="flex gap-1 items-center">
+                <div className="font-bold text-xs">
+                  {`カラム #${columnIndex + 1}`}
+                </div>
+                <div className="grow" />
+                <Button
+                  icon
+                  onClick={() => {
+                    handleMoveColumn(columnIndex, 1);
+                  }}
+                  disabled={columnIndex >= columns.length - 1}
+                >
+                  <MdArrowDropDown />
+                </Button>
+                <Button
+                  icon
+                  onClick={() => {
+                    handleMoveColumn(columnIndex, -1);
+                  }}
+                  disabled={columnIndex === 0}
+                >
+                  <MdArrowDropUp />
+                </Button>
+                <Button
+                  icon
+                  variant="destructive"
+                  onClick={() => {
+                    const newColumns = JSON.parse(
+                      JSON.stringify(columns)
+                    ) as typeof columns; // Deep copy
+                    newColumns.splice(columnIndex, 1);
+                    handleChange({ newColumns });
+                  }}
+                  disabled={columns.length === 1}
+                >
+                  <MdDelete />
+                </Button>
               </div>
-              <div className="grow" />
-              <Button
-                icon
-                onClick={() => {
-                  handleMoveColumn(columnIndex, 1);
-                }}
-                disabled={columnIndex >= columns.length - 1}
-              >
-                <MdArrowDropDown />
-              </Button>
-              <Button
-                icon
-                onClick={() => {
-                  handleMoveColumn(columnIndex, -1);
-                }}
-                disabled={columnIndex === 0}
-              >
-                <MdArrowDropUp />
-              </Button>
-              <Button
-                icon
-                variant="destructive"
-                onClick={() => {
+              {/* COLUMN INPUTS */}
+              <InputLabel>画像URL</InputLabel>
+              <TextField
+                value={column.thumbnailImageUrl}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   const newColumns = JSON.parse(
                     JSON.stringify(columns)
                   ) as typeof columns; // Deep copy
-                  newColumns.splice(columnIndex, 1);
-                  handleChange(newColumns);
+                  newColumns[columnIndex].thumbnailImageUrl = e.target.value;
+                  handleChange({ newColumns });
                 }}
-                disabled={columns.length === 1}
-              >
-                <MdDelete />
-              </Button>
+                error={
+                  !!errors?.template?.columns?.[columnIndex]?.thumbnailImageUrl
+                }
+              />
+              <InputLabel>タイトル</InputLabel>
+              <TextField
+                value={column.title}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const newColumns = JSON.parse(
+                    JSON.stringify(columns)
+                  ) as typeof columns; // Deep copy
+                  newColumns[columnIndex].title = e.target.value;
+                  handleChange({ newColumns });
+                }}
+                error={!!errors?.template?.columns?.[columnIndex]?.title}
+              />
+              <InputLabel>詳細</InputLabel>
+              <TextField
+                value={column.text}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const newColumns = JSON.parse(
+                    JSON.stringify(columns)
+                  ) as typeof columns; // Deep copy
+                  newColumns[columnIndex].text = e.target.value;
+                  handleChange({ newColumns });
+                }}
+                error={!!errors?.template?.columns?.[columnIndex]?.text}
+              />
+              <InputLabel>デフォルトURL</InputLabel>
+              <TextField
+                value={column.defaultAction.uri}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const newColumns = JSON.parse(
+                    JSON.stringify(columns)
+                  ) as typeof columns; // Deep copy
+                  newColumns[columnIndex].defaultAction.uri = e.target.value;
+                  handleChange({ newColumns });
+                }}
+                error={
+                  !!errors?.template?.columns?.[columnIndex]?.defaultAction?.uri
+                }
+              />
+              {/* ACTIONS */}
+              <Actions
+                actions={column.actions}
+                columnIndex={columnIndex}
+                onMoveAction={(columnIndex, actionIndex, shift) => {
+                  handleMoveAction(columnIndex, actionIndex, shift);
+                }}
+                onChange={(newActions: ActionType[]) => {
+                  const newColumns = JSON.parse(
+                    JSON.stringify(columns)
+                  ) as typeof columns; // Deep copy
+                  newColumns[columnIndex].actions = newActions;
+                  handleChange({ newColumns });
+                }}
+                errors={errors}
+              />
             </div>
-            {/* COLUMN INPUTS */}
-            <InputLabel>画像URL</InputLabel>
-            <TextField
-              value={column.thumbnailImageUrl}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newColumns = JSON.parse(
-                  JSON.stringify(columns)
-                ) as typeof columns; // Deep copy
-                newColumns[columnIndex].thumbnailImageUrl = e.target.value;
-                handleChange(newColumns);
-              }}
-              error={
-                !!errors?.template?.columns?.[columnIndex]?.thumbnailImageUrl
-              }
-            />
-            <InputLabel>タイトル</InputLabel>
-            <TextField
-              value={column.title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newColumns = JSON.parse(
-                  JSON.stringify(columns)
-                ) as typeof columns; // Deep copy
-                newColumns[columnIndex].title = e.target.value;
-                handleChange(newColumns);
-              }}
-              error={!!errors?.template?.columns?.[columnIndex]?.title}
-            />
-            <InputLabel>詳細</InputLabel>
-            <TextField
-              value={column.text}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newColumns = JSON.parse(
-                  JSON.stringify(columns)
-                ) as typeof columns; // Deep copy
-                newColumns[columnIndex].text = e.target.value;
-                handleChange(newColumns);
-              }}
-              error={!!errors?.template?.columns?.[columnIndex]?.text}
-            />
-            <InputLabel>デフォルトURL</InputLabel>
-            <TextField
-              value={column.defaultAction.uri}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newColumns = JSON.parse(
-                  JSON.stringify(columns)
-                ) as typeof columns; // Deep copy
-                newColumns[columnIndex].defaultAction.uri = e.target.value;
-                handleChange(newColumns);
-              }}
-              error={
-                !!errors?.template?.columns?.[columnIndex]?.defaultAction?.uri
-              }
-            />
-            {/* ACTIONS */}
-            <Actions
-              actions={column.actions}
-              columnIndex={columnIndex}
-              onMoveAction={(columnIndex, actionIndex, shift) => {
-                handleMoveAction(columnIndex, actionIndex, shift);
-              }}
-              onChange={(newActions: ActionType[]) => {
-                const newColumns = JSON.parse(
-                  JSON.stringify(columns)
-                ) as typeof columns; // Deep copy
-                newColumns[columnIndex].actions = newActions;
-                handleChange(newColumns);
-              }}
-              errors={errors}
-            />
           </div>
-        </div>
-      ))}
-      {/* ADD COLUMN BUTTON */}
-      <div>
-        <Button
-          onClick={() => {
-            const newColumns = JSON.parse(
-              JSON.stringify(columns)
-            ) as typeof columns; // Deep copy
-            const defaultColumn: ColumnType = {
-              ...DEFAULT_CAROUSEL_COLUMN,
-              key: Date.now(),
-              actions: DEFAULT_CAROUSEL_COLUMN.actions.map((action) => ({
-                ...action,
+        ))}
+        {/* ADD COLUMN BUTTON */}
+        <div>
+          <Button
+            onClick={() => {
+              const newColumns = JSON.parse(
+                JSON.stringify(columns)
+              ) as typeof columns; // Deep copy
+              const defaultColumn: ColumnType = {
+                ...DEFAULT_CAROUSEL_COLUMN,
                 key: Date.now(),
-              })),
-            };
-            newColumns.push(defaultColumn);
-            handleChange(newColumns);
-          }}
-          disabled={messageDetails.template.columns.length >= MAX_COLUMNS}
-        >
-          <MdAdd />
-          カラム追加
-        </Button>
+                actions: DEFAULT_CAROUSEL_COLUMN.actions.map((action) => ({
+                  ...action,
+                  key: Date.now(),
+                })),
+              };
+              newColumns.push(defaultColumn);
+              handleChange({ newColumns });
+            }}
+            disabled={messageDetails.template.columns.length >= MAX_COLUMNS}
+          >
+            <MdAdd />
+            カラム追加
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
