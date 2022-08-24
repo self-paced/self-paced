@@ -35,7 +35,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     // callback
     jwt({ token, user }) {
-      user && (token.ecfToken = user.ecfToken);
+      user &&
+        (token.ecfToken = user.ecfToken) &&
+        (token.projectId = user.projectId);
       return token;
     },
   },

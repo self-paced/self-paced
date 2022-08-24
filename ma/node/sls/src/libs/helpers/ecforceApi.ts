@@ -122,7 +122,7 @@ export type CustomerItem = {
 
 const DEV_ORIGINS = ['http://localhost:4040', 'https://dev-ma.ec-force.com'];
 
-const getOrigin = (ctx: Context) => {
+export const getOrigin = (ctx: Context) => {
   const origin =
     ctx.req.headers.origin ??
     `${new URL(ctx.req.headers.referer ?? '').origin}`;
