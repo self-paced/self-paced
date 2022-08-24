@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(_credentials, req) {
         try {
           if (!req.headers?.origin) throw new Error('origin header not found');
-          const url = `${getTRPCUrl()}/auth.signInWithCookie`;
+          const url = `${getTRPCUrl(req.headers.origin)}/auth.signInWithCookie`;
           const res = await fetch(url, {
             method: 'POST',
             headers: {
