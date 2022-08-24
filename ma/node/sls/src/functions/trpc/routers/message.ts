@@ -75,12 +75,12 @@ const message = createRouter()
   })
   .query('event', {
     input: z.object({
-      id: z.string().nullish(),
+      id: z.string(),
     }),
     resolve: async ({ input, ctx }) => {
       return await ctx.prisma.messageEvent.findUnique({
         where: {
-          id: input.id != null ? input.id : undefined,
+          id: input.id,
         },
       });
     },
