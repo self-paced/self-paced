@@ -42,7 +42,7 @@ export const getBaseUrl = (origin?: string) => {
     return process.env.BASE_PATH;
   }
   if (process.env.VERCEL_URL && origin)
-    return `https://${origin}${process.env.BASE_PATH}`; // SSRの場合はVERCELのURLを利用
+    return `${origin}${process.env.BASE_PATH}`; // SSRの場合はVERCELのURLを利用
 
   return `http://localhost:4040${process.env.BASE_PATH}`; // devの場合はlocalhostを利用
 };
