@@ -76,6 +76,7 @@ export const lineMessageSchema = z
 const publisher = createRouter().mutation('push', {
   input: z.object({
     title: z.string().min(1),
+    segmentTitle: z.string().min(1),
     token: z.string().min(1),
     messages: lineMessageSchema,
   }),
@@ -106,8 +107,9 @@ const publisher = createRouter().mutation('push', {
       await ctx.prisma.messageEvent.create({
         data: {
           title: input.title,
+          segmentId: input.token,
+          segmentTitle: input.segmentTitle,
           content: JSON.stringify(input.messages),
-          segment_id: input.token,
         },
       });
     } catch (e) {

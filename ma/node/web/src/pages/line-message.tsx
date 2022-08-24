@@ -24,7 +24,7 @@ import LineMessageInput, {
   LineMessageInputEventHandler,
   lineMessageInputSchema,
   LineMessageInputValue,
-} from '../components/LineMessageInput';
+} from '../components/LineMessage/Input';
 import v from '../utils/validation';
 import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
 import Router from 'next/router';
@@ -71,7 +71,7 @@ const lineSchema = z.object({
 
 const ecfSchema = z.object({
   title: z.string().min(1, { message: v.MESSAGES.required('タイトル') }),
-
+  segmentTitle: z.string().min(1),
   messages: lineMessageInputSchema,
   segmentToken: z
     .string()
@@ -135,6 +135,7 @@ const EcfForm: React.FC<{
     register,
     handleSubmit,
     watch,
+    setValue,
     control,
     getValues,
     formState: { errors, isSubmitting },
@@ -187,7 +188,7 @@ const EcfForm: React.FC<{
     await publisher.mutate(
       {
         title: data.title,
-
+        segmentTitle: data.segmentTitle,
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
       },
@@ -196,7 +197,7 @@ const EcfForm: React.FC<{
           onError('エラーが発生しました。');
         },
         onSuccess: async () => {
-          await Router.replace('/send-complete');
+          await Router.push('/message-events');
         },
       }
     );
@@ -214,6 +215,10 @@ const EcfForm: React.FC<{
     }
   };
 
+  const handleSegmentChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setValue('segmentTitle', e.target.selectedOptions[0].text);
+  };
+
   return (
     <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
       <Card>
@@ -225,7 +230,11 @@ const EcfForm: React.FC<{
           </div>
           <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
-            <Select {...register('segmentToken')} error={!!errors.segmentToken}>
+            <Select
+              {...register('segmentToken')}
+              error={!!errors.segmentToken}
+              onChange={handleSegmentChange}
+            >
               <option value="">選択してください</option>
               {segments.map((segment) => (
                 <option key={segment.token} value={segment.token}>

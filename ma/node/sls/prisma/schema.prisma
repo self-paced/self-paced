@@ -11,17 +11,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id    String @id @default(uuid())
-  title String
-  text  String
-}
-
 model MessageEvent {
   id String @id @default(uuid())
   title String @db.VarChar(100)
+  segmentId String @db.VarChar(100)
+  segmentTitle String @db.VarChar(100)
   content Json
-  segment_id String @db.VarChar(100)
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @default(now()) @updatedAt @db.Timestamp(0)
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime @default(now()) @updatedAt @db.Timestamp(0)
 }

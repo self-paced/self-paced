@@ -63,6 +63,17 @@ export const dListSegmentsResponse: EcfPaginatedResponse<SegmentItem[]> = {
         updated_at: '2022/08/15 20:08:06',
       },
     },
+    {
+      id: '4',
+      type: 'search_query',
+      attributes: {
+        id: 4,
+        token: '2y43d62r-y53v-34rf-3r4r-3rrwr4t434t3',
+        name: 'segment D - ハヴィ',
+        created_at: '2022/08/15 20:08:06',
+        updated_at: '2022/08/15 20:08:06',
+      },
+    },
   ],
   ...dMeta,
 };
@@ -191,6 +202,21 @@ export const dListCustomersFromSegmentResponse: {
           ...dCustomer.attributes,
           id: 5,
           line_id: 'U2b5ef79a4c8085f615df92b7753a9e83',
+        },
+      },
+    ],
+    ...dMeta,
+  },
+  '2y43d62r-y53v-34rf-3r4r-3rrwr4t434t3': {
+    data: [
+      {
+        // Ravi
+        ...dCustomer,
+        id: '2',
+        attributes: {
+          ...dCustomer.attributes,
+          id: 2,
+          line_id: 'Uabe224d99d896c04a0fc5730a8c58cb4',
         },
       },
     ],
