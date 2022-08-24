@@ -80,7 +80,7 @@ const message = createRouter()
     resolve: async ({ input, ctx }) => {
       return await ctx.prisma.messageEvent.findUnique({
         where: {
-          id: input.id || undefined,
+          id: input.id != null ? input.id : undefined,
         },
       });
     },
