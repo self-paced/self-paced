@@ -80,13 +80,6 @@ const ecfSchema = z.object({
 
 export type EcfSchema = z.infer<typeof ecfSchema>;
 export type LineSchema = z.infer<typeof lineSchema>;
-type HTMLInputElementExtension = HTMLInputElement & {
-  selectedOptions: selectedOptions[];
-};
-
-type selectedOptions = {
-  text: string;
-};
 
 const TypeSelector: React.FC<{
   type: 'ecf' | 'line';
@@ -222,7 +215,7 @@ const EcfForm: React.FC<{
     }
   };
 
-  const handleSegumentChange = (e: ChangeEvent<HTMLInputElementExtension>) => {
+  const handleSegmentChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setValue('segmentTitle', e.target.selectedOptions[0].text);
   };
 
@@ -240,7 +233,7 @@ const EcfForm: React.FC<{
             <Select
               {...register('segmentToken')}
               error={!!errors.segmentToken}
-              onChange={handleSegumentChange}
+              onChange={handleSegmentChange}
             >
               <option value="">選択してください</option>
               {segments.map((segment) => (
