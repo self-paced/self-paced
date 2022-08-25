@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { InputLabel, TextField } from '@super_studio/ecforce_ui_albers';
-import { MessageComponent } from '.';
-import { ChangeEvent } from 'react';
 import v from '../../../utils/validation';
 
 export const lineImageMessageSchema = z.object({

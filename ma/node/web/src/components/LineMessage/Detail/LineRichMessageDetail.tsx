@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { MessageComponent } from '../MessageType';
-import LineImageMessageType from '../MessageType/LineImageMessageType';
+import LineRichMessageType from '../MessageType/LineRichMessageType';
 
-const LineImageMessageDetail: MessageComponent<LineImageMessageType> = ({
+const LineRichMessageDetail: MessageComponent<LineRichMessageType> = ({
   messageDetails,
 }) => {
   return (
@@ -11,21 +11,21 @@ const LineImageMessageDetail: MessageComponent<LineImageMessageType> = ({
         <dt>メッセージタイプ</dt>
         <dd>{messageDetails.type}</dd>
         <dt>画像URL</dt>
-        <dd>{messageDetails.originalContentUrl}</dd>
-        <dt>プレビュー画像URL</dt>
         <dd>
           <div className="w-24 h-24">
             <img
-              src={messageDetails.previewImageUrl}
-              alt={messageDetails.previewImageUrl}
+              src={messageDetails.contents.hero.url}
+              alt={messageDetails.contents.hero.url}
               className="w-full h-full object-cover"
             />
           </div>
-          {messageDetails.previewImageUrl}
+          {messageDetails.contents.hero.url}
         </dd>
+        <dt>アクションリンク</dt>
+        <dd>{messageDetails.contents.hero.action.uri}</dd>
       </dl>
     </div>
   );
 };
 
-export default LineImageMessageDetail;
+export default LineRichMessageDetail;

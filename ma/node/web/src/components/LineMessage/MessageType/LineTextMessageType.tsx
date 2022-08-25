@@ -1,7 +1,4 @@
-import { TextArea } from '@super_studio/ecforce_ui_albers';
-import { ChangeEvent } from 'react';
 import { z } from 'zod';
-import { MessageComponent } from '.';
 import v from '../../../utils/validation';
 
 export const lineTextMessageSchema = z.object({
