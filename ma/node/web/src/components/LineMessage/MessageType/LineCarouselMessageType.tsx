@@ -1,14 +1,4 @@
 import { z } from 'zod';
-import { InputLabel, TextField, Button } from '@super_studio/ecforce_ui_albers';
-import { MessageComponent } from '.';
-import { ChangeEvent, useState } from 'react';
-import {
-  MdAdd,
-  MdArrowDropDown,
-  MdArrowDropUp,
-  MdDelete,
-} from 'react-icons/md';
-import { useAutoAnimate } from '@formkit/auto-animate/react';
 import v from '../../../utils/validation';
 
 export const MAX_COLUMNS = 10;
@@ -16,7 +6,9 @@ export const MAX_ACTIONS = 3;
 
 export const lineCarouselMessageSchema = z.object({
   type: z.literal('template'),
-  altText: z.string().min(1),
+  altText: z
+    .string()
+    .min(1, { message: v.MESSAGES.required('通知のテキスト') }),
   template: z.object({
     type: z.literal('carousel'),
     columns: z

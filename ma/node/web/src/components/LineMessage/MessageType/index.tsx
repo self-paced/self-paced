@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import LineCarouselMessageDetail from '../Detail/LineCarouselMessageDetail';
 import LineImageMessageDetail from '../Detail/LineImageMessageDetail';
+import LineRichMessageDetail from '../Detail/LineRichMessageDetail';
 import LineTextMessageDetail from '../Detail/LineTextMessageDetail';
 import LineVideoMessageDetail from '../Detail/LineVideoMessageDetail';
 import LineCarouselMessageInput, {
@@ -9,6 +10,9 @@ import LineCarouselMessageInput, {
 import LineImageMessageInput, {
   DEFAULT_IMAGE_MESSAGE,
 } from '../Input/LineImageMessageInput';
+import LineRichMessageInput, {
+  DEFAULT_RICH_MESSAGE,
+} from '../Input/LineRichMessageInput';
 import LineTextMessageInput, {
   DEFAULT_TEXT_MESSAGE,
 } from '../Input/LineTextMessageInput';
@@ -17,6 +21,7 @@ import LineVideoMessageInput, {
 } from '../Input/LineVideoMessageInput';
 import { lineCarouselMessageSchema } from './LineCarouselMessageType';
 import { lineImageMessageSchema } from './LineImageMessageType';
+import { lineRichMessageSchema } from './LineRichMessageType';
 import { lineTextMessageSchema } from './LineTextMessageType';
 import { lineVideoMessageSchema } from './LineVideoMessageType';
 
@@ -25,6 +30,7 @@ export const anyMessageTypeSchema = z.union([
   lineImageMessageSchema,
   lineVideoMessageSchema,
   lineCarouselMessageSchema,
+  lineRichMessageSchema,
 ]);
 
 export type AnyMessageTypeDetails = z.infer<typeof anyMessageTypeSchema>;
@@ -60,6 +66,12 @@ const MessageType: {
     inputComponent: LineVideoMessageInput,
     detailComponent: LineVideoMessageDetail,
     default: DEFAULT_VIDEO_MESSAGE,
+  },
+  flex: {
+    name: 'リッチ',
+    inputComponent: LineRichMessageInput,
+    detailComponent: LineRichMessageDetail,
+    default: DEFAULT_RICH_MESSAGE,
   },
   template: {
     name: 'カルーセル',

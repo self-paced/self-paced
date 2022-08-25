@@ -1,6 +1,6 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import { Client } from '@line/bot-sdk';
+import { Client, Message } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import ecforceApi from '../../../libs/helpers/ecforceApi';
 import config from '../../../libs/config';
@@ -26,6 +26,25 @@ const lineVideoMessageSchema = z.object({
   type: z.literal('video'),
   originalContentUrl: z.string().url(),
   previewImageUrl: z.string().url(),
+});
+const lineRichMessageSchema = z.object({
+  type: z.literal('flex'),
+  altText: z.string().min(1),
+  contents: z.object({
+    type: z.literal('bubble'),
+    size: z.literal('giga'),
+    hero: z.object({
+      type: z.literal('image'),
+      url: z.string().min(1).url(),
+      size: z.literal('full'),
+      aspectRatio: z.literal('1:1'),
+      aspectMode: z.literal('cover'),
+      action: z.object({
+        type: z.literal('uri'),
+        uri: z.string().min(1).url(),
+      }),
+    }),
+  }),
 });
 const lineCarouselMessageSchema = z.object({
   type: z.literal('template'),
@@ -67,6 +86,7 @@ export const lineMessageSchema = z
       lineTextMessageSchema,
       lineImageMessageSchema,
       lineVideoMessageSchema,
+      lineRichMessageSchema,
       lineCarouselMessageSchema,
     ])
   )
@@ -97,7 +117,7 @@ const publisher = createRouter().mutation('push', {
             if (customer.attributes.line_id) {
               await client.pushMessage(
                 customer.attributes.line_id,
-                input.messages
+                input.messages as Message[]
               );
             }
           })
