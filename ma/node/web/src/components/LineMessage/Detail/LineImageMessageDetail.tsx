@@ -10,7 +10,7 @@ const LineImageMessageDetail: MessageComponent<LineImageMessageType> = ({
       <dl className="grid grid-cols-2">
         <dt>メッセージタイプ</dt>
         <dd>{messageDetails.type}</dd>
-        <dt>動画URL</dt>
+        <dt>画像URL</dt>
         <dd>{messageDetails.originalContentUrl}</dd>
         <dt>プレビュー画像URL</dt>
         <dd>
