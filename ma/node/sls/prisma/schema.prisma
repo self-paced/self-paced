@@ -63,6 +63,8 @@ model UserMessageLinkActivity {
   id                String          @id @default(uuid())
   type              String          @db.VarChar(50)
   content           Json
+  orderId           Int?
+  orderTotal        Int?
   createdAt         DateTime        @default(now()) @db.Timestamp(0)
   updatedAt         DateTime        @default(now()) @updatedAt @db.Timestamp(0)
   userMessageLink   UserMessageLink @relation(fields: [userMessageLinkId], references: [id])

@@ -47,6 +47,8 @@ CREATE TABLE `UserMessageLinkActivity` (
     `id` VARCHAR(191) NOT NULL,
     `type` VARCHAR(50) NOT NULL,
     `content` JSON NOT NULL,
+    `orderId` INTEGER NULL,
+    `orderTotal` INTEGER NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `userMessageLinkId` VARCHAR(191) NOT NULL,
