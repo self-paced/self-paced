@@ -23,7 +23,7 @@ CREATE TABLE `UserMessageEvent` (
     `id` VARCHAR(191) NOT NULL,
     `ecfId` INTEGER NOT NULL,
     `email` VARCHAR(100) NOT NULL,
-    `isRead` BOOLEAN NOT NULL,
+    `isRead` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `messageEventId` VARCHAR(191) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `UserMessageEvent` (
 -- CreateTable
 CREATE TABLE `UserMessageLink` (
     `id` VARCHAR(191) NOT NULL,
-    `originalLink` VARCHAR(100) NOT NULL,
+    `originalLink` VARCHAR(500) NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `userMessageEventId` VARCHAR(191) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `UserMessageLink` (
 -- CreateTable
 CREATE TABLE `UserMessageLinkActivity` (
     `id` VARCHAR(191) NOT NULL,
-    `type` VARCHAR(100) NOT NULL,
+    `type` VARCHAR(50) NOT NULL,
     `content` JSON NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),

@@ -41,7 +41,7 @@ model UserMessageEvent {
   id               String            @id @default(uuid())
   ecfId            Int
   email            String            @db.VarChar(100)
-  isRead           Boolean           @db.TinyInt
+  isRead           Boolean           @default(false) @db.TinyInt
   createdAt        DateTime          @default(now()) @db.Timestamp(0)
   updatedAt        DateTime          @default(now()) @updatedAt @db.Timestamp(0)
   messageEvent     MessageEvent      @relation(fields: [messageEventId], references: [id])
@@ -51,7 +51,7 @@ model UserMessageEvent {
 
 model UserMessageLink {
   id                        String                    @id @default(uuid())
-  originalLink              String                    @db.VarChar(100)
+  originalLink              String                    @db.VarChar(500)
   createdAt                 DateTime                  @default(now()) @db.Timestamp(0)
   updatedAt                 DateTime                  @default(now()) @updatedAt @db.Timestamp(0)
   userMessageEvent          UserMessageEvent          @relation(fields: [userMessageEventId], references: [id])
@@ -61,7 +61,7 @@ model UserMessageLink {
 
 model UserMessageLinkActivity {
   id                String          @id @default(uuid())
-  type              String          @db.VarChar(100)
+  type              String          @db.VarChar(50)
   content           Json
   createdAt         DateTime        @default(now()) @db.Timestamp(0)
   updatedAt         DateTime        @default(now()) @updatedAt @db.Timestamp(0)
