@@ -16,6 +16,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id            String         @id @default(uuid())
+  ecfProjectId  String         @unique
+  createdAt     DateTime
+  updatedAt     DateTime
+  MessageEvents MessageEvent[]
+}
+
 model MessageEvent {
   id                String             @id @default(uuid())
   title             String             @db.VarChar(100)
@@ -24,6 +32,8 @@ model MessageEvent {
   content           Json
   createdAt         DateTime           @default(now()) @db.Timestamp(0)
   updatedAt         DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+  account           Account            @relation(fields: [accountId], references: [id])
+  accountId         String
   userMessageEvents UserMessageEvent[]
 }
 
@@ -41,6 +51,7 @@ model UserMessageEvent {
 
 model UserMessageLink {
   id                        String                    @id @default(uuid())
+  originalLink              String                    @db.VarChar(100)
   createdAt                 DateTime                  @default(now()) @db.Timestamp(0)
   updatedAt                 DateTime                  @default(now()) @updatedAt @db.Timestamp(0)
   userMessageEvent          UserMessageEvent          @relation(fields: [userMessageEventId], references: [id])
