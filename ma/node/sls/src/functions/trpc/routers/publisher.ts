@@ -111,10 +111,33 @@ const publisher = createRouter().mutation('push', {
           page,
         });
         totalPages = res.meta.total_pages;
+
+        const messageEvent = await ctx.prisma.messageEvent.create({
+          data: {
+            projectId: ctx.jwt.projectId,
+            title: input.title,
+            segmentId: input.token,
+            segmentTitle: input.segmentTitle,
+            content: JSON.stringify(input.messages),
+          },
+        });
         // customer loop: ページのすべての顧客に対してメッセージを送信する
         await Promise.all(
           res.data.map(async (customer) => {
             if (customer.attributes.line_id) {
+              await ctx.prisma.userMessageEvent.create({
+                data: {
+                  userId: customer.id,
+                  lineId: customer.attributes.line_id,
+                  email: customer.attributes.email,
+                  userNumber: customer.attributes.number,
+                  messageEvent: {
+                    connect: {
+                      id: messageEvent.id,
+                    },
+                  },
+                },
+              });
               await client.pushMessage(
                 customer.attributes.line_id,
                 input.messages as Message[]
@@ -123,16 +146,6 @@ const publisher = createRouter().mutation('push', {
           })
         );
       } while (page++ < totalPages);
-
-      await ctx.prisma.messageEvent.create({
-        data: {
-          projectId: ctx.jwt.projectId,
-          title: input.title,
-          segmentId: input.token,
-          segmentTitle: input.segmentTitle,
-          content: JSON.stringify(input.messages),
-        },
-      });
     } catch (e) {
       console.error(e);
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
