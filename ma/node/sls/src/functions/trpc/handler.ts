@@ -10,6 +10,8 @@ import { AppRouter, appRouter } from './routers';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+// todo エラーが出たのでコメントアウトしてます。
 const shortTranslator = shortUUID();
 
 const app = express();
@@ -38,6 +40,7 @@ app.use(
  */
 app.get('/cusion/:linkShortId', async (req, res) => {
   const { linkShortId } = req.params;
+  // todo エラーが出たので、一時的にコメントアウト
   //const linkId = shortTranslator.toUUID(linkShortId);
   const dbLink = await prisma.userMessageLink.findUnique({
     where: {
