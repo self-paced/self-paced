@@ -27,8 +27,8 @@ model Account {
 model MessageEvent {
   id                String             @id @default(uuid())
   title             String             @db.VarChar(100)
-  segmentId         String             @db.VarChar(100)
-  segmentTitle      String             @db.VarChar(100)
+  segmentId         String?            @db.VarChar(100)
+  segmentTitle      String?            @db.VarChar(100)
   content           Json
   createdAt         DateTime           @default(now()) @db.Timestamp(0)
   updatedAt         DateTime           @default(now()) @updatedAt @db.Timestamp(0)
@@ -39,9 +39,11 @@ model MessageEvent {
 
 model UserMessageEvent {
   id               String            @id @default(uuid())
-  ecfId            Int
-  email            String            @db.VarChar(100)
-  isRead           Boolean           @default(false) @db.TinyInt
+  lineId           String
+  userId           String?
+  userNumber       String?
+  email            String?           @db.VarChar(256)
+  readAt           DateTime?         @db.Timestamp(0)
   createdAt        DateTime          @default(now()) @db.Timestamp(0)
   updatedAt        DateTime          @default(now()) @updatedAt @db.Timestamp(0)
   messageEvent     MessageEvent      @relation(fields: [messageEventId], references: [id])
@@ -62,9 +64,10 @@ model UserMessageLink {
 model UserMessageLinkActivity {
   id                String          @id @default(uuid())
   type              String          @db.VarChar(50)
-  content           Json
-  orderId           Int?
-  orderTotal        Int?
+  content           Json?
+  orderId           String?
+  orderNumber       String?
+  orderTotal        String?         @db.VarChar(100)
   createdAt         DateTime        @default(now()) @db.Timestamp(0)
   updatedAt         DateTime        @default(now()) @updatedAt @db.Timestamp(0)
   userMessageLink   UserMessageLink @relation(fields: [userMessageLinkId], references: [id])

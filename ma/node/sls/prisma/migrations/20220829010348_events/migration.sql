@@ -5,7 +5,9 @@
 
 */
 -- AlterTable
-ALTER TABLE `MessageEvent` ADD COLUMN `accountId` VARCHAR(191) NOT NULL;
+ALTER TABLE `MessageEvent` ADD COLUMN `accountId` VARCHAR(191) NOT NULL,
+    MODIFY `segmentId` VARCHAR(100) NULL,
+    MODIFY `segmentTitle` VARCHAR(100) NULL;
 
 -- CreateTable
 CREATE TABLE `Account` (
@@ -21,9 +23,11 @@ CREATE TABLE `Account` (
 -- CreateTable
 CREATE TABLE `UserMessageEvent` (
     `id` VARCHAR(191) NOT NULL,
-    `ecfId` INTEGER NOT NULL,
-    `email` VARCHAR(100) NOT NULL,
-    `isRead` BOOLEAN NOT NULL DEFAULT false,
+    `lineId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NULL,
+    `userNumber` VARCHAR(191) NULL,
+    `email` VARCHAR(256) NULL,
+    `readAt` TIMESTAMP(0) NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `messageEventId` VARCHAR(191) NOT NULL,
@@ -46,9 +50,10 @@ CREATE TABLE `UserMessageLink` (
 CREATE TABLE `UserMessageLinkActivity` (
     `id` VARCHAR(191) NOT NULL,
     `type` VARCHAR(50) NOT NULL,
-    `content` JSON NOT NULL,
-    `orderId` INTEGER NULL,
-    `orderTotal` INTEGER NULL,
+    `content` JSON NULL,
+    `orderId` VARCHAR(191) NULL,
+    `orderNumber` VARCHAR(191) NULL,
+    `orderTotal` VARCHAR(100) NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `userMessageLinkId` VARCHAR(191) NOT NULL,
