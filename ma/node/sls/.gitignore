@@ -6,5 +6,5 @@ node_modules
 
 # SERVERLESS STUFF
 .env*
-!.env.example
+!.env.*example
 .serverless
