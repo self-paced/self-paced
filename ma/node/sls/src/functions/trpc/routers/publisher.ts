@@ -126,11 +126,15 @@ const publisher = createRouter().mutation('push', {
 
       await ctx.prisma.messageEvent.create({
         data: {
-          projectId: ctx.jwt.projectId,
           title: input.title,
           segmentId: input.token,
           segmentTitle: input.segmentTitle,
           content: JSON.stringify(input.messages),
+          account: {
+            connect: {
+              projectId: ctx.jwt.projectId,
+            },
+          },
         },
       });
     } catch (e) {
