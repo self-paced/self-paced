@@ -10,4 +10,5 @@ const prisma = new PrismaClient();
       },
     });
   });
+  console.log('Seed Complete!');
 })();
