@@ -4,8 +4,9 @@
   "main": "serverless.ts",
   "private": true,
   "scripts": {
-    "dev": "source .env && sls offline --stage local --httpPort 5050",
-    "prisma:migrate": "npx prisma migrate dev",
+    "dev": "source .env.local && sls offline --stage local --httpPort 5050",
+    "prisma:migrate": "source .env.local && npx prisma migrate dev",
+    "prisma:seed": "source .env.local && npx prisma db seed",
     "deploy:dev": "source .env.dev && sls deploy --stage dev",
     "deploy:prd": "source .env.prd && sls deploy --stage prd",
     "postinstall": "prisma generate"
@@ -14,7 +15,8 @@
     "node": ">=16.15.1"
   },
   "prisma": {
-    "schema": "prisma/schema.prisma"
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@line/bot-sdk": "7.5.0",
@@ -34,6 +36,7 @@
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",
     "@babel/preset-typescript": "7.17.12",
+    "@mermaid-js/mermaid-cli": "9.1.6",
     "@serverless/typescript": "3.19.0",
     "@types/aws-lambda": "8.10.101",
     "@types/aws-sdk": "2.7.0",
@@ -45,6 +48,7 @@
     "copy-webpack-plugin": "11.0.0",
     "fork-ts-checker-webpack-plugin": "7.2.11",
     "prisma": "4.2.1",
+    "prisma-erd-generator": "1.1.0",
     "serverless": "3.19.0",
     "serverless-offline": "8.8.0",
     "serverless-webpack": "5.7.1",

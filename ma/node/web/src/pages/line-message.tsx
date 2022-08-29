@@ -226,11 +226,7 @@ const EcfForm: React.FC<{
       <Card>
         <CardHead>配信対象</CardHead>
         <CardBody>
-          <InputLabel>配信対象</InputLabel>
           <div>
-            <TypeSelector type={type} onChange={onTypeChange} />
-          </div>
-          <div className="mt-3">
             <InputLabel>配信対象検索条件</InputLabel>
             <Select
               {...register('segmentToken')}
@@ -420,11 +416,7 @@ const LineForm: React.FC<{
       <Card>
         <CardHead>配信対象</CardHead>
         <CardBody>
-          <InputLabel>配信対象</InputLabel>
           <div>
-            <TypeSelector type={type} onChange={onTypeChange} />
-          </div>
-          <div className="mt-3">
             <InputLabel>性別</InputLabel>
             <div className="text-xs">
               <Checkbox {...register('gender')} value="male" id="male">

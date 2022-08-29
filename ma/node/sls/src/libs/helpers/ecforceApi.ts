@@ -13,7 +13,7 @@ import {
  *
  * ※ クッキーを削除し、ログイン済みのdemoショップの`_ec_force_session`クッキーを設定する必要がある
  */
-const DUMMY_FLAG = false;
+const DUMMY_FLAG = true;
 
 const callEcforceApi = async <T>(
   ctx: Context,
