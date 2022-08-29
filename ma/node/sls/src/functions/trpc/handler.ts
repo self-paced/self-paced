@@ -5,7 +5,13 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import shortUUID from 'short-uuid';
 import { AppRouter, appRouter } from './routers';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+const shortTranslator = shortUUID();
 
 const app = express();
 app.use(cookieParser());
@@ -26,5 +32,31 @@ app.use(
     createContext,
   })
 );
+
+/**
+ * クッションリンク
+ * こちらのURLに入ると、クリックを登録し、もとのリンク先にリダイレクトされます。
+ */
+app.get('/cusion/:linkShortId', async (req, res) => {
+  const { linkShortId } = req.params;
+  const linkId = shortTranslator.toUUID(linkShortId);
+  const dbLink = await prisma.userMessageLink.findUnique({
+    where: {
+      id: linkId,
+    },
+  });
+  if (!dbLink) {
+    res.json('Not found');
+    return;
+  }
+  await prisma.userMessageLinkActivity.create({
+    data: {
+      userMessageLinkId: linkId,
+      type: 'click',
+    },
+  });
+  const link = dbLink.originalLink;
+  res.redirect(link);
+});
 
 export const main: Handler = serverlessExpress({ app });
