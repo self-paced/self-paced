@@ -25,6 +25,7 @@ export const createContext = async ({
       token,
       secret: config.nextAuthSecret,
     });
+    console.log('JWT Payload:', jwtPayload);
     if (!jwtPayload)
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid JWT' });
   }

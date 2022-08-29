@@ -100,6 +100,7 @@ const publisher = createRouter().mutation('push', {
     token: z.string().min(1),
     messages: lineMessageSchema,
   }),
+  // eslint-disable-next-line max-lines-per-function
   resolve: async ({ input, ctx }) => {
     let page = 1;
     let totalPages: number;
@@ -114,11 +115,15 @@ const publisher = createRouter().mutation('push', {
 
         const messageEvent = await ctx.prisma.messageEvent.create({
           data: {
-            projectId: ctx.jwt.projectId,
             title: input.title,
             segmentId: input.token,
             segmentTitle: input.segmentTitle,
             content: JSON.stringify(input.messages),
+            account: {
+              connect: {
+                projectId: ctx.jwt.projectId,
+              },
+            },
           },
         });
         // customer loop: ページのすべての顧客に対してメッセージを送信する
