@@ -18,9 +18,9 @@ datasource db {
 
 model Account {
   id            String         @id @default(uuid())
-  ecfProjectId  String         @unique
-  createdAt     DateTime
-  updatedAt     DateTime
+  projectId     String         @unique
+  createdAt     DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime       @default(now()) @updatedAt @db.Timestamp(0)
   MessageEvents MessageEvent[]
 }
 
@@ -32,8 +32,8 @@ model MessageEvent {
   content           Json
   createdAt         DateTime           @default(now()) @db.Timestamp(0)
   updatedAt         DateTime           @default(now()) @updatedAt @db.Timestamp(0)
-  account           Account            @relation(fields: [accountId], references: [id])
-  accountId         String
+  account           Account            @relation(fields: [projectId], references: [projectId])
+  projectId         String
   userMessageEvents UserMessageEvent[]
 }
 

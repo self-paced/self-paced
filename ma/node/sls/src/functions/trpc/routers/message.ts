@@ -47,7 +47,7 @@ const message = createRouter()
       const [count, messages] = await prisma.$transaction([
         prisma.messageEvent.count({
           where: {
-            accountId: jwt.projectId,
+            projectId: jwt.projectId,
           },
         }),
         prisma.messageEvent.findMany({
@@ -57,7 +57,7 @@ const message = createRouter()
             [sortData.field]: sortData.direction,
           },
           where: {
-            accountId: jwt.projectId,
+            projectId: jwt.projectId,
           },
         }),
       ]);
@@ -88,7 +88,7 @@ const message = createRouter()
       return await ctx.prisma.messageEvent.findFirst({
         where: {
           id: input.id,
-          accountId: ctx.jwt.projectId,
+          projectId: ctx.jwt.projectId,
         },
       });
     },
