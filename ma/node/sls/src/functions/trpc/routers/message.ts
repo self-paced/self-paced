@@ -32,7 +32,7 @@ const message = createRouter()
         totalPages: z.number().min(1),
       }),
     }),
-    resolve: async ({ input, ctx: { prisma } }) => {
+    resolve: async ({ input, ctx: { prisma, jwt } }) => {
       const { page, perPage } = input;
       const perPageDefault = 10;
       const perPageMax = 100;
@@ -45,12 +45,19 @@ const message = createRouter()
         direction: 'desc',
       };
       const [count, messages] = await prisma.$transaction([
-        prisma.messageEvent.count(),
+        prisma.messageEvent.count({
+          where: {
+            accountId: jwt.projectId,
+          },
+        }),
         prisma.messageEvent.findMany({
           skip,
           take: perPageValue,
           orderBy: {
             [sortData.field]: sortData.direction,
+          },
+          where: {
+            accountId: jwt.projectId,
           },
         }),
       ]);
@@ -78,9 +85,10 @@ const message = createRouter()
       id: z.string(),
     }),
     resolve: async ({ input, ctx }) => {
-      return await ctx.prisma.messageEvent.findUnique({
+      return await ctx.prisma.messageEvent.findFirst({
         where: {
           id: input.id,
+          accountId: ctx.jwt.projectId,
         },
       });
     },
