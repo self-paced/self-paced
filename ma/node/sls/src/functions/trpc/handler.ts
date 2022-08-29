@@ -10,7 +10,6 @@ import { AppRouter, appRouter } from './routers';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
 const shortTranslator = shortUUID();
 
 const app = express();
@@ -57,6 +56,21 @@ app.get('/cusion/:linkShortId', async (req, res) => {
   });
   const link = dbLink.originalLink;
   res.redirect(link);
+});
+app.get('/cv', async (req, res) => {
+  console.log('query', req.query);
+  const account = await prisma.account.create({
+    data: {
+      projectId: 'local2',
+    },
+  });
+  // const messages = await prisma.account.findFirst({
+  //   where: {
+  //     projectId: 'local',
+  //   },
+  // });
+  // console.log('messages', messages);
+  res.send('Hello World!');
 });
 
 export const main: Handler = serverlessExpress({ app });
