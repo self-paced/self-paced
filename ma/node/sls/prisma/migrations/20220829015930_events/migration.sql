@@ -38,7 +38,7 @@ CREATE TABLE `UserMessageEvent` (
 -- CreateTable
 CREATE TABLE `UserMessageLink` (
     `id` VARCHAR(191) NOT NULL,
-    `originalLink` VARCHAR(500) NOT NULL,
+    `originalLink` TEXT NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `userMessageEventId` VARCHAR(191) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE `UserMessageLinkActivity` (
     `content` JSON NULL,
     `orderId` VARCHAR(191) NULL,
     `orderNumber` VARCHAR(191) NULL,
-    `orderTotal` VARCHAR(100) NULL,
+    `orderTotal` VARCHAR(191) NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `userMessageLinkId` VARCHAR(191) NOT NULL,

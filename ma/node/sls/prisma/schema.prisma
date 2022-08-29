@@ -53,7 +53,7 @@ model UserMessageEvent {
 
 model UserMessageLink {
   id                        String                    @id @default(uuid())
-  originalLink              String                    @db.VarChar(500)
+  originalLink              String                    @db.Text
   createdAt                 DateTime                  @default(now()) @db.Timestamp(0)
   updatedAt                 DateTime                  @default(now()) @updatedAt @db.Timestamp(0)
   userMessageEvent          UserMessageEvent          @relation(fields: [userMessageEventId], references: [id])
@@ -67,7 +67,7 @@ model UserMessageLinkActivity {
   content           Json?
   orderId           String?
   orderNumber       String?
-  orderTotal        String?         @db.VarChar(100)
+  orderTotal        String?
   createdAt         DateTime        @default(now()) @db.Timestamp(0)
   updatedAt         DateTime        @default(now()) @updatedAt @db.Timestamp(0)
   userMessageLink   UserMessageLink @relation(fields: [userMessageLinkId], references: [id])
