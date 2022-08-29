@@ -1,9 +1,14 @@
+/* eslint-disable max-depth */
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
 import { Client, Message } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
-import ecforceApi from '../../../libs/helpers/ecforceApi';
+import ecforceApi, { getOrigin } from '../../../libs/helpers/ecforceApi';
 import config from '../../../libs/config';
+import shortUUID from 'short-uuid';
+import { Context } from '../context';
+
+const shortTranslator = shortUUID();
 
 const client = new Client({
   channelAccessToken: config.lineToken,
@@ -93,6 +98,8 @@ export const lineMessageSchema = z
   .min(1)
   .max(MAX_MESSAGES);
 
+type LineMessage = z.infer<typeof lineMessageSchema>;
+
 const publisher = createRouter().mutation('push', {
   input: z.object({
     title: z.string().min(1),
@@ -111,32 +118,52 @@ const publisher = createRouter().mutation('push', {
           page,
         });
         totalPages = res.meta.total_pages;
+
+        const messageEvent = await ctx.prisma.messageEvent.create({
+          data: {
+            title: input.title,
+            segmentId: input.token,
+            segmentTitle: input.segmentTitle,
+            content: JSON.stringify(input.messages),
+            account: {
+              connect: {
+                projectId: ctx.jwt.projectId,
+              },
+            },
+          },
+        });
         // customer loop: ページのすべての顧客に対してメッセージを送信する
         await Promise.all(
           res.data.map(async (customer) => {
             if (customer.attributes.line_id) {
+              const userMessageEvent = await ctx.prisma.userMessageEvent.create(
+                {
+                  data: {
+                    userId: customer.id,
+                    lineId: customer.attributes.line_id,
+                    email: customer.attributes.email,
+                    userNumber: customer.attributes.number,
+                    messageEvent: {
+                      connect: {
+                        id: messageEvent.id,
+                      },
+                    },
+                  },
+                }
+              );
+              const newMessages = await handleLinks(
+                input.messages,
+                userMessageEvent.id,
+                ctx
+              );
               await client.pushMessage(
                 customer.attributes.line_id,
-                input.messages as Message[]
+                newMessages as Message[]
               );
             }
           })
         );
       } while (page++ < totalPages);
-
-      await ctx.prisma.messageEvent.create({
-        data: {
-          title: input.title,
-          segmentId: input.token,
-          segmentTitle: input.segmentTitle,
-          content: JSON.stringify(input.messages),
-          account: {
-            connect: {
-              projectId: ctx.jwt.projectId,
-            },
-          },
-        },
-      });
     } catch (e) {
       console.error(e);
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
@@ -144,5 +171,98 @@ const publisher = createRouter().mutation('push', {
     return true;
   },
 });
+
+const handleLinks = async (
+  messages: LineMessage,
+  userMessageEventId: string,
+  ctx: Context
+) => {
+  const newMessages = [...messages];
+  const cusionUrl = `${getOrigin(ctx)}/admin/ma/sls/${process.env.ENV}/cusion`;
+  for (const message of newMessages) {
+    switch (message.type) {
+      // 【テキストメッセージ】
+      case 'text':
+        // リンクを見つける
+        const links = message.text.match(/https?:\/\/[^\s]+/g);
+        if (links) {
+          for (const link of links) {
+            const dbLink = await ctx.prisma.userMessageLink.create({
+              data: {
+                originalLink: link,
+                userMessageEvent: {
+                  connect: {
+                    id: userMessageEventId,
+                  },
+                },
+              },
+            });
+            // リンクを書き換える
+            message.text = message.text.replace(
+              link,
+              `${cusionUrl}/${shortTranslator.fromUUID(dbLink.id)}`
+            );
+          }
+        }
+        break;
+      // 【リッチメッセージ】
+      case 'flex':
+        const link = message.contents.hero.action.uri;
+        const dbLink = await ctx.prisma.userMessageLink.create({
+          data: {
+            originalLink: link,
+            userMessageEvent: {
+              connect: {
+                id: userMessageEventId,
+              },
+            },
+          },
+        });
+        // リンクを書き換える
+        message.contents.hero.action.uri = `${cusionUrl}/${shortTranslator.fromUUID(
+          dbLink.id
+        )}`;
+        break;
+      // 【カルーセルメッセージ】
+      case 'template':
+        for (const column of message.template.columns) {
+          // デフォルトリンク
+          const link = column.defaultAction.uri;
+          const dbLink = await ctx.prisma.userMessageLink.create({
+            data: {
+              originalLink: link,
+              userMessageEvent: {
+                connect: {
+                  id: userMessageEventId,
+                },
+              },
+            },
+          });
+          // リンクを書き換える
+          column.defaultAction.uri = `${cusionUrl}/${shortTranslator.fromUUID(
+            dbLink.id
+          )}`;
+          // アクションリンク
+          for (const actions of column.actions) {
+            const link = actions.uri;
+            const dbLink = await ctx.prisma.userMessageLink.create({
+              data: {
+                originalLink: link,
+                userMessageEvent: {
+                  connect: {
+                    id: userMessageEventId,
+                  },
+                },
+              },
+            });
+            // リンクを書き換える
+            actions.uri = `${cusionUrl}/${shortTranslator.fromUUID(dbLink.id)}`;
+          }
+        }
+        break;
+    }
+  }
+  return newMessages;
+};
 
 export default publisher;
