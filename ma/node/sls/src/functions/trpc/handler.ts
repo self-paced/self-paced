@@ -57,20 +57,41 @@ app.get('/cusion/:linkShortId', async (req, res) => {
   const link = dbLink.originalLink;
   res.redirect(link);
 });
+
+/**
+ * Socket通信のCVエンドポイント
+ * パラメータを受け取り、DBに保存します。
+ */
 app.get('/cv', async (req, res) => {
-  console.log('query', req.query);
-  const account = await prisma.account.create({
-    data: {
-      projectId: 'local2',
+  const { _ecfma, order_id, order_number, total_price } = req.query;
+
+  const dbLink = await prisma.userMessageLink.findUnique({
+    where: {
+      id: _ecfma?.toString(),
     },
   });
-  // const messages = await prisma.account.findFirst({
-  //   where: {
-  //     projectId: 'local',
-  //   },
-  // });
-  // console.log('messages', messages);
-  res.send('Hello World!');
+
+  if (!dbLink) {
+    res.json('Not found');
+    return;
+  }
+
+  await prisma.userMessageLinkActivity.create({
+    data: {
+      userMessageLink: {
+        connect: {
+          id: _ecfma as string | undefined,
+        },
+      },
+      type: 'cv',
+      orderId: order_id?.toString(),
+      orderNumber: order_number?.toString(),
+      orderTotal: Number(total_price),
+      content: JSON.stringify(req.query),
+    },
+  });
+
+  res.send('success');
 });
 
 export const main: Handler = serverlessExpress({ app });
