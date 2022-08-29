@@ -38,10 +38,10 @@ app.use(
  */
 app.get('/cusion/:linkShortId', async (req, res) => {
   const { linkShortId } = req.params;
-  const linkId = shortTranslator.toUUID(linkShortId);
+  //const linkId = shortTranslator.toUUID(linkShortId);
   const dbLink = await prisma.userMessageLink.findUnique({
     where: {
-      id: linkId,
+      id: linkShortId,
     },
   });
   if (!dbLink) {
@@ -50,12 +50,12 @@ app.get('/cusion/:linkShortId', async (req, res) => {
   }
   await prisma.userMessageLinkActivity.create({
     data: {
-      userMessageLinkId: linkId,
+      userMessageLinkId: linkShortId,
       type: 'click',
     },
   });
   const link = dbLink.originalLink;
-  res.redirect(link);
+  res.redirect(link + '?_ecfma=' + linkShortId);
 });
 
 /**
