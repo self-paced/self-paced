@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  swcMinify: false,
   basePath: process.env.BASE_PATH,
   env: {
     // パブリック環境変数（ブラウザーで取得可能）
@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/line-message',
+        destination: '/message-events',
         permanent: true,
       },
     ];

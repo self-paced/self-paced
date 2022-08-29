@@ -20,14 +20,12 @@
     "eslint-config-next": "12.2.2",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.2.1",
+    "@mermaid-js/mermaid-cli": "9.1.5",
     "turbo": "latest"
   },
   "engines": {
     "npm": ">=7.0.0",
     "node": ">=14.0.0"
   },
-  "packageManager": "npm@8.5.5",
-  "overrides": {
-    "react": "18.2.0"
-  }
+  "packageManager": "npm@8.5.5"
 }

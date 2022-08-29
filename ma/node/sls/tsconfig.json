@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.paths.json",
+  "baseUrl": ".",
   "compilerOptions": {
     "moduleResolution": "node",
     "strict": true,
@@ -14,8 +14,5 @@
     "module": "commonjs",
     "target": "es2022"
   },
-  "include": ["src/**/*.ts", "serverless.ts"],
-  "ts-node": {
-    "require": ["tsconfig-paths/register"]
-  }
+  "include": ["src/**/*.ts", "serverless.ts"]
 }

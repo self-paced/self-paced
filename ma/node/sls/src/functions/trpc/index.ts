@@ -1,4 +1,4 @@
-import { getAPIBaseInfo } from '@libs/helpers/lambdaHelper';
+import { getAPIBaseInfo } from '../../libs/helpers/lambdaHelper';
 
 const { handlerDir } = getAPIBaseInfo(__dirname);
 

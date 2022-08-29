@@ -1,12 +1,12 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
-import { Client, DemographicFilterObject } from '@line/bot-sdk';
+import { Client, DemographicFilterObject, Message } from '@line/bot-sdk';
 import { TRPCError } from '@trpc/server';
 import { lineMessageSchema } from './publisher';
-import { env } from '../../../libs/config/env';
+import config from '../../../libs/config';
 
 const client = new Client({
-  channelAccessToken: env.LINE_TOKEN,
+  channelAccessToken: config.lineToken,
 });
 
 const AGE_SCHEMA = z.union([
@@ -27,17 +27,18 @@ const line = createRouter()
       messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.pushMessage(input.userId, input.messages);
+      await client.pushMessage(input.userId, input.messages as Message[]);
       return true;
     },
   })
   .mutation('multicast', {
     input: z.object({
+      title: z.string().min(1),
       userIds: z.array(z.string()).min(1),
       messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.multicast(input.userIds, input.messages);
+      await client.multicast(input.userIds, input.messages as Message[]);
       return true;
     },
   })
@@ -46,12 +47,13 @@ const line = createRouter()
       messages: lineMessageSchema,
     }),
     resolve: async ({ input }) => {
-      await client.broadcast(input.messages);
+      await client.broadcast(input.messages as Message[]);
       return true;
     },
   })
   .mutation('narrowcast', {
     input: z.object({
+      title: z.string().min(1),
       gender: z.union([z.literal('male'), z.literal('female')]).nullish(),
       age: z
         .object({ gte: AGE_SCHEMA.nullish(), lt: AGE_SCHEMA.nullish() })
@@ -78,7 +80,7 @@ const line = createRouter()
       }
       try {
         await client.narrowcast(
-          input.messages,
+          input.messages as Message[],
           undefined,
           demographicFilter.and.length
             ? {

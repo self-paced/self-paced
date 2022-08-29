@@ -2,7 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  theme    = "default"
 }
 
 datasource db {
@@ -10,8 +16,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id    String @id @default(uuid())
-  title String
-  text  String
+model Account {
+  id            String         @id @default(uuid())
+  projectId     String         @unique
+  createdAt     DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime       @default(now()) @updatedAt @db.Timestamp(0)
+  MessageEvents MessageEvent[]
+}
+
+model MessageEvent {
+  id                String             @id @default(uuid())
+  title             String             @db.VarChar(100)
+  segmentId         String?            @db.VarChar(100)
+  segmentTitle      String?            @db.VarChar(100)
+  content           Json
+  createdAt         DateTime           @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime           @default(now()) @updatedAt @db.Timestamp(0)
+  account           Account            @relation(fields: [projectId], references: [projectId])
+  projectId         String
+  userMessageEvents UserMessageEvent[]
+}
+
+model UserMessageEvent {
+  id               String            @id @default(uuid())
+  lineId           String
+  userId           String?
+  userNumber       String?
+  email            String?           @db.VarChar(256)
+  readAt           DateTime?         @db.Timestamp(0)
+  createdAt        DateTime          @default(now()) @db.Timestamp(0)
+  updatedAt        DateTime          @default(now()) @updatedAt @db.Timestamp(0)
+  messageEvent     MessageEvent      @relation(fields: [messageEventId], references: [id])
+  messageEventId   String
+  userMessageLinks UserMessageLink[]
+}
+
+model UserMessageLink {
+  id                        String                    @id @default(uuid())
+  originalLink              String                    @db.Text
+  createdAt                 DateTime                  @default(now()) @db.Timestamp(0)
+  updatedAt                 DateTime                  @default(now()) @updatedAt @db.Timestamp(0)
+  userMessageEvent          UserMessageEvent          @relation(fields: [userMessageEventId], references: [id])
+  userMessageEventId        String
+  UserMessageLinkActivities UserMessageLinkActivity[]
+}
+
+model UserMessageLinkActivity {
+  id                String          @id @default(uuid())
+  type              String          @db.VarChar(50)
+  content           Json?
+  orderId           String?
+  orderNumber       String?
+  orderTotal        String?
+  createdAt         DateTime        @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime        @default(now()) @updatedAt @db.Timestamp(0)
+  userMessageLink   UserMessageLink @relation(fields: [userMessageLinkId], references: [id])
+  userMessageLinkId String
 }

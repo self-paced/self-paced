@@ -20,11 +20,11 @@ const user = createRouter()
       // ユーザ取得
       return [input];
     },
+  })
+  .query('all', {
+    async resolve({ ctx }) {
+      return await ctx.prisma.messageEvent.findMany();
+    },
   });
-// .query('all', {
-//   async resolve({ ctx }) {
-//     return await ctx.prisma.post.findMany();
-//   },
-// });
 
 export default user;

@@ -7,6 +7,14 @@ import {
   dSignInWithCookieResponse,
 } from './dummyData';
 
+/**
+ * ローカルからdemoショップのデータを連携したい場合
+ * こちらのフラグを`false`にする
+ *
+ * ※ クッキーを削除し、ログイン済みのdemoショップの`_ec_force_session`クッキーを設定する必要がある
+ */
+const DUMMY_FLAG = true;
+
 const callEcforceApi = async <T>(
   ctx: Context,
   params: { url: string; method: string; headers?: AxiosRequestHeaders }
@@ -122,7 +130,7 @@ export type CustomerItem = {
 
 const DEV_ORIGINS = ['http://localhost:4040', 'https://dev-ma.ec-force.com'];
 
-const getOrigin = (ctx: Context) => {
+export const getOrigin = (ctx: Context) => {
   const origin =
     ctx.req.headers.origin ??
     `${new URL(ctx.req.headers.referer ?? '').origin}`;
@@ -134,7 +142,7 @@ const getOrigin = (ctx: Context) => {
 const ecforceApi = {
   signInWithCookie: async (ctx: Context) => {
     const url = `${getOrigin(ctx)}/api/v2/admins/sign_in_with_cookie`;
-    return process.env.NODE_ENV === 'development'
+    return process.env.NODE_ENV === 'development' && DUMMY_FLAG
       ? dSignInWithCookieResponse
       : await callEcforceApi<EcfUser>(ctx, {
           url,
@@ -148,7 +156,7 @@ const ecforceApi = {
     const url = `${getOrigin(
       ctx
     )}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
-    return process.env.NODE_ENV === 'development'
+    return process.env.NODE_ENV === 'development' && DUMMY_FLAG
       ? dListSegmentsResponse
       : await callEcforceApi<EcfPaginatedResponse<SegmentItem[]>>(ctx, {
           url,
@@ -162,7 +170,7 @@ const ecforceApi = {
     const url = `${getOrigin(ctx)}/api/v2/admin/customers?per=100&page=${
       input.page
     }&q[token]=${input.token}`;
-    return process.env.NODE_ENV === 'development'
+    return process.env.NODE_ENV === 'development' && DUMMY_FLAG
       ? dListCustomersFromSegmentResponse[input.token]
       : await callEcforceApi<EcfPaginatedResponse<CustomerItem[]>>(ctx, {
           url,

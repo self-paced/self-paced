@@ -1,11 +1,10 @@
-import { env } from '../../libs/config/env';
 import { inferAsyncReturnType, TRPCError } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { decode, JWT } from 'next-auth/jwt';
 
-// todo prismaを使用するときにコメントアウトを外す
-//import { PrismaClient } from '@prisma/client';
-//const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client';
+import config from '../../libs/config';
+const prisma = new PrismaClient();
 
 const PUBLIC_PATHS = ['/auth.signInWithCookie'];
 
@@ -19,12 +18,12 @@ export const createContext = async ({
     jwtPayload = null;
   } else {
     const token =
-      env.NODE_ENV === 'development'
+      config.nodeEnv === 'development'
         ? req.cookies['next-auth.session-token']
         : req.cookies['__Secure-next-auth.session-token'];
     jwtPayload = await decode({
       token,
-      secret: env.NEXTAUTH_SECRET,
+      secret: config.nextAuthSecret,
     });
     if (!jwtPayload)
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid JWT' });
@@ -33,7 +32,7 @@ export const createContext = async ({
     req,
     res,
     jwt: jwtPayload as JWT,
-    // prisma,
+    prisma,
   };
 };
 export type Context = inferAsyncReturnType<typeof createContext>;

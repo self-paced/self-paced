@@ -4,21 +4,23 @@
   "main": "serverless.ts",
   "private": true,
   "scripts": {
-    "dev": "sls offline --stage local --httpPort 5050",
-    "prisma:migrate": "npx prisma migrate dev --name init",
-    "deploy:dev": "sls deploy --stage dev",
-    "deploy:prd": "sls deploy --stage prd",
+    "dev": "source .env.local && sls offline --stage local --httpPort 5050",
+    "prisma:migrate": "source .env.local && npx prisma migrate dev",
+    "prisma:seed": "source .env.local && npx prisma db seed",
+    "deploy:dev": "source .env.dev && sls deploy --stage dev",
+    "deploy:prd": "source .env.prd && sls deploy --stage prd",
     "postinstall": "prisma generate"
   },
   "engines": {
     "node": ">=16.15.1"
   },
   "prisma": {
-    "schema": "prisma/schema.prisma"
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@line/bot-sdk": "7.5.0",
-    "@prisma/client": "4.1.0",
+    "@prisma/client": "4.2.1",
     "@trpc/server": "9.25.3",
     "@vendia/serverless-express": "4.10.1",
     "aws-sdk": "2.1160.0",
@@ -26,6 +28,7 @@
     "cookie-parser": "1.4.6",
     "cors": "2.8.5",
     "express": "4.18.1",
+    "next-auth": "4.10.0",
     "source-map-support": "0.5.21",
     "zod": "3.17.3"
   },
@@ -33,6 +36,7 @@
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",
     "@babel/preset-typescript": "7.17.12",
+    "@mermaid-js/mermaid-cli": "9.1.6",
     "@serverless/typescript": "3.19.0",
     "@types/aws-lambda": "8.10.101",
     "@types/aws-sdk": "2.7.0",
@@ -43,7 +47,8 @@
     "babel-loader": "8.2.5",
     "copy-webpack-plugin": "11.0.0",
     "fork-ts-checker-webpack-plugin": "7.2.11",
-    "prisma": "4.1.0",
+    "prisma": "4.2.1",
+    "prisma-erd-generator": "1.1.0",
     "serverless": "3.19.0",
     "serverless-offline": "8.8.0",
     "serverless-webpack": "5.7.1",
