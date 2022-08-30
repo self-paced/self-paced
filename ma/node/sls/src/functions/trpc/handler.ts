@@ -11,7 +11,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// todo エラーが出たのでコメントアウトしてます。
 const shortTranslator = shortUUID();
 
 const app = express();
