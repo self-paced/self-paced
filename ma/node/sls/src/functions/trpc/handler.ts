@@ -56,8 +56,9 @@ app.get('/cusion/:linkShortId', async (req, res) => {
       type: 'click',
     },
   });
-  const link = dbLink.originalLink;
-  res.redirect(link + '?_ecfma=' + linkShortId);
+  const url = new URL(dbLink.originalLink);
+  url.searchParams.append('_ecfma', linkShortId);
+  res.redirect(url.toString());
 });
 
 /**

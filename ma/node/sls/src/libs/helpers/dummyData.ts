@@ -372,12 +372,28 @@ export const dListCustomersFromSegmentResponse: {
       {
         // 菊池
         ...dCustomer,
-        id: '6',
+        id: '4',
         attributes: {
           ...dCustomer.attributes,
-          id: 6,
+          id: 4,
           line_id: 'U97e07eaecdc08925a9bec89f31216e08',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '4',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '4',
+        attributes: { ...dIncludedAddress.attributes, id: 4 },
       },
     ],
     ...dMeta,
