@@ -1,4 +1,5 @@
 import {
+  AddressItem,
   CustomerItem,
   EcfPaginatedResponse,
   EcfUser,
@@ -139,8 +140,48 @@ const dCustomer: CustomerItem = {
   },
 };
 
+const dIncludedAddress: AddressItem = {
+  id: '1',
+  type: 'address',
+  attributes: {
+    id: 1,
+    name01: 'Foo',
+    name02: 'Bar',
+    kana01: 'フー',
+    kana02: 'バー',
+    company_name: '',
+    zip01: '123',
+    zip02: '4567',
+    addr01: '渋谷区桜丘町',
+    addr02: '1-1',
+    addr03: '',
+    tel01: '00',
+    tel02: '0000',
+    tel03: '0000',
+    tel01_received: '',
+    tel02_received: '',
+    tel03_received: '',
+    fax01: '',
+    fax02: '',
+    fax03: '',
+    prefecture_id: 13,
+    prefecture_name: '東京都',
+    full_name: 'FooBar',
+    full_kana: 'フーバー',
+    full_tel: '0000000000',
+    full_fax: '',
+    full_zip: '1234567',
+    full_address: '東京都渋谷区桜丘町1-1',
+    full_address_with_space: '東京都 渋谷区桜丘町 1-1 ',
+    created_at: '2022/08/29 14:16:16',
+    updated_at: '2022/08/29 14:16:16',
+  },
+};
+
 export const dListCustomersFromSegmentResponse: {
-  [key: string]: EcfPaginatedResponse<CustomerItem[]>;
+  [key: string]: EcfPaginatedResponse<CustomerItem[]> & {
+    included: AddressItem[];
+  };
 } = {
   '15407622-2adb-4f47-a1c9-5c23bbe57b64': {
     data: [
@@ -153,6 +194,22 @@ export const dListCustomersFromSegmentResponse: {
           id: 1,
           line_id: 'U047bb714204750b1fac84038db302a12',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '1',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '1',
+        attributes: { ...dIncludedAddress.attributes, id: 1 },
       },
     ],
     ...dMeta,
@@ -168,6 +225,15 @@ export const dListCustomersFromSegmentResponse: {
           id: 2,
           line_id: 'Uabe224d99d896c04a0fc5730a8c58cb4',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '2',
+              type: 'address',
+            },
+          },
+        },
       },
       {
         // 河端
@@ -177,6 +243,15 @@ export const dListCustomersFromSegmentResponse: {
           ...dCustomer.attributes,
           id: 3,
           line_id: 'U54e5269306edf7d6a33fe44099a02fe2',
+        },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '3',
+              type: 'address',
+            },
+          },
         },
       },
       {
@@ -188,6 +263,32 @@ export const dListCustomersFromSegmentResponse: {
           id: 4,
           line_id: 'U97e07eaecdc08925a9bec89f31216e08',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '4',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '2',
+        attributes: { ...dIncludedAddress.attributes, id: 2 },
+      },
+      {
+        ...dIncludedAddress,
+        id: '3',
+        attributes: { ...dIncludedAddress.attributes, id: 3 },
+      },
+      {
+        ...dIncludedAddress,
+        id: '4',
+        attributes: { ...dIncludedAddress.attributes, id: 4 },
       },
     ],
     ...dMeta,
@@ -203,6 +304,22 @@ export const dListCustomersFromSegmentResponse: {
           id: 5,
           line_id: 'U2b5ef79a4c8085f615df92b7753a9e83',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '5',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '5',
+        attributes: { ...dIncludedAddress.attributes, id: 5 },
       },
     ],
     ...dMeta,
@@ -218,6 +335,22 @@ export const dListCustomersFromSegmentResponse: {
           id: 2,
           line_id: 'Uabe224d99d896c04a0fc5730a8c58cb4',
         },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '2',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '2',
+        attributes: { ...dIncludedAddress.attributes, id: 2 },
       },
     ],
     ...dMeta,

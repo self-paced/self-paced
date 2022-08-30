@@ -128,6 +128,44 @@ export type CustomerItem = {
   };
 };
 
+export type AddressItem = {
+  id: string;
+  type: string;
+  attributes: {
+    id: number;
+    name01: string;
+    name02: string;
+    kana01: string;
+    kana02: string;
+    company_name: string;
+    zip01: string;
+    zip02: string;
+    addr01: string;
+    addr02: string;
+    addr03: string;
+    tel01: string;
+    tel02: string;
+    tel03: string;
+    tel01_received: string;
+    tel02_received: string;
+    tel03_received: string;
+    fax01: string;
+    fax02: string;
+    fax03: string;
+    prefecture_id: number;
+    prefecture_name: string;
+    full_name: string;
+    full_kana: string;
+    full_tel: string;
+    full_fax: string;
+    full_zip: string;
+    full_address: string;
+    full_address_with_space: string;
+    created_at: string;
+    updated_at: string;
+  };
+};
+
 const DEV_ORIGINS = ['http://localhost:4040', 'https://dev-ma.ec-force.com'];
 
 export const getOrigin = (ctx: Context) => {
@@ -169,10 +207,12 @@ const ecforceApi = {
   ) => {
     const url = `${getOrigin(ctx)}/api/v2/admin/customers?per=100&page=${
       input.page
-    }&q[token]=${input.token}`;
+    }&q[token]=${input.token}&include=billing_address`;
     return process.env.NODE_ENV === 'development' && DUMMY_FLAG
       ? dListCustomersFromSegmentResponse[input.token]
-      : await callEcforceApi<EcfPaginatedResponse<CustomerItem[]>>(ctx, {
+      : await callEcforceApi<
+          EcfPaginatedResponse<CustomerItem[]> & { included: AddressItem[] }
+        >(ctx, {
           url,
           method: 'GET',
         });
