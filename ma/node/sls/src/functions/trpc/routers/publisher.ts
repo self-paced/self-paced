@@ -205,7 +205,7 @@ const handleLinks = async (
   userMessageEventId: string,
   ctx: Context
 ) => {
-  const newMessages = [...messages];
+  const newMessages = JSON.parse(JSON.stringify(messages));
   const cusionUrl = `${getOrigin(ctx)}/admin/ma/sls/${process.env.ENV}/cusion`;
   for (const message of newMessages) {
     switch (message.type) {
