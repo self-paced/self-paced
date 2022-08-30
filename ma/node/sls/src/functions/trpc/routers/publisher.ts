@@ -111,6 +111,20 @@ const publisher = createRouter().mutation('push', {
     let page = 1;
     let totalPages: number;
     try {
+      // メッセージイベントを登録する
+      const messageEvent = await ctx.prisma.messageEvent.create({
+        data: {
+          title: input.title,
+          segmentId: input.token,
+          segmentTitle: input.segmentTitle,
+          content: JSON.stringify(input.messages),
+          account: {
+            connect: {
+              projectId: ctx.jwt.projectId,
+            },
+          },
+        },
+      });
       // page loop: セグメントのすべての顧客を取得する
       do {
         const res = await ecforceApi.listCustomersFromSegment(ctx, {
@@ -118,48 +132,62 @@ const publisher = createRouter().mutation('push', {
           page,
         });
         totalPages = res.meta.total_pages;
-
-        const messageEvent = await ctx.prisma.messageEvent.create({
-          data: {
-            title: input.title,
-            segmentId: input.token,
-            segmentTitle: input.segmentTitle,
-            content: JSON.stringify(input.messages),
-            account: {
-              connect: {
-                projectId: ctx.jwt.projectId,
-              },
-            },
-          },
-        });
         // customer loop: ページのすべての顧客に対してメッセージを送信する
         await Promise.all(
           res.data.map(async (customer) => {
-            if (customer.attributes.line_id) {
-              const userMessageEvent = await ctx.prisma.userMessageEvent.create(
-                {
-                  data: {
-                    userId: customer.id,
-                    lineId: customer.attributes.line_id,
-                    email: customer.attributes.email,
-                    userNumber: customer.attributes.number,
-                    messageEvent: {
-                      connect: {
-                        id: messageEvent.id,
+            try {
+              if (customer.attributes.line_id) {
+                // リレーションの情報を顧客と結合
+                const attr = res.included.find(
+                  (item) =>
+                    item.id === customer.relationships.billing_address.data.id
+                )?.attributes;
+                // ユーザごとのメッセージイベントを登録する
+                const userMessageEvent =
+                  await ctx.prisma.userMessageEvent.create({
+                    data: {
+                      lineId: customer.attributes.line_id,
+                      email: customer.attributes.email,
+                      userId: customer.id,
+                      userNumber: customer.attributes.number,
+                      name: attr?.name01
+                        ? attr?.name01 + (attr?.name02 ? ` ${attr.name02}` : '')
+                        : '',
+                      messageEvent: {
+                        connect: {
+                          id: messageEvent.id,
+                        },
                       },
                     },
-                  },
+                  });
+                try {
+                  // リンクを書き換える
+                  const newMessages = await handleLinks(
+                    input.messages,
+                    userMessageEvent.id,
+                    ctx
+                  );
+                  // メッセージを送信する
+                  await client.pushMessage(
+                    customer.attributes.line_id,
+                    newMessages as Message[]
+                  );
+                } catch (e) {
+                  // 失敗した場合イベントスタータスを更新する
+                  await ctx.prisma.userMessageEvent.update({
+                    where: {
+                      id: userMessageEvent.id,
+                    },
+                    data: {
+                      status: 'failure',
+                    },
+                  });
+                  throw e;
                 }
-              );
-              const newMessages = await handleLinks(
-                input.messages,
-                userMessageEvent.id,
-                ctx
-              );
-              await client.pushMessage(
-                customer.attributes.line_id,
-                newMessages as Message[]
-              );
+              }
+            } catch (e) {
+              console.error(e);
+              console.error('Failed for customer:', customer.attributes.number);
             }
           })
         );

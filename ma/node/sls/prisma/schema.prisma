@@ -40,10 +40,12 @@ model MessageEvent {
 model UserMessageEvent {
   id               String            @id @default(uuid())
   lineId           String
+  name             String?
   userId           String?
   userNumber       String?
   email            String?           @db.VarChar(256)
   readAt           DateTime?         @db.Timestamp(0)
+  status           String?           @default("success") // success, failure
   createdAt        DateTime          @default(now()) @db.Timestamp(0)
   updatedAt        DateTime          @default(now()) @updatedAt @db.Timestamp(0)
   messageEvent     MessageEvent      @relation(fields: [messageEventId], references: [id])
