@@ -40,11 +40,10 @@ app.use(
  */
 app.get('/cusion/:linkShortId', async (req, res) => {
   const { linkShortId } = req.params;
-  // todo エラーが出たので、一時的にコメントアウト
-  //const linkId = shortTranslator.toUUID(linkShortId);
+  const linkId = shortTranslator.toUUID(linkShortId);
   const dbLink = await prisma.userMessageLink.findUnique({
     where: {
-      id: linkShortId,
+      id: linkId,
     },
   });
   if (!dbLink) {
@@ -53,7 +52,7 @@ app.get('/cusion/:linkShortId', async (req, res) => {
   }
   await prisma.userMessageLinkActivity.create({
     data: {
-      userMessageLinkId: linkShortId,
+      userMessageLinkId: linkId,
       type: 'click',
     },
   });
@@ -67,10 +66,11 @@ app.get('/cusion/:linkShortId', async (req, res) => {
  */
 app.get('/cv', async (req, res) => {
   const { _ecfma, order_id, order_number, total_price } = req.query;
+  const linkId = shortTranslator.toUUID(_ecfma as string);
 
   const dbLink = await prisma.userMessageLink.findUnique({
     where: {
-      id: _ecfma?.toString(),
+      id: linkId,
     },
   });
 
@@ -83,7 +83,7 @@ app.get('/cv', async (req, res) => {
     data: {
       userMessageLink: {
         connect: {
-          id: _ecfma as string | undefined,
+          id: linkId,
         },
       },
       type: 'cv',
