@@ -92,6 +92,67 @@ const message = createRouter()
         },
       });
     },
+  })
+  .query('listTargets', {
+    input: z.object({
+      messageId: z.string(),
+      page: z.number().min(1),
+      perPage: z.number().min(1).optional(),
+      sortData: z
+        .object({
+          field: z.string().min(1),
+          direction: z.string().min(1),
+        })
+        .optional(),
+    }),
+    resolve: async ({ input, ctx }) => {
+      const { page, perPage } = input;
+      const perPageDefault = 10;
+      const perPageMax = 100;
+      const perPageValue = perPage
+        ? Math.min(perPage, perPageMax)
+        : perPageDefault;
+      const skip = (page - 1) * perPageValue;
+      const sortData = input.sortData || {
+        field: 'createdAt',
+        direction: 'desc',
+      };
+      const where = {
+        messageEvent: {
+          id: input.messageId,
+          projectId: ctx.jwt.projectId,
+        },
+      };
+      const [count, targets] = await ctx.prisma.$transaction([
+        ctx.prisma.userMessageEvent.count({
+          where,
+        }),
+        ctx.prisma.userMessageEvent.findMany({
+          skip,
+          take: perPageValue,
+          orderBy: {
+            [sortData.field]: sortData.direction,
+          },
+          where,
+          include: {
+            userMessageLinks: {
+              include: {
+                UserMessageLinkActivities: true,
+              },
+            },
+          },
+        }),
+      ]);
+      return {
+        targets: targets,
+        meta: {
+          count,
+          page,
+          perPage: perPageValue,
+          totalPages: Math.ceil(count / perPageValue) || 1,
+        },
+      };
+    },
   });
 
 export default message;
