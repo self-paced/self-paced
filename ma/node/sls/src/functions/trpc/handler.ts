@@ -16,6 +16,7 @@ const shortTranslator = shortUUID();
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
@@ -65,7 +66,8 @@ app.get('/cusion/:linkShortId', async (req, res) => {
  * パラメータを受け取り、DBに保存します。
  */
 app.post('/cv', async (req, res) => {
-  const { _ecfma, order_id, order_number, total_price } = req.query;
+  console.log('CV start', req.body);
+  const { _ecfma, order_id, order_number, total_price } = req.body;
   const linkId = shortTranslator.toUUID(_ecfma as string);
 
   const dbLink = await prisma.userMessageLink.findUnique({
@@ -75,10 +77,12 @@ app.post('/cv', async (req, res) => {
   });
 
   if (!dbLink) {
-    console.error('link not found', req.query);
+    console.error('link not found', req.body);
     res.json('Not found');
     return;
   }
+
+  console.log('CV dbLink', dbLink);
 
   await prisma.userMessageLinkActivity.create({
     data: {
@@ -91,10 +95,11 @@ app.post('/cv', async (req, res) => {
       orderId: order_id?.toString(),
       orderNumber: order_number?.toString(),
       orderTotal: Number(total_price),
-      content: JSON.stringify(req.query),
+      content: JSON.stringify(req.body),
     },
   });
 
+  console.log('CV received', req.body);
   res.send('success');
 });
 
