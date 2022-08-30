@@ -50,10 +50,18 @@ const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
             </TextLink>
           ),
         },
+        { title: '氏名', field: 'name' },
+        { title: 'メールアドレス', field: 'email' },
+        { title: 'LINE ID', field: 'lineId' },
         {
           title: '配信ステータス',
           field: 'status',
           render: (row) => (row.status === 'success' ? '成功' : '失敗'),
+        },
+        {
+          title: '開封',
+          field: 'readAt',
+          render: (row) => (row.readAt ? '開封済み' : '未開封'),
         },
         {
           title: 'クリック',
@@ -83,14 +91,6 @@ const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
             return '未購入';
           },
         },
-        {
-          title: '開封',
-          field: 'readAt',
-          render: (row) => (row.readAt ? '開封済み' : '未開封'),
-        },
-        { title: '氏名', field: 'name' },
-        { title: 'メールアドレス', field: 'email' },
-        { title: 'LINE ID', field: 'lineId' },
       ]}
       data={targets.data.targets}
       page={page}
