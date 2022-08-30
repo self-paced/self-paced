@@ -64,7 +64,7 @@ app.get('/cusion/:linkShortId', async (req, res) => {
  * Socket通信のCVエンドポイント
  * パラメータを受け取り、DBに保存します。
  */
-app.get('/cv', async (req, res) => {
+app.post('/cv', async (req, res) => {
   const { _ecfma, order_id, order_number, total_price } = req.query;
   const linkId = shortTranslator.toUUID(_ecfma as string);
 
@@ -75,6 +75,7 @@ app.get('/cv', async (req, res) => {
   });
 
   if (!dbLink) {
+    console.error('link not found', req.query);
     res.json('Not found');
     return;
   }
