@@ -75,6 +75,18 @@ export const dListSegmentsResponse: EcfPaginatedResponse<SegmentItem[]> = {
         updated_at: '2022/08/15 20:08:06',
       },
     },
+
+    {
+      id: '5',
+      type: 'search_query',
+      attributes: {
+        id: 4,
+        token: '54703b4b-c618-4088-80ea-49c5c99d5222',
+        name: 'segment E - 菊池',
+        created_at: '2022/08/15 20:08:06',
+        updated_at: '2022/08/15 20:08:06',
+      },
+    },
   ],
   ...dMeta,
 };
@@ -351,6 +363,37 @@ export const dListCustomersFromSegmentResponse: {
         ...dIncludedAddress,
         id: '2',
         attributes: { ...dIncludedAddress.attributes, id: 2 },
+      },
+    ],
+    ...dMeta,
+  },
+  '54703b4b-c618-4088-80ea-49c5c99d5222': {
+    data: [
+      {
+        // 菊池
+        ...dCustomer,
+        id: '4',
+        attributes: {
+          ...dCustomer.attributes,
+          id: 4,
+          line_id: 'U97e07eaecdc08925a9bec89f31216e08',
+        },
+        relationships: {
+          ...dCustomer.relationships,
+          billing_address: {
+            data: {
+              id: '4',
+              type: 'address',
+            },
+          },
+        },
+      },
+    ],
+    included: [
+      {
+        ...dIncludedAddress,
+        id: '4',
+        attributes: { ...dIncludedAddress.attributes, id: 4 },
       },
     ],
     ...dMeta,

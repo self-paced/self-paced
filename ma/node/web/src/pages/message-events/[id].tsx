@@ -71,11 +71,11 @@ const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
         },
         {
           title: '受注',
-          field: 'order',
+          field: 'cv',
           render: (row) => {
             for (const link of row.userMessageLinks) {
               for (const activity of link.UserMessageLinkActivities) {
-                if (activity.type === 'order') {
+                if (activity.type === 'cv') {
                   return '購入済み';
                 }
               }
