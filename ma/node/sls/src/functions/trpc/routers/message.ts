@@ -1,5 +1,6 @@
 import { createRouter } from '../../trpc/createRouter';
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 
 const message = createRouter()
   .query('list', {
@@ -38,101 +39,110 @@ const message = createRouter()
       }),
     }),
     resolve: async ({ input, ctx: { prisma, jwt } }) => {
-      const { page, perPage } = input;
-      const perPageDefault = 10;
-      const perPageMax = 100;
-      const perPageValue = perPage
-        ? Math.min(perPage, perPageMax)
-        : perPageDefault;
-      const skip = (page - 1) * perPageValue;
-      const sortData = input.sortData || {
-        field: 'createdAt',
-        direction: 'desc',
-      };
-      const [count, messages] = await prisma.$transaction([
-        prisma.messageEvent.count({
-          where: {
-            projectId: jwt.projectId,
-          },
-        }),
-        prisma.messageEvent.findMany({
-          skip,
-          take: perPageValue,
-          orderBy: {
-            [sortData.field]: sortData.direction,
-          },
-          where: {
-            projectId: jwt.projectId,
-          },
-        }),
-      ]);
-      return {
-        messages :await Promise.all(messages.map(async(message) => ({
-          id: message.id,
-          sendCount: await prisma.userMessageEvent.count({
+      try {
+        const { page, perPage } = input;
+        const perPageDefault = 10;
+        const perPageMax = 100;
+        const perPageValue = perPage
+          ? Math.min(perPage, perPageMax)
+          : perPageDefault;
+        const skip = (page - 1) * perPageValue;
+        const sortData = input.sortData || {
+          field: 'createdAt',
+          direction: 'desc',
+        };
+        const [count, messages] = await prisma.$transaction([
+          prisma.messageEvent.count({
             where: {
-              messageEventId: message.id,
+              projectId: jwt.projectId,
             },
           }),
-          readCount: await prisma.userMessageEvent.count({
+          prisma.messageEvent.findMany({
+            skip,
+            take: perPageValue,
+            orderBy: {
+              [sortData.field]: sortData.direction,
+            },
             where: {
-              messageEventId: message.id,
-              NOT : [{readAt: null}],
+              projectId: jwt.projectId,
             },
           }),
-          uniqClickCount: await prisma.userMessageEvent.count({
-            where: {
-              messageEventId: message.id,
-              userMessageLinks: {
-                some: {
-                  UserMessageLinkActivities: {
+        ]);
+        return {
+          messages: await Promise.all(
+            messages.map(async (message) => ({
+              id: message.id,
+              sendCount: await prisma.userMessageEvent.count({
+                where: {
+                  messageEventId: message.id,
+                },
+              }),
+              readCount: await prisma.userMessageEvent.count({
+                where: {
+                  messageEventId: message.id,
+                  NOT: [{ readAt: null }],
+                },
+              }),
+              uniqClickCount: await prisma.userMessageEvent.count({
+                where: {
+                  messageEventId: message.id,
+                  userMessageLinks: {
                     some: {
-                      type: 'click',
+                      UserMessageLinkActivities: {
+                        some: {
+                          type: 'click',
+                        },
+                      },
                     },
                   },
                 },
-              },
-            },
-          }),
-          orderCount: await prisma.userMessageLinkActivity.count({
-            where: {
-              type: 'cv',
-              userMessageLink: {
-                userMessageEvent: {
-                  messageEventId: message.id
-                }
-              }
-            },
-          }),
-          orderTotal: 0,
-          // orderTotal: (await prisma.userMessageLinkActivity.groupBy({
-          //   by: ['type'],
-          //   _sum: {
-          //     orderTotal: true,
-          //   },
-          //   where: {
-          //     type: 'cv',
-          //     userMessageLink: {
-          //       userMessageEvent: {
-          //         messageEventId: message.id
-          //       }
-          //     }
-          //   },
-          // })),
-          type: 'スポット', // TODO: dbに入れる
-          segment: 'message.segment', // TODO: dbに入れる
-          content: message.content,
-          title: message.title,
-          createdAt: message.createdAt.toISOString(),
-          updatedAt: message.updatedAt.toISOString(),
-        }))),
-        meta: {
-          count,
-          page,
-          perPage: perPageValue,
-          totalPages: Math.ceil(count / perPageValue) || 1,
-        },
-      };
+              }),
+              orderCount: await prisma.userMessageLinkActivity.count({
+                where: {
+                  type: 'cv',
+                  userMessageLink: {
+                    userMessageEvent: {
+                      messageEventId: message.id,
+                    },
+                  },
+                },
+              }),
+              orderTotal:
+                (
+                  await prisma.userMessageLinkActivity.groupBy({
+                    by: ['type'],
+                    _sum: {
+                      orderTotal: true,
+                    },
+                    where: {
+                      type: 'cv',
+                      userMessageLink: {
+                        userMessageEvent: {
+                          messageEventId: message.id,
+                        },
+                      },
+                    },
+                  })
+                )[0]?._sum.orderTotal ?? 0,
+              type: 'スポット', // TODO: dbに入れる
+              segment: 'message.segment', // TODO: dbに入れる
+              content: message.content,
+              title: message.title,
+              createdAt: message.createdAt.toISOString(),
+              updatedAt: message.updatedAt.toISOString(),
+            }))
+          ),
+          meta: {
+            count,
+            page,
+            perPage: perPageValue,
+            totalPages: Math.ceil(count / perPageValue) || 1,
+          },
+        };
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
     },
   })
   .query('event', {
