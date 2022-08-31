@@ -168,13 +168,9 @@ const message = createRouter()
         if (!res) throw new TRPCError({ code: 'NOT_FOUND' });
         const { userMessageEvents, ...messageEvent } = res;
         // map to unique originalLinks
-        const uniqueLinks = [
-          ...new Set(
-            userMessageEvents[0]?.userMessageLinks.map(
-              (dbLink) => dbLink.originalLink
-            )
-          ),
-        ];
+        const uniqueLinks = userMessageEvents[0]?.userMessageLinks
+          .map((dbLink) => dbLink.originalLink)
+          .filter((value, index, self) => self.indexOf(value) === index);
         return {
           messageEvent,
           uniqClickCount: await ctx.prisma.userMessageEvent.count({
