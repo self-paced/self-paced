@@ -17,6 +17,11 @@ const message = createRouter()
       messages: z.array(
         z.object({
           id: z.string(),
+          sendCount: z.number(),
+          readCount: z.number(),
+          uniqClickCount: z.number(),
+          orderCount: z.number(),
+          orderTotal: z.number(),
           type: z.string(),
           segment: z.any(),
           content: z.any(),
@@ -62,15 +67,65 @@ const message = createRouter()
         }),
       ]);
       return {
-        messages: messages.map((message) => ({
+        messages :await Promise.all(messages.map(async(message) => ({
           id: message.id,
+          sendCount: await prisma.userMessageEvent.count({
+            where: {
+              messageEventId: message.id,
+            },
+          }),
+          readCount: await prisma.userMessageEvent.count({
+            where: {
+              messageEventId: message.id,
+              NOT : [{readAt: null}],
+            },
+          }),
+          uniqClickCount: await prisma.userMessageEvent.count({
+            where: {
+              messageEventId: message.id,
+              userMessageLinks: {
+                some: {
+                  UserMessageLinkActivities: {
+                    some: {
+                      type: 'click',
+                    },
+                  },
+                },
+              },
+            },
+          }),
+          orderCount: await prisma.userMessageLinkActivity.count({
+            where: {
+              type: 'cv',
+              userMessageLink: {
+                userMessageEvent: {
+                  messageEventId: message.id
+                }
+              }
+            },
+          }),
+          orderTotal: 0,
+          // orderTotal: (await prisma.userMessageLinkActivity.groupBy({
+          //   by: ['type'],
+          //   _sum: {
+          //     orderTotal: true,
+          //   },
+          //   where: {
+          //     type: 'cv',
+          //     userMessageLink: {
+          //       userMessageEvent: {
+          //         messageEventId: message.id
+          //       }
+          //     }
+          //   },
+          // })),
           type: 'スポット', // TODO: dbに入れる
           segment: 'message.segment', // TODO: dbに入れる
           content: message.content,
           title: message.title,
           createdAt: message.createdAt.toISOString(),
           updatedAt: message.updatedAt.toISOString(),
-        })),
+        }))),
         meta: {
           count,
           page,
