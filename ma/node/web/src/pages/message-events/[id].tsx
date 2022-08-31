@@ -165,7 +165,8 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
             <DetailTableRow>
               <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
               <DetailTableData>{`${aggregationData.uniqClickCount}（${
-                (aggregationData.uniqClickCount / aggregationData.sendCount) *
+                (aggregationData.uniqClickCount /
+                  (aggregationData.sendCount || 1)) *
                 100
               }%）`}</DetailTableData>
             </DetailTableRow>
@@ -180,26 +181,32 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
           </DetailTable>
         </CardBody>
       </Card>
-      <div className="mb-5" />
-      <Card>
-        <CardHead>リンク一覧</CardHead>
-        <CardBody>
-          <DetailTable>
-            <DetailTableRow>
-              <DetailTableHeader className="font-bold">URL</DetailTableHeader>
-              <DetailTableData className="font-bold">
-                クリック数
-              </DetailTableData>
-            </DetailTableRow>
-            {links.map((item) => (
-              <DetailTableRow key={item.link}>
-                <DetailTableHeader>{item.link}</DetailTableHeader>
-                <DetailTableData>{item.clickCount}</DetailTableData>
-              </DetailTableRow>
-            ))}
-          </DetailTable>
-        </CardBody>
-      </Card>
+      {links.length !== 0 && (
+        <>
+          <div className="mb-5" />
+          <Card>
+            <CardHead>リンク一覧</CardHead>
+            <CardBody>
+              <DetailTable>
+                <DetailTableRow>
+                  <DetailTableHeader className="font-bold">
+                    URL
+                  </DetailTableHeader>
+                  <DetailTableData className="font-bold">
+                    クリック数
+                  </DetailTableData>
+                </DetailTableRow>
+                {links.map((item) => (
+                  <DetailTableRow key={item.link}>
+                    <DetailTableHeader>{item.link}</DetailTableHeader>
+                    <DetailTableData>{item.clickCount}</DetailTableData>
+                  </DetailTableRow>
+                ))}
+              </DetailTable>
+            </CardBody>
+          </Card>
+        </>
+      )}
     </>
   );
 };

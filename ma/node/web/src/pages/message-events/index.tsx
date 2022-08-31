@@ -57,14 +57,14 @@ const Home: NextPage = () => {
           //   field: 'readCount',
           //   title: '開封数（開封率）',
           //   render: (row) =>
-          //     `${row.readCount}（${row.readCount / row.sendCount * 100}%）`,
+          //     `${row.readCount}（${row.readCount / (row.sendCount || 1) * 100}%）`,
           // },
           {
             field: 'uniqClickCount',
             title: 'クリック数（クリック率）',
             render: (row) =>
               `${row.uniqClickCount}（${
-                (row.uniqClickCount / row.sendCount) * 100
+                (row.uniqClickCount / (row.sendCount || 1)) * 100
               }%）`,
           },
           {
