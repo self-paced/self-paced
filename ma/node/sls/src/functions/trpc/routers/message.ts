@@ -150,12 +150,106 @@ const message = createRouter()
       id: z.string(),
     }),
     resolve: async ({ input, ctx }) => {
-      return await ctx.prisma.messageEvent.findFirst({
-        where: {
-          id: input.id,
-          projectId: ctx.jwt.projectId,
-        },
-      });
+      try {
+        const res = await ctx.prisma.messageEvent.findFirst({
+          where: {
+            id: input.id,
+            projectId: ctx.jwt.projectId,
+          },
+          include: {
+            userMessageEvents: {
+              take: 1,
+              include: {
+                userMessageLinks: true,
+              },
+            },
+          },
+        });
+        if (!res) throw new TRPCError({ code: 'NOT_FOUND' });
+        const { userMessageEvents, ...messageEvent } = res;
+        // map to unique originalLinks
+        const uniqueLinks = [
+          ...new Set(
+            userMessageEvents[0]?.userMessageLinks.map(
+              (dbLink) => dbLink.originalLink
+            )
+          ),
+        ];
+        return {
+          messageEvent,
+          uniqClickCount: await ctx.prisma.userMessageEvent.count({
+            where: {
+              messageEventId: messageEvent.id,
+              userMessageLinks: {
+                some: {
+                  UserMessageLinkActivities: {
+                    some: {
+                      type: 'click',
+                    },
+                  },
+                },
+              },
+            },
+          }),
+          sendCount: await ctx.prisma.userMessageEvent.count({
+            where: {
+              messageEventId: messageEvent.id,
+            },
+          }),
+          readCount: await ctx.prisma.userMessageEvent.count({
+            where: {
+              messageEventId: messageEvent.id,
+              NOT: [{ readAt: null }],
+            },
+          }),
+          orderCount: await ctx.prisma.userMessageLinkActivity.count({
+            where: {
+              type: 'cv',
+              userMessageLink: {
+                userMessageEvent: {
+                  messageEventId: messageEvent.id,
+                },
+              },
+            },
+          }),
+          orderTotal:
+            (
+              await ctx.prisma.userMessageLinkActivity.groupBy({
+                by: ['type'],
+                _sum: {
+                  orderTotal: true,
+                },
+                where: {
+                  type: 'cv',
+                  userMessageLink: {
+                    userMessageEvent: {
+                      messageEventId: messageEvent.id,
+                    },
+                  },
+                },
+              })
+            )[0]?._sum.orderTotal ?? 0,
+          links: await Promise.all(
+            uniqueLinks.map(async (link) => ({
+              link,
+              clickCount: await ctx.prisma.userMessageLinkActivity.count({
+                where: {
+                  type: 'click',
+                  userMessageLink: {
+                    originalLink: link,
+                    userMessageEvent: {
+                      messageEventId: messageEvent.id,
+                    },
+                  },
+                },
+              }),
+            }))
+          ),
+        };
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
     },
   })
   .query('listTargets', {

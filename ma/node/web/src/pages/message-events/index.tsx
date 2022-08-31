@@ -48,6 +48,34 @@ const Home: NextPage = () => {
             field: 'type',
             title: '配信種別',
           },
+          {
+            field: 'sendCount',
+            title: '配信数',
+          },
+          // TODO: 開封の実装ができたらコメントアウトを外す
+          // {
+          //   field: 'readCount',
+          //   title: '開封数（開封率）',
+          //   render: (row) =>
+          //     `${row.readCount}（${row.readCount / row.sendCount * 100}%）`,
+          // },
+          {
+            field: 'uniqClickCount',
+            title: 'クリック数（クリック率）',
+            render: (row) =>
+              `${row.uniqClickCount}（${
+                (row.uniqClickCount / row.sendCount) * 100
+              }%）`,
+          },
+          {
+            field: 'orderCount',
+            title: '受注数',
+          },
+          {
+            field: 'orderTotal',
+            title: '受注金額',
+            render: (row) => `${row.orderTotal}円`,
+          },
         ]}
         onSort={(sortData) => {
           console.log(sortData);

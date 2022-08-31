@@ -58,11 +58,12 @@ const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
           field: 'status',
           render: (row) => (row.status === 'success' ? '成功' : '失敗'),
         },
-        {
-          title: '開封',
-          field: 'readAt',
-          render: (row) => (row.readAt ? '開封済み' : '未開封'),
-        },
+        // TODO: 開封の対応が完成したら、コメントアウトを外す
+        // {
+        //   title: '開封',
+        //   field: 'readAt',
+        //   render: (row) => (row.readAt ? '開封済み' : '未開封'),
+        // },
         {
           title: 'クリック',
           field: 'click',
@@ -112,43 +113,94 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
     return <div>Loading...</div>;
   }
 
+  const { messageEvent, links, ...aggregationData } = event.data;
+
   return (
-    <Card>
-      <CardHead>配信実績</CardHead>
-      <CardBody>
-        <DetailTable>
-          <DetailTableRow>
-            <DetailTableHeader>配信タイトル</DetailTableHeader>
-            <DetailTableData>{event.data.title}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>配信セグメント</DetailTableHeader>
-            <DetailTableData>{event.data.segmentTitle}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>配信日時</DetailTableHeader>
-            <DetailTableData>{event.data.createdAt}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>配信メッセージ</DetailTableHeader>
-            <DetailTableData>
-              {JSON.parse(event.data.content as string).map(
-                (message: AnyMessageTypeDetails, i: number) => {
-                  const MessageComponent =
-                    MessageType[message.type].detailComponent;
-                  return (
-                    <div key={i} className="mb-5">
-                      <h3 className="font-bold">メッセージ #{i + 1}</h3>
-                      <MessageComponent messageDetails={message} />
-                    </div>
-                  );
-                }
-              )}
-            </DetailTableData>
-          </DetailTableRow>
-        </DetailTable>
-      </CardBody>
-    </Card>
+    <>
+      <Card>
+        <CardHead>配信実績</CardHead>
+        <CardBody>
+          <DetailTable>
+            <DetailTableRow>
+              <DetailTableHeader>配信タイトル</DetailTableHeader>
+              <DetailTableData>{messageEvent.title}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>配信セグメント</DetailTableHeader>
+              <DetailTableData>{messageEvent.segmentTitle}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>配信日時</DetailTableHeader>
+              <DetailTableData>{messageEvent.createdAt}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>配信メッセージ</DetailTableHeader>
+              <DetailTableData>
+                {JSON.parse(messageEvent.content as string).map(
+                  (message: AnyMessageTypeDetails, i: number) => {
+                    const MessageComponent =
+                      MessageType[message.type].detailComponent;
+                    return (
+                      <div key={i} className="mb-5">
+                        <h3 className="font-bold">メッセージ #{i + 1}</h3>
+                        <MessageComponent messageDetails={message} />
+                      </div>
+                    );
+                  }
+                )}
+              </DetailTableData>
+            </DetailTableRow>
+          </DetailTable>
+        </CardBody>
+      </Card>
+      <div className="mb-5" />
+      <Card>
+        <CardHead>分析情報</CardHead>
+        <CardBody>
+          <DetailTable>
+            <DetailTableRow>
+              <DetailTableHeader>配信数</DetailTableHeader>
+              <DetailTableData>{aggregationData.sendCount}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
+              <DetailTableData>{`${aggregationData.uniqClickCount}（${
+                (aggregationData.uniqClickCount / aggregationData.sendCount) *
+                100
+              }%）`}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>受注数</DetailTableHeader>
+              <DetailTableData>{aggregationData.orderCount}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>受注金額</DetailTableHeader>
+              <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
+            </DetailTableRow>
+          </DetailTable>
+        </CardBody>
+      </Card>
+      <div className="mb-5" />
+      <Card>
+        <CardHead>リンク一覧</CardHead>
+        <CardBody>
+          <DetailTable>
+            <DetailTableRow>
+              <DetailTableHeader className="font-bold">URL</DetailTableHeader>
+              <DetailTableData className="font-bold">
+                クリック数
+              </DetailTableData>
+            </DetailTableRow>
+            {links.map((item) => (
+              <DetailTableRow key={item.link}>
+                <DetailTableHeader>{item.link}</DetailTableHeader>
+                <DetailTableData>{item.clickCount}</DetailTableData>
+              </DetailTableRow>
+            ))}
+          </DetailTable>
+        </CardBody>
+      </Card>
+    </>
   );
 };
 
@@ -181,7 +233,7 @@ const Page: NextPage = () => {
           ))}
         </Tabs>
       </div>
-      <div className="mb-5">
+      <div>
         {selectedTab === '配信設定詳細' && (
           <Details messageId={router.query.id as string} />
         )}
@@ -189,6 +241,7 @@ const Page: NextPage = () => {
           <Targets messageId={router.query.id as string} />
         )}
       </div>
+      <div className="mb-5" />
       <Card>
         <CardFooter>
           <div className="flex justify-end m-5">
