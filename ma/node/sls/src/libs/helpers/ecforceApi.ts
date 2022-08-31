@@ -193,7 +193,7 @@ const ecforceApi = {
   listSegments: async (ctx: Context) => {
     const url = `${getOrigin(
       ctx
-    )}/api/v2/admin/search_queries?page=1&per=100&type=customer`; // TODO: 現状は１００件のセグメントしか表示できない
+    )}/api/v2/admin/search_queries?page=1&per=100&type=customer&include_group=1`; // TODO: 現状は１００件のセグメントしか表示できない
     return process.env.NODE_ENV === 'development' && DUMMY_FLAG
       ? dListSegmentsResponse
       : await callEcforceApi<EcfPaginatedResponse<SegmentItem[]>>(ctx, {
