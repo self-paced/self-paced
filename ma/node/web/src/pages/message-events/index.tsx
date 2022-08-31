@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { formatDateTime } from '../../utils/datetime';
 
 const Home: NextPage = () => {
-  const perPage = 10;
+  const perPage = 50;
   const [page, setPage] = useState(1);
   const res = trpc.useQuery(['message.list', { page, perPage }]);
 

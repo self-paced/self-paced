@@ -39,24 +39,62 @@ app.use(
  * こちらのURLに入ると、クリックを登録し、もとのリンク先にリダイレクトされます。
  */
 app.get('/cusion/:linkShortId', async (req, res) => {
+  // DBからURLデータを取得
   const { linkShortId } = req.params;
   const linkId = shortTranslator.toUUID(linkShortId);
   const dbLink = await prisma.userMessageLink.findUnique({
     where: {
       id: linkId,
     },
+    include: {
+      userMessageEvent: {
+        include: {
+          messageEvent: {
+            include: {
+              account: true,
+            },
+          },
+        },
+      },
+    },
   });
   if (!dbLink) {
     res.json('Not found');
     return;
   }
+  const url = new URL(dbLink.originalLink);
+
+  // Lineからのボットアクセスの場合（開封時にサムネールを取得するため）
+  // user-agent: facebookexternalhit/1.1;line-poker/1.0
+  if (req.headers['user-agent']?.match(/facebookexternalhit.*line-poker/)) {
+    // ボットアクセスの場合は、開封日時を設定する
+    await prisma.userMessageEvent.updateMany({
+      data: {
+        readAt: new Date(),
+      },
+      where: {
+        lineId: dbLink.userMessageEvent.lineId,
+        readAt: null,
+        messageEvent: {
+          account: {
+            id: dbLink.userMessageEvent.messageEvent.account.id,
+          },
+        },
+      },
+    });
+    res.redirect(url.toString());
+    return;
+  }
+
+  // クリックからのアクセスの場合、クリックイベントを登録する
   await prisma.userMessageLinkActivity.create({
     data: {
       userMessageLinkId: linkId,
       type: 'click',
     },
   });
-  const url = new URL(dbLink.originalLink);
+
+  // 設定URLにリダイレクトする
   url.searchParams.append('_ecfma', linkShortId);
   res.redirect(url.toString());
 });
