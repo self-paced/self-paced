@@ -18,3 +18,12 @@ export function formatDateTime(date: Date | string): string {
     second: '2-digit',
   });
 }
+
+export function formatDecimals(
+  value: number,
+  decimals = 2,
+  hideDecimalWhenInt = true
+): string {
+  const res = value.toFixed(decimals);
+  return hideDecimalWhenInt ? res.replace(/\.0+/, '') : res;
+}
