@@ -4,7 +4,7 @@ import Table from '../../components/Table';
 import { Button, TextLink } from '@super_studio/ecforce_ui_albers';
 import { trpc } from '../../utils/trpc';
 import Link from 'next/link';
-import { formatDateTime } from '../../utils/datetime';
+import { formatDateTime, formatDecimals } from '../../utils/formatter';
 
 const Home: NextPage = () => {
   const perPage = 50;
@@ -63,9 +63,9 @@ const Home: NextPage = () => {
             field: 'uniqClickCount',
             title: 'クリック数（クリック率）',
             render: (row) =>
-              `${row.uniqClickCount}（${
+              `${row.uniqClickCount}（${formatDecimals(
                 (row.uniqClickCount / (row.sendCount || 1)) * 100
-              }%）`,
+              )}%）`,
           },
           {
             field: 'orderCount',

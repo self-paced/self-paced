@@ -20,13 +20,14 @@ import MessageType, {
 } from '../../components/LineMessage/MessageType';
 import { useState } from 'react';
 import Table from '../../components/Table';
+import { formatDecimals } from '../../utils/formatter';
 
 const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
   const [page, setPage] = useState(1);
   const perPage = 30;
 
   const targets = trpc.useQuery([
-    'message.listTargets',
+    'message.eventTargets',
     { messageId, page: 1, perPage },
   ]);
 
@@ -45,7 +46,7 @@ const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
           title: '顧客番号',
           field: 'userNumber',
           render: (row) => (
-            <TextLink href={`/admin/customers/${row.userId}`}>
+            <TextLink href={`/admin/customers/${row.userId}`} target="_blank">
               {row.userNumber}
             </TextLink>
           ),
@@ -113,7 +114,7 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
     return <div>Loading...</div>;
   }
 
-  const { messageEvent, links, ...aggregationData } = event.data;
+  const messageEvent = event.data;
 
   return (
     <>
@@ -154,64 +155,106 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
         </CardBody>
       </Card>
       <div className="mb-5" />
-      <Card>
-        <CardHead>分析情報</CardHead>
-        <CardBody>
-          <DetailTable>
-            <DetailTableRow>
-              <DetailTableHeader>配信数</DetailTableHeader>
-              <DetailTableData>{aggregationData.sendCount}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
-              <DetailTableData>{`${aggregationData.uniqClickCount}（${
-                (aggregationData.uniqClickCount /
-                  (aggregationData.sendCount || 1)) *
-                100
-              }%）`}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>受注数</DetailTableHeader>
-              <DetailTableData>{aggregationData.orderCount}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>受注金額</DetailTableHeader>
-              <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
-            </DetailTableRow>
-          </DetailTable>
-        </CardBody>
-      </Card>
-      {links.length !== 0 && (
-        <>
-          <div className="mb-5" />
-          <Card>
-            <CardHead>リンク一覧</CardHead>
-            <CardBody>
-              <DetailTable>
-                <DetailTableRow>
-                  <DetailTableHeader className="font-bold">
-                    URL
-                  </DetailTableHeader>
-                  <DetailTableData className="font-bold">
-                    クリック数
-                  </DetailTableData>
-                </DetailTableRow>
-                {links.map((item) => (
-                  <DetailTableRow key={item.link}>
-                    <DetailTableHeader>{item.link}</DetailTableHeader>
-                    <DetailTableData>{item.clickCount}</DetailTableData>
-                  </DetailTableRow>
-                ))}
-              </DetailTable>
-            </CardBody>
-          </Card>
-        </>
-      )}
     </>
   );
 };
 
-const TABS = Object.freeze(['配信設定詳細', '配信対象者']);
+const Links: React.FC<{ messageId: string }> = ({ messageId }) => {
+  const linkData = trpc.useQuery(['message.eventLinks', { id: messageId }]);
+
+  if (linkData.error) {
+    return <div>Error: {linkData.error.message}</div>;
+  }
+
+  if (!linkData.data) {
+    return <div>Loading...</div>;
+  }
+  const sendCount = linkData.data.sendCount;
+  return (
+    <Table
+      columnDefs={[
+        {
+          title: 'リンク',
+          field: 'link',
+          render: (row) => (
+            <TextLink href={row.link} target="_blank">
+              {row.link}
+            </TextLink>
+          ),
+        },
+        {
+          title: 'クリック数（クリック率）',
+          field: 'clickCount',
+          render: (row) =>
+            `${row.uniqClickCount}（${formatDecimals(
+              (row.uniqClickCount / (sendCount || 1)) * 100
+            )}%）`,
+        },
+        {
+          title: '受注数',
+          field: 'orderCount',
+        },
+        {
+          title: '受注金額',
+          field: 'orderTotal',
+          render: (row) => `${row.orderTotal}円`,
+        },
+      ]}
+      data={linkData.data.links}
+    />
+  );
+};
+
+const AggregationData: React.FC<{ messageId: string }> = ({ messageId }) => {
+  const res = trpc.useQuery(['message.eventAggregations', { id: messageId }]);
+
+  if (res.error) {
+    return <div>Error: {res.error.message}</div>;
+  }
+
+  if (!res.data) {
+    return <div>Loading...</div>;
+  }
+  const aggregationData = res.data;
+  return (
+    <Card>
+      <CardHead>分析情報</CardHead>
+      <CardBody>
+        <DetailTable>
+          <DetailTableRow>
+            <DetailTableHeader>配信数</DetailTableHeader>
+            <DetailTableData>{aggregationData.sendCount}</DetailTableData>
+          </DetailTableRow>
+          <DetailTableRow>
+            <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
+            <DetailTableData>{`${
+              aggregationData.uniqClickCount
+            }（${formatDecimals(
+              (aggregationData.uniqClickCount /
+                (aggregationData.sendCount || 1)) *
+                100
+            )}%）`}</DetailTableData>
+          </DetailTableRow>
+          <DetailTableRow>
+            <DetailTableHeader>受注数</DetailTableHeader>
+            <DetailTableData>{aggregationData.orderCount}</DetailTableData>
+          </DetailTableRow>
+          <DetailTableRow>
+            <DetailTableHeader>受注金額</DetailTableHeader>
+            <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
+          </DetailTableRow>
+        </DetailTable>
+      </CardBody>
+    </Card>
+  );
+};
+
+const TABS = Object.freeze([
+  '配信設定詳細',
+  '配信対象者',
+  '分析情報',
+  'リンク一覧',
+]);
 
 const Page: NextPage = () => {
   const router = useRouter();
@@ -246,6 +289,12 @@ const Page: NextPage = () => {
         )}
         {selectedTab === '配信対象者' && (
           <Targets messageId={router.query.id as string} />
+        )}
+        {selectedTab === '分析情報' && (
+          <AggregationData messageId={router.query.id as string} />
+        )}
+        {selectedTab === 'リンク一覧' && (
+          <Links messageId={router.query.id as string} />
         )}
       </div>
       <div className="mb-5" />
