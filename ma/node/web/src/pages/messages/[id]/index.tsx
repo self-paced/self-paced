@@ -1,5 +1,5 @@
 import type { NextPage } from 'next';
-import { trpc } from '../../utils/trpc';
+import { trpc } from '../../../utils/trpc';
 import {
   Card,
   CardHead,
@@ -10,6 +10,7 @@ import {
   DetailTableHeader,
   DetailTableData,
   Button,
+  FloatArea,
   Tabs,
   Tab,
   TextLink,
@@ -17,10 +18,10 @@ import {
 import { useRouter } from 'next/router';
 import MessageType, {
   AnyMessageTypeDetails,
-} from '../../components/LineMessage/MessageType';
+} from '../../../components/LineMessage/MessageType';
 import { useState } from 'react';
-import Table from '../../components/Table';
-import { formatDecimals } from '../../utils/formatter';
+import Table from '../../../components/Table';
+import { formatDecimals } from '../../../utils/formatter';
 
 const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
   const event = trpc.useQuery(['schedule.event', { id: messageId }]);
@@ -115,21 +116,24 @@ const Page: NextPage = () => {
     router.back();
   };
 
+  const onEdit = () => {
+    router.push(`/messages/${router.query.id}/edit`);
+  };
+
   return (
     <div>
       <div>
         <Details messageId={router.query.id as string} />
       </div>
       <div className="mb-5" />
-      <Card>
-        <CardFooter>
-          <div className="flex justify-end m-5">
-            <Button variant="basic" onClick={onHistoryback}>
-              戻る
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+      <FloatArea
+        basicButton={<Button onClick={onHistoryback}>戻る</Button>}
+        secondaryButton={
+          <Button variant="secondary" onClick={onEdit}>
+            編集
+          </Button>
+        }
+      />
     </div>
   );
 };

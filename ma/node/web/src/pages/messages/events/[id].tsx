@@ -1,5 +1,5 @@
 import type { NextPage } from 'next';
-import { trpc } from '../../utils/trpc';
+import { trpc } from '../../../utils/trpc';
 import {
   Card,
   CardHead,
@@ -13,14 +13,15 @@ import {
   Tabs,
   Tab,
   TextLink,
+  FloatArea,
 } from '@super_studio/ecforce_ui_albers';
 import { useRouter } from 'next/router';
 import MessageType, {
   AnyMessageTypeDetails,
-} from '../../components/LineMessage/MessageType';
+} from '../../../components/LineMessage/MessageType';
 import { useState } from 'react';
-import Table from '../../components/Table';
-import { formatDecimals } from '../../utils/formatter';
+import Table from '../../../components/Table';
+import { formatDecimals } from '../../../utils/formatter';
 
 const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
   const [page, setPage] = useState(1);
@@ -278,15 +279,7 @@ const Page: NextPage = () => {
         )}
       </div>
       <div className="mb-5" />
-      <Card>
-        <CardFooter>
-          <div className="flex justify-end m-5">
-            <Button variant="basic" onClick={onHistoryback}>
-              戻る
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+      <FloatArea basicButton={<Button onClick={onHistoryback}>戻る</Button>} />
     </div>
   );
 };

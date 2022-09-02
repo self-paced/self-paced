@@ -4,7 +4,7 @@ import Table from '../../components/Table';
 import { Button, TextLink } from '@super_studio/ecforce_ui_albers';
 import { trpc } from '../../utils/trpc';
 import Link from 'next/link';
-import { formatDateTime, formatDecimals } from '../../utils/formatter';
+import { formatDateTime } from '../../utils/formatter';
 
 const Home: NextPage = () => {
   const perPage = 50;

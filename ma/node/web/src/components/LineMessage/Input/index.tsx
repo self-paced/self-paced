@@ -12,7 +12,7 @@ import MessageType, {
   AnyMessageTypeDetails,
   anyMessageTypeSchema,
 } from '../MessageType';
-import { EcfSchema } from '../../../pages/line-message';
+import { EcfSchema } from '../../../pages/messages/new';
 
 const MAX_MESSAGES = 5;
 
@@ -45,6 +45,8 @@ const LineMessageInput: React.FC<{
   errors: Partial<EcfSchema>;
   onChange?: LineMessageInputEventHandler;
 }> = ({ name, onChange, value, errors }) => {
+  console.log('value', value);
+
   const [messages, setMessages] = useState<LineMessageInputValue>(
     value ?? [
       {
@@ -82,6 +84,7 @@ const LineMessageInput: React.FC<{
   return (
     <div ref={parent}>
       {messages.map((message, i) => {
+        console.log('component', message);
         const MessageComponent =
           MessageType[message.details.type].inputComponent;
         return (
