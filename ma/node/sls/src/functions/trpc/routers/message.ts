@@ -171,72 +171,6 @@ const message = createRouter()
     }),
     resolve: async ({ input, ctx }) => {
       try {
-        return {
-          uniqClickCount: await ctx.prisma.userMessageEvent.count({
-            where: {
-              messageEventId: input.id,
-              userMessageLinks: {
-                some: {
-                  UserMessageLinkActivities: {
-                    some: {
-                      type: 'click',
-                    },
-                  },
-                },
-              },
-            },
-          }),
-          sendCount: await ctx.prisma.userMessageEvent.count({
-            where: {
-              messageEventId: input.id,
-            },
-          }),
-          readCount: await ctx.prisma.userMessageEvent.count({
-            where: {
-              messageEventId: input.id,
-              NOT: [{ readAt: null }],
-            },
-          }),
-          orderCount: await ctx.prisma.userMessageLinkActivity.count({
-            where: {
-              type: 'cv',
-              userMessageLink: {
-                userMessageEvent: {
-                  messageEventId: input.id,
-                },
-              },
-            },
-          }),
-          orderTotal:
-            (
-              await ctx.prisma.userMessageLinkActivity.groupBy({
-                by: ['type'],
-                _sum: {
-                  orderTotal: true,
-                },
-                where: {
-                  type: 'cv',
-                  userMessageLink: {
-                    userMessageEvent: {
-                      messageEventId: input.id,
-                    },
-                  },
-                },
-              })
-            )[0]?._sum.orderTotal ?? 0,
-        };
-      } catch (e) {
-        console.error(e);
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-      }
-    },
-  })
-  .query('eventLinks', {
-    input: z.object({
-      id: z.string(),
-    }),
-    resolve: async ({ input, ctx }) => {
-      try {
         const res = await ctx.prisma.messageEvent.findFirst({
           where: {
             id: input.id,
@@ -260,28 +194,84 @@ const message = createRouter()
             .filter((value, index, self) => self.indexOf(value) === index) ??
           [];
         return {
-          messageEvent,
-          sendCount: await ctx.prisma.userMessageEvent.count({
+          uniqClickCount: await ctx.prisma.userMessageEvent.count({
             where: {
               messageEventId: messageEvent.id,
-            },
-          }),
-          links: await Promise.all(
-            uniqueLinks.map(async (link) => ({
-              link,
-              uniqClickCount: await ctx.prisma.userMessageLink.count({
-                where: {
-                  originalLink: link,
-                  userMessageEvent: {
-                    messageEventId: messageEvent.id,
-                  },
+              userMessageLinks: {
+                some: {
                   UserMessageLinkActivities: {
                     some: {
                       type: 'click',
                     },
                   },
                 },
-              }),
+              },
+            },
+          }),
+          sendCount: await ctx.prisma.userMessageEvent.count({
+            where: {
+              messageEventId: messageEvent.id,
+            },
+          }),
+          readCount: await ctx.prisma.userMessageEvent.count({
+            where: {
+              messageEventId: messageEvent.id,
+              NOT: [{ readAt: null }],
+            },
+          }),
+          orderCount: await ctx.prisma.userMessageLinkActivity.count({
+            where: {
+              type: 'cv',
+              userMessageLink: {
+                userMessageEvent: {
+                  messageEventId: messageEvent.id,
+                },
+              },
+            },
+          }),
+          orderTotal:
+            (
+              await ctx.prisma.userMessageLinkActivity.groupBy({
+                by: ['type'],
+                _sum: {
+                  orderTotal: true,
+                },
+                where: {
+                  type: 'cv',
+                  userMessageLink: {
+                    userMessageEvent: {
+                      messageEventId: messageEvent.id,
+                    },
+                  },
+                },
+              })
+            )[0]?._sum.orderTotal ?? 0,
+          links: await Promise.all(
+            uniqueLinks.map(async (link) => ({
+              link,
+              uniqClickCount: Number(
+                (
+                  (await ctx.prisma.$queryRaw`
+                      SELECT
+                        COUNT(*) as _count
+                      FROM
+                        (
+                          SELECT
+                            DISTINCT UserMessageLink.userMessageEventId
+                          FROM
+                            UserMessageLink
+                            INNER JOIN UserMessageEvent ON UserMessageLink.userMessageEventId = UserMessageEvent.id
+                            INNER JOIN UserMessageLinkActivity ON UserMessageLink.id = UserMessageLinkActivity.userMessageLinkId
+                          WHERE
+                            UserMessageLink.originalLink = ${link}
+                            AND UserMessageEvent.messageEventId = ${messageEvent.id}
+                            AND UserMessageLinkActivity.type = 'click'
+                        ) as tmp;
+                  `) as {
+                    _count: number;
+                  }[]
+                )[0]?._count ?? 0
+              ),
               orderCount: await ctx.prisma.userMessageLinkActivity.count({
                 where: {
                   type: 'cv',

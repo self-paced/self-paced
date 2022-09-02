@@ -159,52 +159,6 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
   );
 };
 
-const Links: React.FC<{ messageId: string }> = ({ messageId }) => {
-  const linkData = trpc.useQuery(['message.eventLinks', { id: messageId }]);
-
-  if (linkData.error) {
-    return <div>Error: {linkData.error.message}</div>;
-  }
-
-  if (!linkData.data) {
-    return <div>Loading...</div>;
-  }
-  const sendCount = linkData.data.sendCount;
-  return (
-    <Table
-      columnDefs={[
-        {
-          title: 'リンク',
-          field: 'link',
-          render: (row) => (
-            <TextLink href={row.link} target="_blank">
-              {row.link}
-            </TextLink>
-          ),
-        },
-        {
-          title: 'クリック数（クリック率）',
-          field: 'clickCount',
-          render: (row) =>
-            `${row.uniqClickCount}（${formatDecimals(
-              (row.uniqClickCount / (sendCount || 1)) * 100
-            )}%）`,
-        },
-        {
-          title: '受注数',
-          field: 'orderCount',
-        },
-        {
-          title: '受注金額',
-          field: 'orderTotal',
-          render: (row) => `${row.orderTotal}円`,
-        },
-      ]}
-      data={linkData.data.links}
-    />
-  );
-};
-
 const AggregationData: React.FC<{ messageId: string }> = ({ messageId }) => {
   const res = trpc.useQuery(['message.eventAggregations', { id: messageId }]);
 
@@ -215,46 +169,75 @@ const AggregationData: React.FC<{ messageId: string }> = ({ messageId }) => {
   if (!res.data) {
     return <div>Loading...</div>;
   }
-  const aggregationData = res.data;
+  const { links, ...aggregationData } = res.data;
   return (
-    <Card>
-      <CardHead>分析情報</CardHead>
-      <CardBody>
-        <DetailTable>
-          <DetailTableRow>
-            <DetailTableHeader>配信数</DetailTableHeader>
-            <DetailTableData>{aggregationData.sendCount}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
-            <DetailTableData>{`${
-              aggregationData.uniqClickCount
-            }（${formatDecimals(
-              (aggregationData.uniqClickCount /
-                (aggregationData.sendCount || 1)) *
-                100
-            )}%）`}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>受注数</DetailTableHeader>
-            <DetailTableData>{aggregationData.orderCount}</DetailTableData>
-          </DetailTableRow>
-          <DetailTableRow>
-            <DetailTableHeader>受注金額</DetailTableHeader>
-            <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
-          </DetailTableRow>
-        </DetailTable>
-      </CardBody>
-    </Card>
+    <>
+      <Card>
+        <CardHead>サマリー</CardHead>
+        <CardBody>
+          <DetailTable>
+            <DetailTableRow>
+              <DetailTableHeader>配信数</DetailTableHeader>
+              <DetailTableData>{aggregationData.sendCount}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
+              <DetailTableData>{`${
+                aggregationData.uniqClickCount
+              }（${formatDecimals(
+                (aggregationData.uniqClickCount /
+                  (aggregationData.sendCount || 1)) *
+                  100
+              )}%）`}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>受注数</DetailTableHeader>
+              <DetailTableData>{aggregationData.orderCount}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>受注金額</DetailTableHeader>
+              <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
+            </DetailTableRow>
+          </DetailTable>
+        </CardBody>
+      </Card>
+
+      <Table
+        columnDefs={[
+          {
+            title: 'リンク',
+            field: 'link',
+            render: (row) => (
+              <TextLink href={row.link} target="_blank">
+                {row.link}
+              </TextLink>
+            ),
+          },
+          {
+            title: 'クリック数（クリック率）',
+            field: 'clickCount',
+            render: (row) =>
+              `${row.uniqClickCount}（${formatDecimals(
+                (row.uniqClickCount / (aggregationData.sendCount || 1)) * 100
+              )}%）`,
+          },
+          {
+            title: '受注数',
+            field: 'orderCount',
+          },
+          {
+            title: '受注金額',
+            field: 'orderTotal',
+            render: (row) => `${row.orderTotal}円`,
+          },
+        ]}
+        data={links}
+      />
+    </>
   );
 };
 
-const TABS = Object.freeze([
-  '配信設定詳細',
-  '配信対象者',
-  '分析情報',
-  'リンク一覧',
-]);
+const TABS = Object.freeze(['配信設定詳細', '配信対象者', '分析情報']);
 
 const Page: NextPage = () => {
   const router = useRouter();
@@ -292,9 +275,6 @@ const Page: NextPage = () => {
         )}
         {selectedTab === '分析情報' && (
           <AggregationData messageId={router.query.id as string} />
-        )}
-        {selectedTab === 'リンク一覧' && (
-          <Links messageId={router.query.id as string} />
         )}
       </div>
       <div className="mb-5" />
