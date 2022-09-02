@@ -249,24 +249,29 @@ const message = createRouter()
           links: await Promise.all(
             uniqueLinks.map(async (link) => ({
               link,
-              uniqClickCount:
+              uniqClickCount: Number(
                 (
-                  await ctx.prisma.userMessageLink.groupBy({
-                    by: ['originalLink', 'userMessageEventId'],
-                    _count: true,
-                    where: {
-                      originalLink: link,
-                      userMessageEvent: {
-                        messageEventId: messageEvent.id,
-                      },
-                      UserMessageLinkActivities: {
-                        some: {
-                          type: 'click',
-                        },
-                      },
-                    },
-                  })
-                )[0]?._count ?? 0,
+                  (await ctx.prisma.$queryRaw`
+                      SELECT
+                        COUNT(*) as _count
+                      FROM
+                        (
+                          SELECT
+                            DISTINCT UserMessageLink.userMessageEventId
+                          FROM
+                            UserMessageLink
+                            INNER JOIN UserMessageEvent ON UserMessageLink.userMessageEventId = UserMessageEvent.id
+                            INNER JOIN UserMessageLinkActivity ON UserMessageLink.id = UserMessageLinkActivity.userMessageLinkId
+                          WHERE
+                            UserMessageLink.originalLink = ${link}
+                            AND UserMessageEvent.messageEventId = ${messageEvent.id}
+                            AND UserMessageLinkActivity.type = 'click'
+                        ) as tmp;
+                  `) as {
+                    _count: number;
+                  }[]
+                )[0]?._count ?? 0
+              ),
               orderCount: await ctx.prisma.userMessageLinkActivity.count({
                 where: {
                   type: 'cv',
