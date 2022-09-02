@@ -20,13 +20,6 @@ const Home: NextPage = () => {
 
   return (
     <div>
-      <div className="text-right">
-        <Link href="/line-message">
-          <Button variant="primary" size="medium">
-            新規作成
-          </Button>
-        </Link>
-      </div>
       <Table
         data={res.data.messages}
         columnDefs={[

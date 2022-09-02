@@ -45,12 +45,12 @@ const Home: NextPage = () => {
             render: (row) => formatDateTime(row.createdAt),
           },
           {
-            field: 'type',
-            title: '配信種別',
+            field: 'segmentTitle',
+            title: '配信セグメント',
           },
           {
-            field: 'sendCount',
-            title: '配信数',
+            field: 'type',
+            title: '配信種別',
           },
         ]}
         onSort={(sortData) => {

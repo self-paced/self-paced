@@ -51,7 +51,7 @@ const schedule = createRouter()
       messages: z.array(
         z.object({
           id: z.string(),
-          segment: z.any(),
+          segmentTitle: z.any(),
           content: z.any(),
           title: z.string(),
           createdAt: z.string(),
@@ -102,7 +102,7 @@ const schedule = createRouter()
               title: message.title,
               content: message.content,
               type: 'スポット',
-              segment: message.segmentTitle,
+              segmentTitle: message.segmentTitle,
               createdAt: message.createdAt.toISOString(),
               updatedAt: message.updatedAt.toISOString(),
             }))
