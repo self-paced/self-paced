@@ -47,7 +47,7 @@ model MessageSchedule {
   content            Json
   segmentId          String?
   segmentTitle       String?
-  deliveryScheduleAt DateTime
+  deliveryScheduleAt DateTime?
   createdAt          DateTime          @default(now()) @db.Timestamp(0)
   updatedAt          DateTime          @default(now()) @updatedAt @db.Timestamp(0)
   status             String            @default("draft")

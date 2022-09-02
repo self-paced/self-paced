@@ -1,10 +1,10 @@
 import type { NextPage } from 'next';
 import { useState } from 'react';
-import Table from '../../components/Table';
+import Table from '../../../components/Table';
 import { Button, TextLink } from '@super_studio/ecforce_ui_albers';
-import { trpc } from '../../utils/trpc';
+import { trpc } from '../../../utils/trpc';
 import Link from 'next/link';
-import { formatDateTime, formatDecimals } from '../../utils/formatter';
+import { formatDateTime, formatDecimals } from '../../../utils/formatter';
 
 const Home: NextPage = () => {
   const perPage = 50;
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
             field: 'title',
             title: '配信名',
             render: (row) => (
-              <Link href={`/message-events/${row.id}`} passHref>
+              <Link href={`/messages/events/${row.id}`} passHref>
                 <TextLink>{row.title}</TextLink>
               </Link>
             ),

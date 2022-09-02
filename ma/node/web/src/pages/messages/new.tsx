@@ -150,9 +150,12 @@ const EcfForm: React.FC<{
   const showDialog = useDialog();
   const [testIdList, setTestIdList] = useState('');
   const segmentToken = watch('segmentToken');
+  const messages = watch('messages');
+  const segmentTitle = watch('segmentTitle');
 
-  const publisher = trpc.useMutation('schedule.create');
   const multicast = trpc.useMutation('line.multicast');
+  const scheduleCreate = trpc.useMutation('schedule.create');
+  const scheduleDraft = trpc.useMutation('schedule.draft');
 
   const sendTestMessage = async () => {
     try {
@@ -186,19 +189,41 @@ const EcfForm: React.FC<{
   };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    await publisher.mutate(
+    await scheduleCreate.mutate(
       {
         title: data.title,
         segmentTitle: data.segmentTitle,
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
+        status: 'waiting',
       },
       {
         onError: () => {
           onError('エラーが発生しました。');
         },
         onSuccess: async () => {
-          await Router.push('/message-events');
+          await Router.push('/messages');
+        },
+      }
+    );
+  };
+
+  const handleDraft: SubmitHandler<EcfSchema> = async (data) => {
+    console.log(data.title);
+    await scheduleDraft.mutate(
+      {
+        title: title,
+        segmentTitle: segmentTitle,
+        token: segmentToken,
+        messages: messages.map((message) => message.details),
+        status: 'draft',
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.push('/messages');
         },
       }
     );
@@ -303,6 +328,7 @@ const EcfForm: React.FC<{
       </Card>
       <div className="mt-6" />
       <FloatArea
+        basicButton={<Button onClick={handleDraft}>下書き保存</Button>}
         secondaryButton={
           <Button type="submit" variant="secondary" disabled={isSubmitting}>
             送信

@@ -11,6 +11,7 @@ const schedule = createRouter()
       segmentTitle: z.string().min(1),
       token: z.string().min(1),
       messages: lineMessageSchema,
+      status: z.enum(['waiting']),
     }),
     resolve: async ({ input, ctx }) => {
       try {
@@ -21,6 +22,7 @@ const schedule = createRouter()
             segmentId: input.token,
             segmentTitle: input.segmentTitle,
             deliveryScheduleAt: new Date(),
+            status: 'waiting',
             content: JSON.stringify(input.messages),
             account: {
               connect: {
@@ -34,6 +36,36 @@ const schedule = createRouter()
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
       return true;
+    },
+  })
+  .mutation('draft', {
+    input: z.object({
+      title: z.string().min(1),
+      segmentTitle: z.string().min(1),
+      token: z.string().min(1),
+      messages: lineMessageSchema,
+      status: z.enum(['waiting', 'draft']),
+    }),
+    resolve: async ({ input, ctx }) => {
+      try {
+        await ctx.prisma.messageSchedule.create({
+          data: {
+            title: input.title,
+            segmentId: input.token,
+            segmentTitle: input.segmentTitle,
+            status: input.status,
+            content: JSON.stringify(input.messages),
+            account: {
+              connect: {
+                projectId: ctx.jwt.projectId,
+              },
+            },
+          },
+        });
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
     },
   })
   .query('list', {

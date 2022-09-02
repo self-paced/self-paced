@@ -11,15 +11,15 @@ const Sidebar: React.FC = () => {
           <span className="text-2xl">
             <i className="bx bx-home"></i>
           </span>
-          <span>配信予定一覧</span>
+          <span>配信予約</span>
         </a>
       </Link>
-      <Link href="/message-events">
+      <Link href="/messages/events">
         <a className="flex items-center space-x-1 rounded-md px-2 py-3 hover:bg-gray-100 hover:text-blue-600">
           <span className="text-2xl">
             <i className="bx bx-cart"></i>
           </span>
-          <span>配信実績一覧</span>
+          <span>配信実績</span>
         </a>
       </Link>
     </aside>

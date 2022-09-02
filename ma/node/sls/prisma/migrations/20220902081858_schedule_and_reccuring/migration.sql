@@ -31,7 +31,7 @@ CREATE TABLE `MessageSchedule` (
     `content` JSON NOT NULL,
     `segmentId` VARCHAR(191) NULL,
     `segmentTitle` VARCHAR(191) NULL,
-    `deliveryScheduleAt` DATETIME(3) NOT NULL,
+    `deliveryScheduleAt` DATETIME(3) NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `status` VARCHAR(191) NOT NULL DEFAULT 'draft',
