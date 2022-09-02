@@ -29,7 +29,7 @@ CREATE TABLE `MessageSchedule` (
     `deliveryScheduleAt` DATETIME(3) NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-    `status` VARCHAR(191) NOT NULL DEFAULT '下書き',
+    `status` VARCHAR(191) NOT NULL DEFAULT 'draft',
     `projectId` VARCHAR(191) NOT NULL,
     `messageReccuringId` VARCHAR(191) NULL,
 
