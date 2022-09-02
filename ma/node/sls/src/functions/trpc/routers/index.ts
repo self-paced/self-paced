@@ -5,12 +5,14 @@ import segment from './segment';
 import publisher from './publisher';
 import auth from './auth';
 import message from './message';
+import schedule from './schedule';
 
 export const appRouter = createRouter()
   .merge('line.', line)
   .merge('user.', user)
   .merge('segment.', segment)
   .merge('publisher.', publisher)
+  .merge('schedule.', schedule)
   .merge('message.', message)
   .merge('auth.', auth);
 // APIの型定義をExport

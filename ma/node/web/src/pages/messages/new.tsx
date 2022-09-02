@@ -7,7 +7,7 @@ import {
   useForm,
 } from 'react-hook-form';
 import { z } from 'zod';
-import { trpc } from '../utils/trpc';
+import { trpc } from '../../utils/trpc';
 import {
   Card,
   CardHead,
@@ -25,9 +25,9 @@ import LineMessageInput, {
   LineMessageInputEventHandler,
   lineMessageInputSchema,
   LineMessageInputValue,
-} from '../components/LineMessage/Input';
-import v from '../utils/validation';
-import { useDialog } from '../components/AppUtilityProvider/DialogProvider';
+} from '../../components/LineMessage/Input';
+import v from '../../utils/validation';
+import { useDialog } from '../../components/AppUtilityProvider/DialogProvider';
 import Router from 'next/router';
 
 // TODO: 年齢の対応の時、以下は使われます。
@@ -151,7 +151,7 @@ const EcfForm: React.FC<{
   const [testIdList, setTestIdList] = useState('');
   const segmentToken = watch('segmentToken');
 
-  const publisher = trpc.useMutation('publisher.push');
+  const publisher = trpc.useMutation('schedule.create');
   const multicast = trpc.useMutation('line.multicast');
 
   const sendTestMessage = async () => {
