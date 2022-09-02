@@ -61,6 +61,7 @@ model MessageEvent {
   title             String             @db.VarChar(100) // todo メッセージイベントの記述変更後に削除
   segmentId         String?            @db.VarChar(100)
   segmentTitle      String?            @db.VarChar(100)
+  content           Json
   createdAt         DateTime           @default(now()) @db.Timestamp(0)
   updatedAt         DateTime           @default(now()) @updatedAt @db.Timestamp(0)
   account           Account            @relation(fields: [projectId], references: [projectId])
