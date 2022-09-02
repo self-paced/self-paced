@@ -29,6 +29,7 @@ model Account {
 model MessageReccuring {
   id                String            @id @default(uuid())
   title             String            @db.VarChar(100)
+  content           Json
   deliveryCycle     String
   nextDeliveryAt    DateTime
   startDeliveryTerm DateTime?
@@ -43,10 +44,11 @@ model MessageReccuring {
 model MessageSchedule {
   id                 String            @id @default(uuid())
   title              String            @db.VarChar(100)
+  content            Json
   deliveryScheduleAt DateTime
   createdAt          DateTime          @default(now()) @db.Timestamp(0)
   updatedAt          DateTime          @default(now()) @updatedAt @db.Timestamp(0)
-  status             String            @default("下書き")
+  status             String            @default("draft")
   account            Account           @relation(fields: [projectId], references: [projectId])
   projectId          String
   messageReccuring   MessageReccuring? @relation(fields: [messageReccuringId], references: [id])
