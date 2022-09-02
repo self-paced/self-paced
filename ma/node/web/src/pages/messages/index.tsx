@@ -21,7 +21,7 @@ const Home: NextPage = () => {
   return (
     <div>
       <div className="text-right">
-        <Link href="/message/new">
+        <Link href="/messages/new">
           <Button variant="primary" size="medium">
             新規作成
           </Button>
@@ -34,23 +34,32 @@ const Home: NextPage = () => {
             field: 'title',
             title: '配信名',
             render: (row) => (
-              <Link href={`/message-events/${row.id}`} passHref>
+              <Link href={`/messages/${row.id}`} passHref>
                 <TextLink>{row.title}</TextLink>
               </Link>
             ),
-          },
-          {
-            field: 'createdAt',
-            title: '配信日時',
-            render: (row) => formatDateTime(row.createdAt),
           },
           {
             field: 'segmentTitle',
             title: '配信セグメント',
           },
           {
+            field: 'status',
+            title: 'ステータス',
+          },
+          {
             field: 'type',
             title: '配信種別',
+          },
+          {
+            field: 'deliveryScheduleAt',
+            title: '配信日時',
+            render: (row) => formatDateTime(row.createdAt),
+          },
+          {
+            field: 'updatedAt',
+            title: '更新日時',
+            render: (row) => formatDateTime(row.updatedAt),
           },
         ]}
         onSort={(sortData) => {

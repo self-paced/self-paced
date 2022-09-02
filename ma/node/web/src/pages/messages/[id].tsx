@@ -22,89 +22,8 @@ import { useState } from 'react';
 import Table from '../../components/Table';
 import { formatDecimals } from '../../utils/formatter';
 
-const Targets: React.FC<{ messageId: string }> = ({ messageId }) => {
-  const [page, setPage] = useState(1);
-  const perPage = 30;
-
-  const targets = trpc.useQuery([
-    'message.eventTargets',
-    { messageId, page: 1, perPage },
-  ]);
-
-  if (targets.error) {
-    return <div>Error: {targets.error.message}</div>;
-  }
-
-  if (!targets.data) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <Table
-      columnDefs={[
-        {
-          title: '顧客番号',
-          field: 'userNumber',
-          render: (row) => (
-            <TextLink href={`/admin/customers/${row.userId}`} target="_blank">
-              {row.userNumber}
-            </TextLink>
-          ),
-        },
-        { title: '氏名', field: 'name' },
-        { title: 'メールアドレス', field: 'email' },
-        { title: 'LINE ID', field: 'lineId' },
-        {
-          title: '配信ステータス',
-          field: 'status',
-          render: (row) => (row.status === 'success' ? '成功' : '失敗'),
-        },
-        // TODO: 開封の対応が完成したら、コメントアウトを外す
-        // {
-        //   title: '開封',
-        //   field: 'readAt',
-        //   render: (row) => (row.readAt ? '開封済み' : '未開封'),
-        // },
-        {
-          title: 'クリック',
-          field: 'click',
-          render: (row) => {
-            for (const link of row.userMessageLinks) {
-              for (const activity of link.UserMessageLinkActivities) {
-                if (activity.type === 'click') {
-                  return 'クリック済み';
-                }
-              }
-            }
-            return '未クリック';
-          },
-        },
-        {
-          title: '受注',
-          field: 'cv',
-          render: (row) => {
-            for (const link of row.userMessageLinks) {
-              for (const activity of link.UserMessageLinkActivities) {
-                if (activity.type === 'cv') {
-                  return '購入済み';
-                }
-              }
-            }
-            return '未購入';
-          },
-        },
-      ]}
-      data={targets.data.targets}
-      page={page}
-      pageSize={perPage}
-      totalItems={targets.data.meta.count}
-      onPageChange={(page) => setPage(page)}
-    />
-  );
-};
-
 const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
-  const event = trpc.useQuery(['message.event', { id: messageId }]);
+  const event = trpc.useQuery(['schedule.event', { id: messageId }]);
 
   if (event.error) {
     return <div>Error: {event.error.message}</div>;
@@ -114,7 +33,7 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
     return <div>Loading...</div>;
   }
 
-  const messageEvent = event.data;
+  const messageSchedule = event.data;
 
   return (
     <>
@@ -124,20 +43,46 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
           <DetailTable>
             <DetailTableRow>
               <DetailTableHeader>配信タイトル</DetailTableHeader>
-              <DetailTableData>{messageEvent.title}</DetailTableData>
+              <DetailTableData>{messageSchedule.title}</DetailTableData>
             </DetailTableRow>
             <DetailTableRow>
               <DetailTableHeader>配信セグメント</DetailTableHeader>
-              <DetailTableData>{messageEvent.segmentTitle}</DetailTableData>
+              <DetailTableData>{messageSchedule.segmentTitle}</DetailTableData>
             </DetailTableRow>
             <DetailTableRow>
-              <DetailTableHeader>配信日時</DetailTableHeader>
-              <DetailTableData>{messageEvent.createdAt}</DetailTableData>
+              <DetailTableHeader>配信予定日時</DetailTableHeader>
+              <DetailTableData>
+                {messageSchedule.deliveryScheduleAt}
+              </DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>更新日時</DetailTableHeader>
+              <DetailTableData>{messageSchedule.updatedAt}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>ステータス</DetailTableHeader>
+              <DetailTableData>{messageSchedule.status}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>タイプ</DetailTableHeader>
+              <DetailTableData>{messageSchedule.status}</DetailTableData>
+            </DetailTableRow>
+            <DetailTableRow>
+              <DetailTableHeader>定期配信の有無</DetailTableHeader>
+              <DetailTableData>
+                {(() => {
+                  if (messageSchedule.messageReccuringId != null) {
+                    return <>あり</>;
+                  } else {
+                    return <>なし</>;
+                  }
+                })()}
+              </DetailTableData>
             </DetailTableRow>
             <DetailTableRow>
               <DetailTableHeader>配信メッセージ</DetailTableHeader>
               <DetailTableData>
-                {JSON.parse(messageEvent.content as string).map(
+                {JSON.parse(messageSchedule.content as string).map(
                   (message: AnyMessageTypeDetails, i: number) => {
                     const MessageComponent =
                       MessageType[message.type].detailComponent;
@@ -159,89 +104,8 @@ const Details: React.FC<{ messageId: string }> = ({ messageId }) => {
   );
 };
 
-const AggregationData: React.FC<{ messageId: string }> = ({ messageId }) => {
-  const res = trpc.useQuery(['message.eventAggregations', { id: messageId }]);
-
-  if (res.error) {
-    return <div>Error: {res.error.message}</div>;
-  }
-
-  if (!res.data) {
-    return <div>Loading...</div>;
-  }
-  const { links, ...aggregationData } = res.data;
-  return (
-    <>
-      <Card>
-        <CardHead>サマリー</CardHead>
-        <CardBody>
-          <DetailTable>
-            <DetailTableRow>
-              <DetailTableHeader>配信数</DetailTableHeader>
-              <DetailTableData>{aggregationData.sendCount}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>クリック数（クリック率）</DetailTableHeader>
-              <DetailTableData>{`${
-                aggregationData.uniqClickCount
-              }（${formatDecimals(
-                (aggregationData.uniqClickCount /
-                  (aggregationData.sendCount || 1)) *
-                  100
-              )}%）`}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>受注数</DetailTableHeader>
-              <DetailTableData>{aggregationData.orderCount}</DetailTableData>
-            </DetailTableRow>
-            <DetailTableRow>
-              <DetailTableHeader>受注金額</DetailTableHeader>
-              <DetailTableData>{aggregationData.orderTotal}円</DetailTableData>
-            </DetailTableRow>
-          </DetailTable>
-        </CardBody>
-      </Card>
-
-      <Table
-        columnDefs={[
-          {
-            title: 'リンク',
-            field: 'link',
-            render: (row) => (
-              <TextLink href={row.link} target="_blank">
-                {row.link}
-              </TextLink>
-            ),
-          },
-          {
-            title: 'クリック数（クリック率）',
-            field: 'clickCount',
-            render: (row) =>
-              `${row.uniqClickCount}（${formatDecimals(
-                (row.uniqClickCount / (aggregationData.sendCount || 1)) * 100
-              )}%）`,
-          },
-          {
-            title: '受注数',
-            field: 'orderCount',
-          },
-          {
-            title: '受注金額',
-            field: 'orderTotal',
-            render: (row) => `${row.orderTotal}円`,
-          },
-        ]}
-        data={links}
-      />
-    </>
-  );
-};
-
-const TABS = Object.freeze(['配信設定詳細', '配信対象者', '分析情報']);
-
 const Page: NextPage = () => {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState(TABS[0]);
 
   if (!router.query.id) {
     return <div>No id</div>;
@@ -253,29 +117,8 @@ const Page: NextPage = () => {
 
   return (
     <div>
-      <div className="mb-5">
-        <Tabs>
-          {TABS.map((tab) => (
-            <Tab
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              selected={tab === selectedTab}
-            >
-              {tab}
-            </Tab>
-          ))}
-        </Tabs>
-      </div>
       <div>
-        {selectedTab === '配信設定詳細' && (
-          <Details messageId={router.query.id as string} />
-        )}
-        {selectedTab === '配信対象者' && (
-          <Targets messageId={router.query.id as string} />
-        )}
-        {selectedTab === '分析情報' && (
-          <AggregationData messageId={router.query.id as string} />
-        )}
+        <Details messageId={router.query.id as string} />
       </div>
       <div className="mb-5" />
       <Card>

@@ -54,6 +54,8 @@ const schedule = createRouter()
           segmentTitle: z.any(),
           content: z.any(),
           title: z.string(),
+          type: z.string(),
+          status: z.string(),
           createdAt: z.string(),
           updatedAt: z.string(),
         })
@@ -101,6 +103,7 @@ const schedule = createRouter()
               id: message.id,
               title: message.title,
               content: message.content,
+              status: message.status,
               type: 'スポット',
               segmentTitle: message.segmentTitle,
               createdAt: message.createdAt.toISOString(),
@@ -114,6 +117,26 @@ const schedule = createRouter()
             totalPages: Math.ceil(count / perPageValue) || 1,
           },
         };
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+    },
+  })
+  .query('event', {
+    input: z.object({
+      id: z.string(),
+    }),
+    resolve: async ({ input, ctx }) => {
+      try {
+        const messageSchedule = await ctx.prisma.messageSchedule.findFirst({
+          where: {
+            id: input.id,
+            projectId: ctx.jwt.projectId,
+          },
+        });
+        if (!messageSchedule) throw new TRPCError({ code: 'NOT_FOUND' });
+        return messageSchedule;
       } catch (e) {
         console.error(e);
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
