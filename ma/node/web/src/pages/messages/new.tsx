@@ -13,11 +13,12 @@ import {
   CardHead,
   CardBody,
   Radio,
-  Checkbox,
   Button,
   Select,
   InputLabel,
   TextField,
+  TextLink,
+  ChevronLeftIcon,
   FloatArea,
 } from '@super_studio/ecforce_ui_albers';
 import { ChangeEvent, ChangeEventHandler, useState } from 'react';
@@ -29,6 +30,9 @@ import LineMessageInput, {
 import v from '../../utils/validation';
 import { useDialog } from '../../components/AppUtilityProvider/DialogProvider';
 import Router from 'next/router';
+import Link from 'next/link';
+import FormArea from '../../components/FormArea';
+import { useToast } from '../../components/AppUtilityProvider/ToastProvider';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -147,6 +151,7 @@ const EcfForm: React.FC<{
       messages: defaultMessages,
     },
   });
+  const showToast = useToast();
   const showDialog = useDialog();
   const [testIdList, setTestIdList] = useState('');
   const segmentToken = watch('segmentToken');
@@ -189,23 +194,33 @@ const EcfForm: React.FC<{
   };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    await scheduleCreate.mutate(
-      {
-        title: data.title,
-        segmentTitle: data.segmentTitle,
-        token: segmentToken,
-        messages: data.messages.map((message) => message.details),
-        status: 'waiting',
-      },
-      {
-        onError: () => {
-          onError('エラーが発生しました。');
+    if (
+      await showDialog({
+        title: 'メッセージ配信',
+        message: 'この内容でメッセージを配信しますか？',
+      })
+    ) {
+      await scheduleCreate.mutate(
+        {
+          title: data.title,
+          segmentTitle: data.segmentTitle,
+          token: segmentToken,
+          messages: data.messages.map((message) => message.details),
+          status: 'waiting',
         },
-        onSuccess: async () => {
-          await Router.push('/messages');
-        },
-      }
-    );
+        {
+          onError: () => {
+            onError('エラーが発生しました。');
+          },
+          onSuccess: async () => {
+            showToast({
+              message: '送信しました。',
+            });
+            await Router.push('/messages');
+          },
+        }
+      );
+    }
   };
 
   const handleDraft: SubmitHandler<EcfSchema> = async (data) => {
@@ -249,80 +264,101 @@ const EcfForm: React.FC<{
   return (
     <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
       <Card>
-        <CardHead>配信対象</CardHead>
+        <CardHead>基本情報</CardHead>
         <CardBody>
-          <div>
-            <InputLabel>配信対象検索条件</InputLabel>
-            <Select
-              {...register('segmentToken')}
-              error={!!errors.segmentToken}
-              onChange={handleSegmentChange}
-            >
-              <option value="">選択してください</option>
-              {segments.map((segment) => (
-                <option key={segment.token} value={segment.token}>
-                  {segment.name}
-                </option>
-              ))}
-            </Select>
-          </div>
+          <FormArea>
+            <div>
+              <InputLabel required className="mb-2">
+                配信名
+              </InputLabel>
+              <div className="flex item-center gap2">
+                <div className="grow">
+                  <Controller
+                    control={control}
+                    name="title"
+                    render={({ field: { name, onChange } }) => (
+                      <TextField
+                        name={name}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          onChange(e);
+                          onTitleChange(e);
+                        }}
+                        value={title}
+                        error={!!errors.title}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+          </FormArea>
         </CardBody>
       </Card>
       <div className="mt-6" />
       <Card>
-        <CardHead>配信内容</CardHead>
+        <CardHead>配信先の設定</CardHead>
         <CardBody>
-          <div className="mb-4">
-            <InputLabel>配信タイトル</InputLabel>
-            <div className="flex item-center gap2">
-              <div className="grow">
-                <Controller
-                  control={control}
-                  name="title"
-                  render={({ field: { name, onChange } }) => (
-                    <TextField
-                      name={name}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        onChange(e);
-                        onTitleChange(e);
-                      }}
-                      value={title}
-                      error={!!errors.title}
-                    />
-                  )}
-                />
-              </div>
+          <FormArea>
+            <div>
+              <InputLabel required className="mb-2">
+                配信対象
+              </InputLabel>
+              <Select
+                {...register('segmentToken')}
+                error={!!errors.segmentToken}
+                onChange={handleSegmentChange}
+              >
+                <option value="">選択してください</option>
+                {segments.map((segment) => (
+                  <option key={segment.token} value={segment.token}>
+                    {segment.name}
+                  </option>
+                ))}
+              </Select>
             </div>
-          </div>
-          <Controller
-            control={control}
-            name="messages"
-            render={({ field: { name, onChange } }) => (
-              <LineMessageInput
-                name={name}
-                onChange={(e) => {
-                  onChange(e);
-                  onMessageChange(e);
-                }}
-                value={defaultMessages}
-                errors={errors as Partial<EcfSchema>}
-              />
-            )}
+          </FormArea>
+        </CardBody>
+      </Card>
+      <hr className="my-7" />
+      <div className="text-[16px] font-bold">メッセージ設定</div>
+      <div className="mb-6" />
+      <div className="text-xs text-gray-500">
+        メッセージを最大5個まで送信できます。
+        <br />
+        カード内アクションは最大3個まで設定できます。アクションの数はすべてのカードで揃える必要があります。
+      </div>
+      <div className="mb-6" />
+      <Controller
+        control={control}
+        name="messages"
+        render={({ field: { name, onChange } }) => (
+          <LineMessageInput
+            name={name}
+            onChange={(e) => {
+              onChange(e);
+              onMessageChange(e);
+            }}
+            value={defaultMessages}
+            errors={errors as Partial<EcfSchema>}
           />
-          <div className="my-2">
-            <InputLabel>テスト配信</InputLabel>
-            <div className="flex items-center gap-2">
-              <div className="grow">
-                <TextField
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setTestIdList(e.target.value);
-                  }}
-                />
-              </div>
-              <Button variant="secondary" onClick={sendTestMessage}>
-                テスト送信
-              </Button>
+        )}
+      />
+      <div className="mt-6" />
+      <Card>
+        <CardHead>テスト配信</CardHead>
+        <CardBody>
+          <div className="flex items-center gap-2">
+            <div className="grow">
+              <TextField
+                placeholder="LINEユーザーIDをカンマ区切りで入力"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setTestIdList(e.target.value);
+                }}
+              />
             </div>
+            <Button variant="secondary" onClick={sendTestMessage}>
+              テスト送信
+            </Button>
           </div>
         </CardBody>
       </Card>
@@ -339,192 +375,192 @@ const EcfForm: React.FC<{
   );
 };
 
-const LineForm: React.FC<{
-  title: string;
-  type: 'ecf' | 'line';
-  defaultMessages: LineMessageInputValue;
-  onTitleChange: ChangeEventHandler<HTMLInputElement>;
-  onTypeChange: ChangeEventHandler<HTMLInputElement>;
-  onMessageChange: LineMessageInputEventHandler;
-  onError: (message: string) => void;
-  onValidationError: (error: z.ZodIssue[]) => void;
-}> = ({
-  title,
-  type,
-  defaultMessages,
-  onTitleChange,
-  onTypeChange,
-  onMessageChange,
-  onError,
-  onValidationError,
-}) => {
-  const showDialog = useDialog();
-  const [testIdList, setTestIdList] = useState('');
-  const narrowcast = trpc.useMutation('line.narrowcast');
-  const multicast = trpc.useMutation('line.multicast');
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm<LineSchema>({
-    resolver: zodResolver(lineSchema),
-    defaultValues: {
-      messages: defaultMessages,
-      gender: [],
-    },
-  });
+// const LineForm: React.FC<{
+//   title: string;
+//   type: 'ecf' | 'line';
+//   defaultMessages: LineMessageInputValue;
+//   onTitleChange: ChangeEventHandler<HTMLInputElement>;
+//   onTypeChange: ChangeEventHandler<HTMLInputElement>;
+//   onMessageChange: LineMessageInputEventHandler;
+//   onError: (message: string) => void;
+//   onValidationError: (error: z.ZodIssue[]) => void;
+// }> = ({
+//   title,
+//   type,
+//   defaultMessages,
+//   onTitleChange,
+//   onTypeChange,
+//   onMessageChange,
+//   onError,
+//   onValidationError,
+// }) => {
+//   const showDialog = useDialog();
+//   const [testIdList, setTestIdList] = useState('');
+//   const narrowcast = trpc.useMutation('line.narrowcast');
+//   const multicast = trpc.useMutation('line.multicast');
+//   const {
+//     register,
+//     handleSubmit,
+//     getValues,
+//     control,
+//     formState: { errors, isSubmitting },
+//   } = useForm<LineSchema>({
+//     resolver: zodResolver(lineSchema),
+//     defaultValues: {
+//       messages: defaultMessages,
+//       gender: [],
+//     },
+//   });
 
-  const sendTestMessage = async () => {
-    try {
-      const data = getValues();
-      lineMessageInputSchema.parse(data.messages);
-      await multicast.mutate(
-        {
-          title: data.title,
-          messages: data.messages.map((message) => message.details),
-          userIds: testIdList.split(','),
-        },
-        {
-          onError: () => {
-            onError('エラーが発生しました。');
-          },
-          onSuccess: () => {
-            showDialog({
-              title: 'テストメッセージ配信完了。',
-              noCancelButton: true,
-            });
-          },
-        }
-      );
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        onValidationError(e.issues);
-      } else {
-        onError('エラーが発生しました。');
-      }
-    }
-  };
+//   const sendTestMessage = async () => {
+//     try {
+//       const data = getValues();
+//       lineMessageInputSchema.parse(data.messages);
+//       await multicast.mutate(
+//         {
+//           title: data.title,
+//           messages: data.messages.map((message) => message.details),
+//           userIds: testIdList.split(','),
+//         },
+//         {
+//           onError: () => {
+//             onError('エラーが発生しました。');
+//           },
+//           onSuccess: () => {
+//             showDialog({
+//               title: 'テストメッセージ配信完了。',
+//               noCancelButton: true,
+//             });
+//           },
+//         }
+//       );
+//     } catch (e) {
+//       if (e instanceof z.ZodError) {
+//         onValidationError(e.issues);
+//       } else {
+//         onError('エラーが発生しました。');
+//       }
+//     }
+//   };
 
-  const handleValid: SubmitHandler<LineSchema> = async (data) => {
-    await narrowcast.mutate(
-      {
-        title: data.title,
-        messages: data.messages.map((message) => message.details),
-        gender: data.gender.length === 1 ? data.gender[0] : undefined,
-      },
-      {
-        onError: () => {
-          onError('エラーが発生しました。');
-        },
-        onSuccess: async () => {
-          await Router.replace('/send-complete');
-        },
-      }
-    );
-  };
+//   const handleValid: SubmitHandler<LineSchema> = async (data) => {
+//     await narrowcast.mutate(
+//       {
+//         title: data.title,
+//         messages: data.messages.map((message) => message.details),
+//         gender: data.gender.length === 1 ? data.gender[0] : undefined,
+//       },
+//       {
+//         onError: () => {
+//           onError('エラーが発生しました。');
+//         },
+//         onSuccess: async () => {
+//           await Router.replace('/send-complete');
+//         },
+//       }
+//     );
+//   };
 
-  const handleInvalid: SubmitErrorHandler<EcfSchema> = () => {
-    try {
-      lineSchema.parse(getValues());
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        onValidationError(e.issues);
-      } else {
-        onError('エラーが発生しました。');
-      }
-    }
-  };
+//   const handleInvalid: SubmitErrorHandler<EcfSchema> = () => {
+//     try {
+//       lineSchema.parse(getValues());
+//     } catch (e) {
+//       if (e instanceof z.ZodError) {
+//         onValidationError(e.issues);
+//       } else {
+//         onError('エラーが発生しました。');
+//       }
+//     }
+//   };
 
-  return (
-    <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
-      <Card>
-        <CardHead>配信対象</CardHead>
-        <CardBody>
-          <div>
-            <InputLabel>性別</InputLabel>
-            <div className="text-xs">
-              <Checkbox {...register('gender')} value="male" id="male">
-                男性
-              </Checkbox>
-              <div className="inline mr-8"></div>
-              <Checkbox {...register('gender')} value="female" id="female">
-                女性
-              </Checkbox>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-      <div className="mt-6" />
-      <Card>
-        <CardHead>配信内容</CardHead>
-        <CardBody>
-          <div className="mb-4">
-            <InputLabel>配信タイトル</InputLabel>
-            <div className="flex item-center gap2">
-              <div className="grow">
-                <Controller
-                  control={control}
-                  name="title"
-                  render={({ field: { name, onChange } }) => (
-                    <TextField
-                      name={name}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        onChange(e);
-                        onTitleChange(e);
-                      }}
-                      value={title}
-                      error={!!errors.title}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-          <Controller
-            control={control}
-            name="messages"
-            render={({ field: { name, onChange } }) => (
-              <LineMessageInput
-                name={name}
-                onChange={(e) => {
-                  onChange(e);
-                  onMessageChange(e);
-                }}
-                value={defaultMessages}
-                errors={errors as Partial<LineSchema>}
-              />
-            )}
-          />
-          <div className="my-2">
-            <InputLabel>テスト配信</InputLabel>
-            <div className="flex items-center gap-2">
-              <div className="grow">
-                <TextField
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setTestIdList(e.target.value);
-                  }}
-                />
-              </div>
-              <Button variant="secondary" onClick={sendTestMessage}>
-                テスト送信
-              </Button>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
-      <div className="mt-6" />
-      <FloatArea
-        secondaryButton={
-          <Button type="submit" variant="secondary" disabled={isSubmitting}>
-            送信
-          </Button>
-        }
-      />
-    </form>
-  );
-};
+//   return (
+//     <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
+//       <Card>
+//         <CardHead>配信対象</CardHead>
+//         <CardBody>
+//           <div>
+//             <InputLabel>性別</InputLabel>
+//             <div className="text-xs">
+//               <Checkbox {...register('gender')} value="male" id="male">
+//                 男性
+//               </Checkbox>
+//               <div className="inline mr-8"></div>
+//               <Checkbox {...register('gender')} value="female" id="female">
+//                 女性
+//               </Checkbox>
+//             </div>
+//           </div>
+//         </CardBody>
+//       </Card>
+//       <div className="mt-6" />
+//       <Card>
+//         <CardHead>配信内容</CardHead>
+//         <CardBody>
+//           <div className="mb-4">
+//             <InputLabel>配信タイトル</InputLabel>
+//             <div className="flex item-center gap2">
+//               <div className="grow">
+//                 <Controller
+//                   control={control}
+//                   name="title"
+//                   render={({ field: { name, onChange } }) => (
+//                     <TextField
+//                       name={name}
+//                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
+//                         onChange(e);
+//                         onTitleChange(e);
+//                       }}
+//                       value={title}
+//                       error={!!errors.title}
+//                     />
+//                   )}
+//                 />
+//               </div>
+//             </div>
+//           </div>
+//           <Controller
+//             control={control}
+//             name="messages"
+//             render={({ field: { name, onChange } }) => (
+//               <LineMessageInput
+//                 name={name}
+//                 onChange={(e) => {
+//                   onChange(e);
+//                   onMessageChange(e);
+//                 }}
+//                 value={defaultMessages}
+//                 errors={errors as Partial<LineSchema>}
+//               />
+//             )}
+//           />
+//           <div className="my-2">
+//             <InputLabel>テスト配信</InputLabel>
+//             <div className="flex items-center gap-2">
+//               <div className="grow">
+//                 <TextField
+//                   onChange={(e: ChangeEvent<HTMLInputElement>) => {
+//                     setTestIdList(e.target.value);
+//                   }}
+//                 />
+//               </div>
+//               <Button variant="secondary" onClick={sendTestMessage}>
+//                 テスト送信
+//               </Button>
+//             </div>
+//           </div>
+//         </CardBody>
+//       </Card>
+//       <div className="mt-6" />
+//       <FloatArea
+//         secondaryButton={
+//           <Button type="submit" variant="secondary" disabled={isSubmitting}>
+//             送信
+//           </Button>
+//         }
+//       />
+//     </form>
+//   );
+// };
 
 const Page: NextPage = () => {
   const showDialog = useDialog();
@@ -598,7 +634,7 @@ const Page: NextPage = () => {
           segments={segments.data}
         />
       )}
-      {type === 'line' && (
+      {/* {type === 'line' && (
         <LineForm
           title={title}
           type={type}
@@ -609,7 +645,14 @@ const Page: NextPage = () => {
           onError={handleError}
           onValidationError={handleValidationError}
         />
-      )}
+      )} */}
+      <div className="mt-6" />
+      <Link href="/messages" passHref>
+        <TextLink>
+          <ChevronLeftIcon />
+          一覧に戻る
+        </TextLink>
+      </Link>
     </div>
   );
 };

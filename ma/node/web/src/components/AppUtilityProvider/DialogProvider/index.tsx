@@ -5,6 +5,8 @@ interface DialogOptions {
   title: string;
   message?: string;
   noCancelButton?: boolean;
+  variant?: 'primary' | 'destructive';
+  confirmText?: string;
 }
 
 interface PromiseInfo {
@@ -49,6 +51,8 @@ const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
         open={open}
         title={options.title}
         body={options.message}
+        variant={options.variant}
+        confirmText={options.confirmText}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
         noCancelButton={options.noCancelButton}

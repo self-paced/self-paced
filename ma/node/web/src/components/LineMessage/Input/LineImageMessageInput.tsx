@@ -2,6 +2,7 @@ import { InputLabel, TextField } from '@super_studio/ecforce_ui_albers';
 import { MessageComponent } from '../MessageType';
 import { ChangeEvent } from 'react';
 import LineImageMessageType from '../MessageType/LineImageMessageType';
+import FormArea from '../../FormArea';
 
 export const DEFAULT_IMAGE_MESSAGE = Object.freeze<LineImageMessageType>({
   type: 'image',
@@ -15,9 +16,12 @@ const LineImageMessageInput: MessageComponent<LineImageMessageType> = ({
   errors,
 }) => {
   return (
-    <div>
-      <InputLabel>画像URL</InputLabel>
+    <FormArea>
+      <InputLabel required className="mb-2">
+        画像URL
+      </InputLabel>
       <TextField
+        placeholder="画像URL"
         value={messageDetails.originalContentUrl}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newMessageDetails = { ...messageDetails };
@@ -26,8 +30,12 @@ const LineImageMessageInput: MessageComponent<LineImageMessageType> = ({
         }}
         error={errors?.originalContentUrl}
       />
-      <InputLabel>プレビュー画像URL</InputLabel>
+      <div className="mb-4" />
+      <InputLabel required className="mb-2">
+        プレビュー画像URL
+      </InputLabel>
       <TextField
+        placeholder="プレビュー画像URL"
         value={messageDetails.previewImageUrl}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           const newMessageDetails = { ...messageDetails };
@@ -36,7 +44,7 @@ const LineImageMessageInput: MessageComponent<LineImageMessageType> = ({
         }}
         error={errors?.previewImageUrl}
       />
-    </div>
+    </FormArea>
   );
 };
 

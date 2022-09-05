@@ -21,9 +21,9 @@ model Account {
   projectId        String             @unique
   createdAt        DateTime           @default(now()) @db.Timestamp(0)
   updatedAt        DateTime           @default(now()) @updatedAt @db.Timestamp(0)
-  MessageEvents    MessageEvent[]
-  MessageReccuring MessageReccuring[]
-  MessageSchedule  MessageSchedule[]
+  messageEvents    MessageEvent[]
+  messageReccuring MessageReccuring[]
+  messageSchedule  MessageSchedule[]
 }
 
 model MessageReccuring {
@@ -70,7 +70,7 @@ model MessageEvent {
   account           Account            @relation(fields: [projectId], references: [projectId])
   projectId         String
   userMessageEvents UserMessageEvent[]
-  MessageSchedule   MessageSchedule    @relation(fields: [messageScheduleId], references: [id])
+  messageSchedule   MessageSchedule    @relation(fields: [messageScheduleId], references: [id])
   messageScheduleId String             @unique
 }
 
@@ -97,7 +97,7 @@ model UserMessageLink {
   updatedAt                 DateTime                  @default(now()) @updatedAt @db.Timestamp(0)
   userMessageEvent          UserMessageEvent          @relation(fields: [userMessageEventId], references: [id])
   userMessageEventId        String
-  UserMessageLinkActivities UserMessageLinkActivity[]
+  userMessageLinkActivities UserMessageLinkActivity[]
 }
 
 model UserMessageLinkActivity {

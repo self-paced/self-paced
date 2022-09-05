@@ -1,18 +1,26 @@
 import { ChangeEvent, useState } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import {
-  MdArrowDropDown,
-  MdArrowDropUp,
-  MdAdd,
-  MdDelete,
-} from 'react-icons/md';
-import { Button, Select } from '@super_studio/ecforce_ui_albers';
+  Button,
+  Select,
+  Card,
+  CardHead,
+  CardBody,
+  InputLabel,
+  AddIcon,
+  ArrowDownwardIcon,
+  ArrowUpwardIcon,
+  ClearIcon,
+} from '@super_studio/ecforce_ui_albers';
 import { z } from 'zod';
 import MessageType, {
   AnyMessageTypeDetails,
   anyMessageTypeSchema,
 } from '../MessageType';
 import { EcfSchema } from '../../../pages/messages/new';
+import FormArea from '../../FormArea';
+import IconButton from '../../IconButton';
+import { useDialog } from '../../AppUtilityProvider/DialogProvider';
 
 const MAX_MESSAGES = 5;
 
@@ -45,8 +53,7 @@ const LineMessageInput: React.FC<{
   errors: Partial<EcfSchema>;
   onChange?: LineMessageInputEventHandler;
 }> = ({ name, onChange, value, errors }) => {
-  console.log('value', value);
-
+  const showDialog = useDialog();
   const [messages, setMessages] = useState<LineMessageInputValue>(
     value ?? [
       {
@@ -88,91 +95,106 @@ const LineMessageInput: React.FC<{
         const MessageComponent =
           MessageType[message.details.type].inputComponent;
         return (
-          <div
-            key={message.key}
-            className="border-l-4 border-b-4 border-gray-200 pl-4 mb-2"
-          >
-            {/* HEADER */}
-            <div className="flex gap-1 items-center">
-              <div className="font-bold">{`メッセージ #${i + 1}`}</div>
-              <Select
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                  const type = e.target.value as keyof typeof MessageType;
-                  const newMessages = [...messages];
-                  newMessages[i].details = JSON.parse(
-                    JSON.stringify(MessageType[type].default)
-                  ); // deep copy
-                  handleChange(newMessages);
-                }}
-              >
-                {Object.entries(MessageType).map(([type, details]) => (
-                  <option key={type} value={type}>
-                    {details.name}
-                  </option>
-                ))}
-              </Select>
-              <div className="grow" />
-              <Button
-                icon
-                onClick={() => {
-                  handleMove(i, 1);
-                }}
-                disabled={i >= messages.length - 1}
-              >
-                <MdArrowDropDown />
-              </Button>
-              <Button
-                icon
-                onClick={() => {
-                  handleMove(i, -1);
-                }}
-                disabled={i === 0}
-              >
-                <MdArrowDropUp />
-              </Button>
-              <Button
-                icon
-                variant="destructive"
-                onClick={() => {
-                  const newMessages = [...messages];
-                  newMessages.splice(i, 1);
-                  setMessages(newMessages);
-                  onChange &&
-                    onChange({
-                      target: {
-                        name,
-                        value: newMessages,
-                      },
-                    });
-                }}
-                disabled={messages.length === 1}
-              >
-                <MdDelete />
-              </Button>
-            </div>
-            {/* CUSTOM MESSAGE INPUT */}
-            <div className="my-1">
-              <MessageComponent
-                messageDetails={message.details as any}
-                onChange={(v) => {
-                  const newMessages = [...messages];
-                  newMessages[i].details = v;
-                  handleChange(newMessages);
-                }}
-                errors={
-                  errors.messages
-                    ? (errors.messages[i]
-                        ?.details as Partial<AnyMessageTypeDetails>)
-                    : undefined
-                }
-              />
-            </div>
+          <div key={message.key}>
+            <Card>
+              <CardHead>
+                <div className="flex gap-1 items-center">
+                  {`メッセージ ${i + 1}`}
+                  <div className="grow" />
+                  <IconButton
+                    onClick={() => {
+                      handleMove(i, 1);
+                    }}
+                    disabled={i >= messages.length - 1}
+                  >
+                    <ArrowDownwardIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      handleMove(i, -1);
+                    }}
+                    disabled={i === 0}
+                  >
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={async () => {
+                      if (
+                        await showDialog({
+                          title: 'メッセージ削除',
+                          message: `メッセージ${i + 1}を削除しますか？`,
+                          variant: 'destructive',
+                          confirmText: '削除',
+                        })
+                      ) {
+                        const newMessages = [...messages];
+                        newMessages.splice(i, 1);
+                        setMessages(newMessages);
+                        onChange &&
+                          onChange({
+                            target: {
+                              name,
+                              value: newMessages,
+                            },
+                          });
+                      }
+                    }}
+                    disabled={messages.length === 1}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </div>
+              </CardHead>
+              <CardBody>
+                <FormArea>
+                  <InputLabel required className="mb-2">
+                    タイプ
+                  </InputLabel>
+                  <Select
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                      const type = e.target.value as keyof typeof MessageType;
+                      const newMessages = [...messages];
+                      newMessages[i].details = JSON.parse(
+                        JSON.stringify(MessageType[type].default)
+                      ); // deep copy
+                      handleChange(newMessages);
+                    }}
+                  >
+                    {Object.entries(MessageType).map(([type, details]) => (
+                      <option key={type} value={type}>
+                        {details.name}
+                      </option>
+                    ))}
+                  </Select>
+                  <div className="mb-4" />
+                </FormArea>
+                {/* CUSTOM MESSAGE INPUT */}
+                <div className="my-1">
+                  <MessageComponent
+                    messageDetails={message.details as any}
+                    onChange={(v) => {
+                      const newMessages = [...messages];
+                      newMessages[i].details = v;
+                      handleChange(newMessages);
+                    }}
+                    errors={
+                      errors.messages
+                        ? (errors.messages[i]
+                            ?.details as Partial<AnyMessageTypeDetails>)
+                        : undefined
+                    }
+                  />
+                </div>
+              </CardBody>
+            </Card>
+            <div className="mb-6" />
           </div>
         );
       })}
       {/* ADD MESSAGE BUTTON */}
       <div>
         <Button
+          icon={<AddIcon height={16} width={16} />}
           onClick={() => {
             const newMessages: typeof messages = [
               ...messages,
@@ -189,7 +211,6 @@ const LineMessageInput: React.FC<{
           }}
           disabled={messages.length >= MAX_MESSAGES}
         >
-          <MdAdd />
           メッセージ追加
         </Button>
       </div>

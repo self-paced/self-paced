@@ -1,17 +1,24 @@
-import { InputLabel, TextField, Button } from '@super_studio/ecforce_ui_albers';
+import {
+  InputLabel,
+  TextField,
+  Button,
+  ArrowDownwardIcon,
+  ArrowUpwardIcon,
+  ClearIcon,
+  Select,
+  TextArea,
+  AddIcon,
+} from '@super_studio/ecforce_ui_albers';
 import { MessageComponent } from '../MessageType';
 import { ChangeEvent, useState } from 'react';
-import {
-  MdAdd,
-  MdArrowDropDown,
-  MdArrowDropUp,
-  MdDelete,
-} from 'react-icons/md';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import LineCarouselMessageType, {
   MAX_ACTIONS,
   MAX_COLUMNS,
 } from '../MessageType/LineCarouselMessageType';
+import FormArea from '../../FormArea';
+import IconButton from '../../IconButton';
+import { useDialog } from '../../AppUtilityProvider/DialogProvider';
 
 const DEFAULT_CAROUSEL_COLUMN = Object.freeze<
   LineCarouselMessageType['template']['columns'][0]
@@ -27,16 +34,14 @@ const DEFAULT_CAROUSEL_COLUMN = Object.freeze<
   actions: [
     {
       type: 'uri',
-      label: '詳細を見る',
+      label: '',
       uri: '',
     },
   ],
 });
 
 type ActionType =
-  LineCarouselMessageType['template']['columns'][0]['actions'][0] & {
-    key: number;
-  };
+  LineCarouselMessageType['template']['columns'][0]['actions'][0];
 
 type ColumnType = Omit<
   LineCarouselMessageType['template']['columns'][0],
@@ -51,19 +56,42 @@ export const DEFAULT_CAROUSEL_MESSAGE = Object.freeze<LineCarouselMessageType>({
   altText: '',
   template: {
     type: 'carousel',
-    columns: [
-      JSON.parse(JSON.stringify(DEFAULT_CAROUSEL_COLUMN)),
-      JSON.parse(JSON.stringify(DEFAULT_CAROUSEL_COLUMN)),
-    ],
+    columns: [JSON.parse(JSON.stringify(DEFAULT_CAROUSEL_COLUMN))],
   },
 });
+
+const ColumnCard: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return <div className="bg-gray-100 rounded-md">{children}</div>;
+};
+
+const ColumnCardHead: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return (
+    <div className="px-5 py-4 border-b border-b-white flex gap-1 items-center">
+      {children}
+    </div>
+  );
+};
+
+const ColumnCardBody: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return <div className="px-4 py-2">{children}</div>;
+};
 
 const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
   messageDetails,
   onChange,
   errors,
 }) => {
+  const showDialog = useDialog();
   const [altText, setAltText] = useState(messageDetails.altText);
+  const [actionNumber, setActionNumber] = useState(
+    messageDetails.template.columns[0].actions.length
+  );
   const [columns, setColumns] = useState<ColumnType[]>(
     messageDetails.template.columns.map((column, index) => {
       return {
@@ -132,137 +160,188 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
 
   return (
     <>
-      <div className="mb-2">
-        <InputLabel>通知のテキスト</InputLabel>
-        <TextField
-          value={altText}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            handleChange({ newAltText: e.target.value });
-          }}
-          error={errors?.altText}
-        />
-      </div>
+      <FormArea>
+        <div className="mb-2">
+          <InputLabel required className="mb-2">
+            通知のテキスト
+          </InputLabel>
+          <TextField
+            value={altText}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              handleChange({ newAltText: e.target.value });
+            }}
+            error={errors?.altText}
+          />
+          <div className="mb-4" />
+          <InputLabel required className="mb-2">
+            アクションの数
+          </InputLabel>
+          <Select
+            value={actionNumber}
+            onChange={async (e: ChangeEvent<HTMLSelectElement>) => {
+              let confirmed = true;
+              const newActionNumber = parseInt(e.target.value);
+              if (newActionNumber < actionNumber) {
+                confirmed = await showDialog({
+                  title: 'アクション削除',
+                  message: 'アクションの数を減らすと、データが失われます。',
+                  confirmText: '削除',
+                  variant: 'destructive',
+                });
+              }
+              if (confirmed) {
+                setActionNumber(newActionNumber);
+                const newColumns = JSON.parse(
+                  JSON.stringify(columns)
+                ) as typeof columns; // Deep copy
+                newColumns.forEach((column) => {
+                  column.actions = [];
+                  for (let i = 0; i < newActionNumber; i++) {
+                    column.actions.push({
+                      ...DEFAULT_CAROUSEL_COLUMN.actions[0],
+                    });
+                  }
+                });
+                handleChange({ newColumns });
+              }
+            }}
+          >
+            {[...Array(MAX_ACTIONS)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </FormArea>
+      <div className="mb-4" />
       <div ref={parent}>
         {columns.map((column, columnIndex) => (
-          <div
-            key={column.key}
-            className="border-l-4 border-b-4 border-gray-200 pl-4 max-w-xl mb-2"
-          >
-            <div className="my-1">
-              {/* COLUMN HEADER */}
-              <div className="flex gap-1 items-center">
+          <div key={column.key}>
+            <ColumnCard>
+              <ColumnCardHead>
                 <div className="font-bold text-xs">
-                  {`カラム #${columnIndex + 1}`}
+                  {`カード ${columnIndex + 1}`}
                 </div>
                 <div className="grow" />
-                <Button
-                  icon
+                <IconButton
                   onClick={() => {
                     handleMoveColumn(columnIndex, 1);
                   }}
                   disabled={columnIndex >= columns.length - 1}
                 >
-                  <MdArrowDropDown />
-                </Button>
-                <Button
-                  icon
+                  <ArrowDownwardIcon />
+                </IconButton>
+                <IconButton
                   onClick={() => {
                     handleMoveColumn(columnIndex, -1);
                   }}
                   disabled={columnIndex === 0}
                 >
-                  <MdArrowDropUp />
-                </Button>
-                <Button
-                  icon
-                  variant="destructive"
-                  onClick={() => {
-                    const newColumns = JSON.parse(
-                      JSON.stringify(columns)
-                    ) as typeof columns; // Deep copy
-                    newColumns.splice(columnIndex, 1);
-                    handleChange({ newColumns });
+                  <ArrowUpwardIcon />
+                </IconButton>
+                <IconButton
+                  onClick={async () => {
+                    if (
+                      await showDialog({
+                        title: 'メッセージ削除',
+                        message: `カード${columnIndex + 1}を削除しますか？`,
+                        variant: 'destructive',
+                        confirmText: '削除',
+                      })
+                    ) {
+                      const newColumns = JSON.parse(
+                        JSON.stringify(columns)
+                      ) as typeof columns; // Deep copy
+                      newColumns.splice(columnIndex, 1);
+                      handleChange({ newColumns });
+                    }
                   }}
                   disabled={columns.length === 1}
                 >
-                  <MdDelete />
-                </Button>
-              </div>
-              {/* COLUMN INPUTS */}
-              <InputLabel>画像URL</InputLabel>
-              <TextField
-                value={column.thumbnailImageUrl}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newColumns = JSON.parse(
-                    JSON.stringify(columns)
-                  ) as typeof columns; // Deep copy
-                  newColumns[columnIndex].thumbnailImageUrl = e.target.value;
-                  handleChange({ newColumns });
-                }}
-                error={
-                  !!errors?.template?.columns?.[columnIndex]?.thumbnailImageUrl
-                }
-              />
-              <InputLabel>タイトル</InputLabel>
-              <TextField
-                value={column.title}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newColumns = JSON.parse(
-                    JSON.stringify(columns)
-                  ) as typeof columns; // Deep copy
-                  newColumns[columnIndex].title = e.target.value;
-                  handleChange({ newColumns });
-                }}
-                error={!!errors?.template?.columns?.[columnIndex]?.title}
-              />
-              <InputLabel>詳細</InputLabel>
-              <TextField
-                value={column.text}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newColumns = JSON.parse(
-                    JSON.stringify(columns)
-                  ) as typeof columns; // Deep copy
-                  newColumns[columnIndex].text = e.target.value;
-                  handleChange({ newColumns });
-                }}
-                error={!!errors?.template?.columns?.[columnIndex]?.text}
-              />
-              <InputLabel>デフォルトURL</InputLabel>
-              <TextField
-                value={column.defaultAction.uri}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  const newColumns = JSON.parse(
-                    JSON.stringify(columns)
-                  ) as typeof columns; // Deep copy
-                  newColumns[columnIndex].defaultAction.uri = e.target.value;
-                  handleChange({ newColumns });
-                }}
-                error={
-                  !!errors?.template?.columns?.[columnIndex]?.defaultAction?.uri
-                }
-              />
-              {/* ACTIONS */}
-              <Actions
-                actions={column.actions}
-                columnIndex={columnIndex}
-                onMoveAction={(columnIndex, actionIndex, shift) => {
-                  handleMoveAction(columnIndex, actionIndex, shift);
-                }}
-                onChange={(newActions: ActionType[]) => {
-                  const newColumns = JSON.parse(
-                    JSON.stringify(columns)
-                  ) as typeof columns; // Deep copy
-                  newColumns[columnIndex].actions = newActions;
-                  handleChange({ newColumns });
-                }}
-                errors={errors}
-              />
-            </div>
+                  <ClearIcon />
+                </IconButton>
+              </ColumnCardHead>
+              <ColumnCardBody>
+                <FormArea>
+                  <InputLabel required className="mb-2">
+                    タイトル
+                  </InputLabel>
+                  <TextField
+                    value={column.title}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const newColumns = JSON.parse(
+                        JSON.stringify(columns)
+                      ) as typeof columns; // Deep copy
+                      newColumns[columnIndex].title = e.target.value;
+                      handleChange({ newColumns });
+                    }}
+                    error={!!errors?.template?.columns?.[columnIndex]?.title}
+                  />
+                  <div className="mb-3" />
+                  <InputLabel required className="mb-2">
+                    画像
+                  </InputLabel>
+                  <TextField
+                    placeholder="画像URL"
+                    value={column.thumbnailImageUrl}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const newColumns = JSON.parse(
+                        JSON.stringify(columns)
+                      ) as typeof columns; // Deep copy
+                      newColumns[columnIndex].thumbnailImageUrl =
+                        e.target.value;
+                      handleChange({ newColumns });
+                    }}
+                    error={
+                      !!errors?.template?.columns?.[columnIndex]
+                        ?.thumbnailImageUrl
+                    }
+                  />
+                  <div className="mb-3" />
+                  <InputLabel required className="mb-2">
+                    テキスト
+                  </InputLabel>
+                  <TextArea
+                    placeholder="テキストを入力してください"
+                    value={column.text}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const newColumns = JSON.parse(
+                        JSON.stringify(columns)
+                      ) as typeof columns; // Deep copy
+                      newColumns[columnIndex].text = e.target.value;
+                      handleChange({ newColumns });
+                    }}
+                    error={!!errors?.template?.columns?.[columnIndex]?.text}
+                  />
+                  <div className="mb-3" />
+                  {/* ACTIONS */}
+                  <Actions
+                    actions={column.actions}
+                    columnIndex={columnIndex}
+                    onMoveAction={(columnIndex, actionIndex, shift) => {
+                      handleMoveAction(columnIndex, actionIndex, shift);
+                    }}
+                    onChange={(newActions: ActionType[]) => {
+                      const newColumns = JSON.parse(
+                        JSON.stringify(columns)
+                      ) as typeof columns; // Deep copy
+                      newColumns[columnIndex].actions = newActions;
+                      newColumns[columnIndex].defaultAction = newActions[0];
+                      handleChange({ newColumns });
+                    }}
+                    errors={errors}
+                  />
+                </FormArea>
+              </ColumnCardBody>
+            </ColumnCard>
+            <div className="mb-6" />
           </div>
         ))}
         {/* ADD COLUMN BUTTON */}
         <div>
           <Button
+            icon={<AddIcon height={16} width={16} />}
             onClick={() => {
               const newColumns = JSON.parse(
                 JSON.stringify(columns)
@@ -270,9 +349,8 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
               const defaultColumn: ColumnType = {
                 ...DEFAULT_CAROUSEL_COLUMN,
                 key: Date.now(),
-                actions: DEFAULT_CAROUSEL_COLUMN.actions.map((action) => ({
-                  ...action,
-                  key: Date.now(),
+                actions: [...Array(actionNumber)].map(() => ({
+                  ...DEFAULT_CAROUSEL_COLUMN.actions[0],
                 })),
               };
               newColumns.push(defaultColumn);
@@ -280,7 +358,6 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
             }}
             disabled={messageDetails.template.columns.length >= MAX_COLUMNS}
           >
-            <MdAdd />
             カラム追加
           </Button>
         </div>
@@ -302,110 +379,51 @@ const Actions: React.FC<{
   ) => void;
   onChange: (newActions: ActionType[]) => void;
   errors?: Partial<LineCarouselMessageType>;
-}> = ({ columnIndex, actions, onMoveAction, onChange, errors }) => {
-  const [parent] = useAutoAnimate<HTMLDivElement>();
+}> = ({ columnIndex, actions, onChange, errors }) => {
   return (
-    <div ref={parent}>
+    <div>
+      <InputLabel required className="mb-2">
+        アクション
+      </InputLabel>
       {actions.map((action, actionIndex) => (
-        <div
-          key={action.key}
-          className="border-l-4 border-b-4 border-gray-200 pl-4 max-w-md my-2"
-        >
-          <div className="my-1">
-            {/* ACTION HEADER */}
-            <div className="flex gap-1 items-center">
-              <div className="font-bold text-xs">
-                {`アクション #${actionIndex + 1}`}
-              </div>
-              <div className="grow" />
-              <Button
-                icon
-                onClick={() => {
-                  onMoveAction(columnIndex, actionIndex, 1);
-                }}
-                disabled={actionIndex >= actions.length - 1}
-              >
-                <MdArrowDropDown />
-              </Button>
-              <Button
-                icon
-                onClick={() => {
-                  onMoveAction(columnIndex, actionIndex, -1);
-                }}
-                disabled={actionIndex === 0}
-              >
-                <MdArrowDropUp />
-              </Button>
-              <Button
-                icon
-                variant="destructive"
-                onClick={() => {
-                  const newActions = JSON.parse(
-                    JSON.stringify(actions)
-                  ) as typeof actions; // Deep copy
-                  newActions.splice(actionIndex, 1);
-                  onChange(newActions);
-                }}
-                disabled={actions.length === 1}
-              >
-                <MdDelete />
-              </Button>
-            </div>
-            {/* ACTION INPUTS */}
-            <InputLabel>ラベル</InputLabel>
-            <TextField
-              value={action.label}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newActions = JSON.parse(
-                  JSON.stringify(actions)
-                ) as typeof actions; // Deep copy
-                newActions[actionIndex].label = e.target.value;
-                onChange(newActions);
-              }}
-              error={
-                !!errors?.template?.columns?.[columnIndex]?.actions?.[
-                  actionIndex
-                ]?.label
-              }
-            />
-            <InputLabel>URL</InputLabel>
-            <TextField
-              value={action.uri}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const newActions = JSON.parse(
-                  JSON.stringify(actions)
-                ) as typeof actions; // Deep copy
-                newActions[actionIndex].uri = e.target.value;
-                onChange(newActions);
-              }}
-              error={
-                !!errors?.template?.columns?.[columnIndex]?.actions?.[
-                  actionIndex
-                ]?.uri
-              }
-            />
-          </div>
+        <div key={actionIndex} className="max-w-md my-2">
+          {/* ACTION INPUTS */}
+          <TextField
+            placeholder="アクションラベル"
+            value={action.label}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const newActions = JSON.parse(
+                JSON.stringify(actions)
+              ) as typeof actions; // Deep copy
+              newActions[actionIndex].label = e.target.value;
+              onChange(newActions);
+            }}
+            error={
+              !!errors?.template?.columns?.[columnIndex]?.actions?.[actionIndex]
+                ?.label
+            }
+          />
+          <div className="mb-2" />
+          <TextField
+            placeholder="アクション先URL"
+            value={action.uri}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const newActions = JSON.parse(
+                JSON.stringify(actions)
+              ) as typeof actions; // Deep copy
+              newActions[actionIndex].uri = e.target.value;
+              onChange(newActions);
+            }}
+            error={
+              !!errors?.template?.columns?.[columnIndex]?.actions?.[actionIndex]
+                ?.uri
+            }
+          />
+          {actionIndex < actions.length - 1 && (
+            <hr className="mt-2 border-gray-300" />
+          )}
         </div>
       ))}
-      {/* ADD ACTION BUTTON */}
-      <div>
-        <Button
-          onClick={() => {
-            const newActions = JSON.parse(
-              JSON.stringify(actions)
-            ) as typeof actions; // Deep copy
-            newActions.push({
-              ...DEFAULT_CAROUSEL_COLUMN.actions[0],
-              key: Date.now(),
-            });
-            onChange(newActions);
-          }}
-          disabled={actions.length >= MAX_ACTIONS}
-        >
-          <MdAdd />
-          アクション追加
-        </Button>
-      </div>
     </div>
   );
 };
