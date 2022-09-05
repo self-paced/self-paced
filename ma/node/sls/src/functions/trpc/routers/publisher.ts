@@ -118,6 +118,11 @@ const publisher = createRouter().mutation('push', {
           segmentId: input.token,
           segmentTitle: input.segmentTitle,
           content: JSON.stringify(input.messages),
+          MessageSchedule: {
+            connect: {
+              id: input.token,
+            },
+          },
           account: {
             connect: {
               projectId: ctx.jwt.projectId,
