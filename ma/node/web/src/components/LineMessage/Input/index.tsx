@@ -45,8 +45,6 @@ const LineMessageInput: React.FC<{
   errors: Partial<EcfSchema>;
   onChange?: LineMessageInputEventHandler;
 }> = ({ name, onChange, value, errors }) => {
-  console.log('value', value);
-
   const [messages, setMessages] = useState<LineMessageInputValue>(
     value ?? [
       {
@@ -84,7 +82,6 @@ const LineMessageInput: React.FC<{
   return (
     <div ref={parent}>
       {messages.map((message, i) => {
-        console.log('component', message);
         const MessageComponent =
           MessageType[message.details.type].inputComponent;
         return (

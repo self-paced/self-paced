@@ -13,7 +13,6 @@ const LineTextMessageInput: MessageComponent<LineTextMessageType> = ({
   onChange,
   errors,
 }) => {
-  console.log('text form', messageDetails);
   return (
     <TextArea
       value={messageDetails.text}

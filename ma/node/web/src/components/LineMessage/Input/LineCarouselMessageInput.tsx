@@ -63,6 +63,7 @@ const LineCarouselMessageInput: MessageComponent<LineCarouselMessageType> = ({
   onChange,
   errors,
 }) => {
+  console.log('carousel', messageDetails);
   const [altText, setAltText] = useState(messageDetails.altText);
   const [columns, setColumns] = useState<ColumnType[]>(
     messageDetails.template.columns.map((column, index) => {

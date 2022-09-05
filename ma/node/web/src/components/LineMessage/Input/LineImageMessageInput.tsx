@@ -14,6 +14,7 @@ const LineImageMessageInput: MessageComponent<LineImageMessageType> = ({
   onChange,
   errors,
 }) => {
+  console.log('image', messageDetails);
   return (
     <div>
       <InputLabel>画像URL</InputLabel>

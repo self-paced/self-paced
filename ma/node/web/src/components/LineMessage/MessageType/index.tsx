@@ -15,6 +15,7 @@ import LineRichMessageInput, {
 } from '../Input/LineRichMessageInput';
 import LineTextMessageInput, {
   DEFAULT_TEXT_MESSAGE,
+  LineMessageEdit,
 } from '../Input/LineTextMessageInput';
 import LineVideoMessageInput, {
   DEFAULT_VIDEO_MESSAGE,
@@ -22,7 +23,9 @@ import LineVideoMessageInput, {
 import { lineCarouselMessageSchema } from './LineCarouselMessageType';
 import { lineImageMessageSchema } from './LineImageMessageType';
 import { lineRichMessageSchema } from './LineRichMessageType';
-import { lineTextMessageSchema } from './LineTextMessageType';
+import LineTextMessageType, {
+  lineTextMessageSchema,
+} from './LineTextMessageType';
 import { lineVideoMessageSchema } from './LineVideoMessageType';
 
 export const anyMessageTypeSchema = z.union([

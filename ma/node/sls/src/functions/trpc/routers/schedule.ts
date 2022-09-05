@@ -38,7 +38,38 @@ const schedule = createRouter()
       return true;
     },
   })
-  .mutation('draft', {
+  .mutation('update', {
+    input: z.object({
+      id: z.string().min(1),
+      title: z.string().min(1),
+      segmentTitle: z.string().min(1),
+      token: z.string().min(1),
+      messages: lineMessageSchema,
+      status: z.enum(['waiting', 'sending', 'sent']),
+    }),
+    resolve: async ({ input, ctx }) => {
+      try {
+        // メッセージスケジュールを更新する
+        await ctx.prisma.messageSchedule.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            title: input.title,
+            segmentId: input.token,
+            segmentTitle: input.segmentTitle,
+            status: 'waiting',
+            content: JSON.stringify(input.messages),
+          },
+        });
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+      return true;
+    },
+  })
+  .mutation('createDraft', {
     input: z.object({
       title: z.string().min(1),
       segmentTitle: z.string().min(1),
@@ -60,6 +91,35 @@ const schedule = createRouter()
                 projectId: ctx.jwt.projectId,
               },
             },
+          },
+        });
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+    },
+  })
+  .mutation('updateDraft', {
+    input: z.object({
+      id: z.string().min(1),
+      title: z.string().min(1),
+      segmentTitle: z.string().min(1),
+      token: z.string().min(1),
+      messages: lineMessageSchema,
+      status: z.enum(['waiting', 'draft']),
+    }),
+    resolve: async ({ input, ctx }) => {
+      try {
+        await ctx.prisma.messageSchedule.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            title: input.title,
+            segmentId: input.token,
+            segmentTitle: input.segmentTitle,
+            status: input.status,
+            content: JSON.stringify(input.messages),
           },
         });
       } catch (e) {
