@@ -91,7 +91,6 @@ const LineMessageInput: React.FC<{
   return (
     <div ref={parent}>
       {messages.map((message, i) => {
-        console.log('component', message);
         const MessageComponent =
           MessageType[message.details.type].inputComponent;
         return (

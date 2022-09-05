@@ -35,6 +35,7 @@ import LineMessageInput, {
 import v from '../../../utils/validation';
 import { useDialog } from '../../../components/AppUtilityProvider/DialogProvider';
 import Router, { useRouter } from 'next/router';
+import { AnyMessageTypeDetails } from '../../../components/LineMessage/MessageType';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -119,24 +120,32 @@ const TypeSelector: React.FC<{
 
 const EcfForm: React.FC<{
   title: string;
+  segmentId: string;
+  segmentTitle: string;
   type: 'ecf' | 'line';
   defaultMessages: LineMessageInputValue;
   onTitleChange: ChangeEventHandler<HTMLInputElement>;
   onTypeChange: ChangeEventHandler<HTMLInputElement>;
+  onSegmentChange: ChangeEventHandler<HTMLSelectElement>;
   onMessageChange: LineMessageInputEventHandler;
   onError: (message: string) => void;
   onValidationError: (error: z.ZodIssue[]) => void;
   segments: { token: string; name: string }[];
+  load: boolean;
 }> = ({
   title,
+  segmentId,
+  segmentTitle,
   type,
   defaultMessages,
   onTitleChange,
   onTypeChange,
+  onSegmentChange,
   onMessageChange,
   onError,
   onValidationError,
   segments,
+  load,
 }) => {
   const {
     register,
@@ -145,11 +154,14 @@ const EcfForm: React.FC<{
     setValue,
     control,
     getValues,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<EcfSchema>({
     resolver: zodResolver(ecfSchema),
     defaultValues: {
       title: title,
+      segmentToken: segmentId,
+      segmentTitle: segmentTitle,
       messages: defaultMessages,
     },
   });
@@ -159,11 +171,22 @@ const EcfForm: React.FC<{
 
   const segmentToken = watch('segmentToken');
   const messages = watch('messages');
-  const segmentTitle = watch('segmentTitle');
 
   const multicast = trpc.useMutation('line.multicast');
-  const scheduleCreate = trpc.useMutation('schedule.create');
-  const scheduleDraft = trpc.useMutation('schedule.draft');
+  const scheduleUpdate = trpc.useMutation('schedule.update');
+  const updateDraft = trpc.useMutation('schedule.updateDraft');
+  const deleteSchedule = trpc.useMutation('schedule.delete');
+
+  useEffect(() => {
+    if (load) {
+      reset({
+        title: title,
+        segmentTitle: segmentTitle,
+        messages: defaultMessages,
+        segmentToken: segmentId,
+      });
+    }
+  }, [reset, load, defaultMessages, title, segmentTitle, segmentId]);
 
   const sendTestMessage = async () => {
     try {
@@ -197,10 +220,11 @@ const EcfForm: React.FC<{
   };
 
   const handleValid: SubmitHandler<EcfSchema> = async (data) => {
-    await scheduleCreate.mutate(
+    await scheduleUpdate.mutate(
       {
-        title: data.title,
-        segmentTitle: data.segmentTitle,
+        id: Router.query.id as string,
+        title: title,
+        segmentTitle: segmentTitle,
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
         status: 'waiting',
@@ -216,10 +240,11 @@ const EcfForm: React.FC<{
     );
   };
 
+  // todo validationがsubmitと違う気がするので共通化したい
   const handleDraft: SubmitHandler<EcfSchema> = async (data) => {
-    console.log('draft', data);
-    await scheduleDraft.mutate(
+    await updateDraft.mutate(
       {
+        id: Router.query.id as string,
         title: title,
         segmentTitle: segmentTitle,
         token: segmentToken,
@@ -237,11 +262,28 @@ const EcfForm: React.FC<{
     );
   };
 
+  const handleDelete = async () => {
+    await deleteSchedule.mutate(
+      {
+        id: Router.query.id as string,
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.push('/messages');
+        },
+      }
+    );
+  };
+
   const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
     try {
       ecfSchema.parse(getValues());
     } catch (e) {
       if (e instanceof z.ZodError) {
+        console.error(ecfSchema.parse(getValues()));
         onValidationError(e.issues);
       } else {
         onError('エラーが発生しました。');
@@ -249,10 +291,9 @@ const EcfForm: React.FC<{
     }
   };
 
-  const handleSegmentChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setValue('segmentTitle', e.target.selectedOptions[0].text);
-    setValue('segmentToken', e.target.selectedOptions[0].value);
-  };
+  if (!load) {
+    return <div>loading...</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit(handleValid, handleInvalid)}>
@@ -264,7 +305,8 @@ const EcfForm: React.FC<{
             <Select
               {...register('segmentToken')}
               error={!!errors.segmentToken}
-              onChange={handleSegmentChange}
+              onChange={onSegmentChange}
+              value={segmentId}
             >
               <option value="">選択してください</option>
               {segments.map((segment) => (
@@ -336,6 +378,22 @@ const EcfForm: React.FC<{
       </Card>
       <div className="mt-6" />
       <FloatArea
+        destructiveButton={
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              const confirmed = await showDialog({
+                title: '配信予約を削除しますか？',
+                message: '削除した配信予約は復元できません。',
+              });
+              if (confirmed) {
+                handleDelete();
+              }
+            }}
+          >
+            削除
+          </Button>
+        }
         basicButton={<Button onClick={handleDraft}>下書き保存</Button>}
         secondaryButton={
           <Button type="submit" variant="secondary" disabled={isSubmitting}>
@@ -539,6 +597,8 @@ const Page: NextPage = () => {
   const showDialog = useDialog();
   const [type, setType] = useState('ecf');
   const [title, setTitle] = useState('');
+  const [segmentId, setSegmentId] = useState('');
+  const [segmentTitle, setSegmentTitle] = useState('');
   const [load, setLoad] = useState(false);
   const [messages, setMessages] = useState<LineMessageInputValue>([
     {
@@ -554,36 +614,27 @@ const Page: NextPage = () => {
   const messageSchedule = trpc.useQuery([
     'schedule.event',
     {
-      id: router.query.id || '',
+      id: router.query.id as string,
     },
   ]);
 
-  type Content = {
-    text: string;
-    type: string;
-  };
-
   useEffect(() => {
-    if (messageSchedule.data) {
-      console.log('initial', messageSchedule.data);
+    if (messageSchedule.data && segments.data) {
       setTitle(messageSchedule.data.title);
+      setSegmentId(messageSchedule.data.segmentId as string);
+      setSegmentTitle(messageSchedule.data.segmentTitle as string);
       const messages = JSON.parse(messageSchedule.data.content as string).map(
-        (message: Content, i: number) => {
+        (message: AnyMessageTypeDetails, i: number) => {
           return {
-            id: i,
-            details: {
-              type: message.type,
-              text: message.text,
-            },
+            key: i,
+            details: message,
           };
         }
       );
-
-      console.log('messages', messages);
-
       setMessages(messages);
+      setLoad(true);
     }
-  }, [messageSchedule.data]);
+  }, [messageSchedule.data, segments.data]);
 
   if (!segments.data) {
     return <div>Loading...</div>;
@@ -606,6 +657,11 @@ const Page: NextPage = () => {
   const handleMessageChange: LineMessageInputEventHandler = (e) => {
     setMessages(e.target.value);
   };
+  const handleSegmentChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
+    setSegmentId(e.target.selectedOptions[0].value);
+    setSegmentTitle(e.target.selectedOptions[0].text);
+  };
+
   const handleError = () => {
     showDialog({
       title: '送信エラー',
@@ -639,14 +695,18 @@ const Page: NextPage = () => {
       {type === 'ecf' && (
         <EcfForm
           title={title}
+          segmentId={segmentId}
+          segmentTitle={segmentTitle}
           type={type}
           defaultMessages={messages}
           onTitleChange={handleTitleChange}
           onTypeChange={handleTypeChange}
           onMessageChange={handleMessageChange}
+          onSegmentChange={handleSegmentChange}
           onError={handleError}
           onValidationError={handleValidationError}
           segments={segments.data}
+          load={load}
         />
       )}
       {type === 'line' && (

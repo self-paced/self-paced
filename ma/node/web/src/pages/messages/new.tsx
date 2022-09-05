@@ -160,7 +160,7 @@ const EcfForm: React.FC<{
 
   const multicast = trpc.useMutation('line.multicast');
   const scheduleCreate = trpc.useMutation('schedule.create');
-  const scheduleDraft = trpc.useMutation('schedule.draft');
+  const scheduleDraft = trpc.useMutation('schedule.createDraft');
 
   const sendTestMessage = async () => {
     try {
