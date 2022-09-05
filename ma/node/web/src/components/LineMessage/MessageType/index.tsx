@@ -22,9 +22,7 @@ import LineVideoMessageInput, {
 import { lineCarouselMessageSchema } from './LineCarouselMessageType';
 import { lineImageMessageSchema } from './LineImageMessageType';
 import { lineRichMessageSchema } from './LineRichMessageType';
-import LineTextMessageType, {
-  lineTextMessageSchema,
-} from './LineTextMessageType';
+import { lineTextMessageSchema } from './LineTextMessageType';
 import { lineVideoMessageSchema } from './LineVideoMessageType';
 
 export const anyMessageTypeSchema = z.union([
