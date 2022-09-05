@@ -180,13 +180,13 @@ const EcfForm: React.FC<{
 
   useEffect(() => {
     if (load) {
-      console.log(defaultMessages);
-      setValue('title', title);
-      setValue('messages', defaultMessages);
-
-      reset;
+      reset({
+        title: title,
+        segmentTitle: segmentTitle,
+        messages: defaultMessages,
+      });
     }
-  }, [load, defaultMessages, setValue, reset, title]);
+  }, [load, defaultMessages, setValue, reset, title, segmentTitle]);
 
   const sendTestMessage = async () => {
     try {
@@ -594,9 +594,9 @@ const Page: NextPage = () => {
       setSegmentId(messageSchedule.data.segmentId as string);
       setSegmentTitle(messageSchedule.data.segmentTitle as string);
       const messages = JSON.parse(messageSchedule.data.content as string).map(
-        (message: AnyMessageTypeDetails) => {
+        (message: AnyMessageTypeDetails, i: number) => {
           return {
-            // id: i,
+            key: i,
             details: message,
           };
         }

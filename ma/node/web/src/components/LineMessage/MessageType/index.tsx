@@ -15,7 +15,6 @@ import LineRichMessageInput, {
 } from '../Input/LineRichMessageInput';
 import LineTextMessageInput, {
   DEFAULT_TEXT_MESSAGE,
-  LineMessageEdit,
 } from '../Input/LineTextMessageInput';
 import LineVideoMessageInput, {
   DEFAULT_VIDEO_MESSAGE,
