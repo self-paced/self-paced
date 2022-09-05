@@ -163,6 +163,7 @@ const EcfForm: React.FC<{
     resolver: zodResolver(ecfSchema),
     defaultValues: {
       title: title,
+      segmentToken: segmentId,
       segmentTitle: segmentTitle,
       messages: defaultMessages,
     },
@@ -184,9 +185,10 @@ const EcfForm: React.FC<{
         title: title,
         segmentTitle: segmentTitle,
         messages: defaultMessages,
+        segmentToken: segmentId,
       });
     }
-  }, [load, defaultMessages, setValue, reset, title, segmentTitle]);
+  }, [reset, load, defaultMessages, title, segmentTitle, segmentId]);
 
   const sendTestMessage = async () => {
     try {
@@ -240,6 +242,7 @@ const EcfForm: React.FC<{
     );
   };
 
+  // todo validationがsubmitと違う気がするので共通化したい
   const handleDraft: SubmitHandler<EcfSchema> = async (data) => {
     await updateDraft.mutate(
       {
@@ -262,14 +265,11 @@ const EcfForm: React.FC<{
   };
 
   const handleInvalid: SubmitErrorHandler<EcfSchema> = (errors) => {
-    console.log(errors);
     try {
       ecfSchema.parse(getValues());
     } catch (e) {
       if (e instanceof z.ZodError) {
-        console.error(getValues());
         console.error(ecfSchema.parse(getValues()));
-        console.error(e.issues);
         onValidationError(e.issues);
       } else {
         onError('エラーが発生しました。');
@@ -619,7 +619,6 @@ const Page: NextPage = () => {
   }
 
   const handleTitleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-    console.log('title', title);
     setTitle(e.target.value);
   };
   const handleTypeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -631,7 +630,6 @@ const Page: NextPage = () => {
   const handleSegmentChange: ChangeEventHandler<HTMLSelectElement> = (e) => {
     setSegmentId(e.target.selectedOptions[0].value);
     setSegmentTitle(e.target.selectedOptions[0].text);
-    console.log('segment title', segmentTitle);
   };
 
   const handleError = () => {

@@ -58,7 +58,7 @@ const schedule = createRouter()
             title: input.title,
             segmentId: input.token,
             segmentTitle: input.segmentTitle,
-            status: 'waiting',
+            status: input.status,
             content: JSON.stringify(input.messages),
           },
         });
