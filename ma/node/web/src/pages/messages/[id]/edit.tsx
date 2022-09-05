@@ -35,10 +35,7 @@ import LineMessageInput, {
 import v from '../../../utils/validation';
 import { useDialog } from '../../../components/AppUtilityProvider/DialogProvider';
 import Router, { useRouter } from 'next/router';
-import MessageType, {
-  AnyMessageTypeDetails,
-} from '../../../components/LineMessage/MessageType';
-import message from '../../../../../sls/src/functions/trpc/routers/message';
+import { AnyMessageTypeDetails } from '../../../components/LineMessage/MessageType';
 
 // TODO: 年齢の対応の時、以下は使われます。
 // type AgeVal =
@@ -178,6 +175,7 @@ const EcfForm: React.FC<{
   const multicast = trpc.useMutation('line.multicast');
   const scheduleUpdate = trpc.useMutation('schedule.update');
   const updateDraft = trpc.useMutation('schedule.updateDraft');
+  const deleteSchedule = trpc.useMutation('schedule.delete');
 
   useEffect(() => {
     if (load) {
@@ -252,6 +250,22 @@ const EcfForm: React.FC<{
         token: segmentToken,
         messages: messages.map((message) => message.details),
         status: 'draft',
+      },
+      {
+        onError: () => {
+          onError('エラーが発生しました。');
+        },
+        onSuccess: async () => {
+          await Router.push('/messages');
+        },
+      }
+    );
+  };
+
+  const handleDelete = async () => {
+    await deleteSchedule.mutate(
+      {
+        id: Router.query.id as string,
       },
       {
         onError: () => {
@@ -364,6 +378,22 @@ const EcfForm: React.FC<{
       </Card>
       <div className="mt-6" />
       <FloatArea
+        destructiveButton={
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              const confirmed = await showDialog({
+                title: '配信予約を削除しますか？',
+                message: '削除した配信予約は復元できません。',
+              });
+              if (confirmed) {
+                handleDelete();
+              }
+            }}
+          >
+            削除
+          </Button>
+        }
         basicButton={<Button onClick={handleDraft}>下書き保存</Button>}
         secondaryButton={
           <Button type="submit" variant="secondary" disabled={isSubmitting}>

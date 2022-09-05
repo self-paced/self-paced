@@ -128,6 +128,24 @@ const schedule = createRouter()
       }
     },
   })
+  .mutation('delete', {
+    input: z.object({
+      id: z.string().min(1),
+    }),
+    resolve: async ({ input, ctx }) => {
+      try {
+        await ctx.prisma.messageSchedule.delete({
+          where: {
+            id: input.id,
+          },
+        });
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+      return true;
+    },
+  })
   .query('list', {
     input: z.object({
       page: z.number().min(1),
