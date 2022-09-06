@@ -119,7 +119,7 @@ const publisher = createRouter().mutation('push', {
           segmentTitle: input.segmentTitle,
           content: JSON.stringify(input.messages),
           // todo ここは仮対応
-          MessageSchedule: {
+          messageSchedule: {
             connect: {
               id: input.token,
             },

@@ -88,7 +88,7 @@ const message = createRouter()
                   messageEventId: message.id,
                   userMessageLinks: {
                     some: {
-                      UserMessageLinkActivities: {
+                      userMessageLinkActivities: {
                         some: {
                           type: 'click',
                         },
@@ -199,7 +199,7 @@ const message = createRouter()
               messageEventId: messageEvent.id,
               userMessageLinks: {
                 some: {
-                  UserMessageLinkActivities: {
+                  userMessageLinkActivities: {
                     some: {
                       type: 'click',
                     },
@@ -354,7 +354,7 @@ const message = createRouter()
           include: {
             userMessageLinks: {
               include: {
-                UserMessageLinkActivities: true,
+                userMessageLinkActivities: true,
               },
             },
           },

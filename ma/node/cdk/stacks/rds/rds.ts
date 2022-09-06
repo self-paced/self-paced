@@ -96,6 +96,7 @@ export const prepareRds = (
     securityGroups: [dbConnectionGroup],
     vpc: vpc,
     maxConnectionsPercent: 80,
+    requireTLS: false,
   });
 };
 
