@@ -49,10 +49,28 @@ const schedule = createRouter()
     }),
     resolve: async ({ input, ctx }) => {
       try {
+        const message = await ctx.prisma.messageSchedule.findFirst({
+          where: {
+            id: input.id,
+            OR: [
+              {
+                status: 'waiting',
+              },
+              {
+                status: 'draft',
+              },
+            ],
+          },
+        });
+
+        if (!message) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
         // メッセージスケジュールを更新する
         await ctx.prisma.messageSchedule.update({
           where: {
-            id: input.id,
+            id: message.id,
           },
           data: {
             title: input.title,
@@ -78,16 +96,14 @@ const schedule = createRouter()
         const message = await ctx.prisma.messageSchedule.findFirst({
           where: {
             id: input.id,
-            AND: {
-              OR: [
-                {
-                  status: 'waiting',
-                },
-                {
-                  status: 'draft',
-                },
-              ],
-            },
+            OR: [
+              {
+                status: 'waiting',
+              },
+              {
+                status: 'draft',
+              },
+            ],
           },
         });
 
