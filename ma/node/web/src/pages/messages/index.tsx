@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import { useState } from 'react';
 import Table from '../../components/Table';
-import { Button, TextLink } from '@super_studio/ecforce_ui_albers';
+import { Button, TextLink, Badge } from '@super_studio/ecforce_ui_albers';
 import { trpc } from '../../utils/trpc';
 import Link from 'next/link';
 import { formatDateTime } from '../../utils/formatter';
@@ -46,6 +46,18 @@ const Home: NextPage = () => {
           {
             field: 'status',
             title: 'ステータス',
+            render: (row) => {
+              switch (row.status) {
+                case 'draft':
+                  return <Badge status="warning" label="下書き" />;
+                case 'waiting':
+                  return <Badge status="success" label="配信待ち" />;
+                case 'canceled':
+                  return <Badge status="inactive" label="キャンセル" />;
+                default:
+                  return <Badge status="warning" label="下書き" />;
+              }
+            },
           },
           {
             field: 'type',

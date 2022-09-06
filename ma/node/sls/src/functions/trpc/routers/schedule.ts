@@ -11,7 +11,7 @@ const schedule = createRouter()
       segmentTitle: z.string().min(1),
       token: z.string().min(1),
       messages: lineMessageSchema,
-      status: z.enum(['waiting']),
+      isDraft: z.boolean(),
     }),
     resolve: async ({ input, ctx }) => {
       try {
@@ -22,7 +22,7 @@ const schedule = createRouter()
             segmentId: input.token,
             segmentTitle: input.segmentTitle,
             deliveryScheduleAt: new Date(),
-            status: 'waiting',
+            status: input.isDraft ? 'draft' : 'waiting',
             content: JSON.stringify(input.messages),
             account: {
               connect: {
@@ -45,7 +45,7 @@ const schedule = createRouter()
       segmentTitle: z.string().min(1),
       token: z.string().min(1),
       messages: lineMessageSchema,
-      status: z.enum(['waiting', 'sending', 'sent']),
+      isDraft: z.boolean(),
     }),
     resolve: async ({ input, ctx }) => {
       try {
@@ -58,7 +58,7 @@ const schedule = createRouter()
             title: input.title,
             segmentId: input.token,
             segmentTitle: input.segmentTitle,
-            status: input.status,
+            status: input.isDraft ? 'draft' : 'waiting',
             content: JSON.stringify(input.messages),
           },
         });
@@ -69,74 +69,38 @@ const schedule = createRouter()
       return true;
     },
   })
-  .mutation('createDraft', {
+  .mutation('cancel', {
     input: z.object({
-      title: z.string().min(1),
-      segmentTitle: z.string().min(1),
-      token: z.string().min(1),
-      messages: lineMessageSchema,
-      status: z.enum(['waiting', 'draft']),
+      id: z.string().min(1),
     }),
     resolve: async ({ input, ctx }) => {
       try {
-        await ctx.prisma.messageSchedule.create({
-          data: {
-            title: input.title,
-            segmentId: input.token,
-            segmentTitle: input.segmentTitle,
-            status: input.status,
-            content: JSON.stringify(input.messages),
-            account: {
-              connect: {
-                projectId: ctx.jwt.projectId,
-              },
+        const message = await ctx.prisma.messageSchedule.findFirst({
+          where: {
+            id: input.id,
+            AND: {
+              OR: [
+                {
+                  status: 'waiting',
+                },
+                {
+                  status: 'draft',
+                },
+              ],
             },
           },
         });
-      } catch (e) {
-        console.error(e);
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-      }
-    },
-  })
-  .mutation('updateDraft', {
-    input: z.object({
-      id: z.string().min(1),
-      title: z.string().min(1),
-      segmentTitle: z.string().min(1),
-      token: z.string().min(1),
-      messages: lineMessageSchema,
-      status: z.enum(['waiting', 'draft']),
-    }),
-    resolve: async ({ input, ctx }) => {
-      try {
+
+        if (!message) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
         await ctx.prisma.messageSchedule.update({
           where: {
-            id: input.id,
+            id: message.id,
           },
           data: {
-            title: input.title,
-            segmentId: input.token,
-            segmentTitle: input.segmentTitle,
-            status: input.status,
-            content: JSON.stringify(input.messages),
-          },
-        });
-      } catch (e) {
-        console.error(e);
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
-      }
-    },
-  })
-  .mutation('delete', {
-    input: z.object({
-      id: z.string().min(1),
-    }),
-    resolve: async ({ input, ctx }) => {
-      try {
-        await ctx.prisma.messageSchedule.delete({
-          where: {
-            id: input.id,
+            status: 'canceled',
           },
         });
       } catch (e) {

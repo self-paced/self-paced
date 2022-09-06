@@ -15,7 +15,6 @@ const LineImageMessageInput: MessageComponent<LineImageMessageType> = ({
   onChange,
   errors,
 }) => {
-  console.log('image', messageDetails);
   return (
     <FormArea>
       <InputLabel required className="mb-2">

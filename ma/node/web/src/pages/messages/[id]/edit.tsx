@@ -174,8 +174,8 @@ const EcfForm: React.FC<{
 
   const multicast = trpc.useMutation('line.multicast');
   const scheduleUpdate = trpc.useMutation('schedule.update');
-  const updateDraft = trpc.useMutation('schedule.updateDraft');
-  const deleteSchedule = trpc.useMutation('schedule.delete');
+  const updateDraft = trpc.useMutation('schedule.update');
+  const deleteSchedule = trpc.useMutation('schedule.cancel');
 
   useEffect(() => {
     if (load) {
@@ -227,7 +227,7 @@ const EcfForm: React.FC<{
         segmentTitle: segmentTitle,
         token: segmentToken,
         messages: data.messages.map((message) => message.details),
-        status: 'waiting',
+        isDraft: false,
       },
       {
         onError: () => {
@@ -249,7 +249,7 @@ const EcfForm: React.FC<{
         segmentTitle: segmentTitle,
         token: segmentToken,
         messages: messages.map((message) => message.details),
-        status: 'draft',
+        isDraft: true,
       },
       {
         onError: () => {

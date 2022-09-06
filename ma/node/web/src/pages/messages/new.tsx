@@ -160,7 +160,7 @@ const EcfForm: React.FC<{
 
   const multicast = trpc.useMutation('line.multicast');
   const scheduleCreate = trpc.useMutation('schedule.create');
-  const scheduleDraft = trpc.useMutation('schedule.createDraft');
+  const scheduleDraft = trpc.useMutation('schedule.create');
 
   const sendTestMessage = async () => {
     try {
@@ -206,7 +206,7 @@ const EcfForm: React.FC<{
           segmentTitle: data.segmentTitle,
           token: segmentToken,
           messages: data.messages.map((message) => message.details),
-          status: 'waiting',
+          isDraft: false,
         },
         {
           onError: () => {
@@ -231,7 +231,7 @@ const EcfForm: React.FC<{
         segmentTitle: segmentTitle,
         token: segmentToken,
         messages: messages.map((message) => message.details),
-        status: 'draft',
+        isDraft: true,
       },
       {
         onError: () => {
